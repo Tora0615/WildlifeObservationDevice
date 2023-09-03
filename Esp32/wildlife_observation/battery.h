@@ -9,6 +9,8 @@
 #define EMPTY_BATTERY_VOLTAGE 2.55  // protect board : 2.54 +- 0.1 / battery : 2.5 
 const float voltage_division_factor = 0.2272;  // 150k : 510k -->  150 / (150 + 510) = 0.2272
 
+#include <SimpleKalmanFilter.h>
+SimpleKalmanFilter simpleKalmanFilter(2, 2, 0.01);
 
 
 void batteryMonitorInit(){
@@ -24,10 +26,16 @@ void batteryMonitorInit(){
 
   https://kknews.cc/digital/lgmbkjz.html
   */
+
+  // put data into the filter
+  for (int i =0; i<10; i++){
+    simpleKalmanFilter.updateEstimate(analogReadMilliVolts(BATTERY_MONITOR_PIN));
+  }
 }
 
 float getBatteryVoltage(){
-  return analogReadMilliVolts(BATTERY_MONITOR_PIN) / 1000.0 / voltage_division_factor;
+  float estimated_value = simpleKalmanFilter.updateEstimate(analogReadMilliVolts(BATTERY_MONITOR_PIN));
+  return estimated_value / 1000.0 / voltage_division_factor;
 }
 
 float getBatteryPercentage(){
@@ -35,7 +43,8 @@ float getBatteryPercentage(){
   const float calculated_full_batter_voltage = FULL_BATTERY_VOLTAGE * voltage_division_factor;
   const float calculated_empty_batter_voltage = EMPTY_BATTERY_VOLTAGE * voltage_division_factor;
 
-  float percentage = (analogReadMilliVolts(BATTERY_MONITOR_PIN) / 1000.0 - calculated_empty_batter_voltage) / (calculated_full_batter_voltage - calculated_empty_batter_voltage);
+  float estimated_value = simpleKalmanFilter.updateEstimate(analogReadMilliVolts(BATTERY_MONITOR_PIN));
+  float percentage = (estimated_value / 1000.0 - calculated_empty_batter_voltage) / (calculated_full_batter_voltage - calculated_empty_batter_voltage);
   percentage = percentage < 0 ? 0 : percentage;
   return percentage * 100;  
 }
