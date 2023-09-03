@@ -1,7 +1,10 @@
 #include "battery.h"
-#include "rtc.h"
+#include "rtc_timer.h"
+#include "sd_operation.h"
+#include "DS18B20.h"
+#include "utills.h"
 
-// uint32_t rtc_time
+
 
 void setup() {
 
@@ -11,17 +14,41 @@ void setup() {
   // system init 
   // time < test or have ACTIVATECODE, pass
 
-  // get RTC time
+  
   
   batteryMonitorInit();
-  
+  RTCInit();
+  SDInit();
+  DS18B20Init();
+
+
+
+
+  // get current time as stander time
+  sys_RTC_time_offset = GetHowManySecondsHasPassedTodayFromRtc();
+  sys_millis_time_offset = millis();
 }
 
 void loop() {
 
+  Serial.println(getDate() + "_" + secMapTo24Hour(getPassedSecOfToday()));
+  Serial.println("today passed sec : " + String(getPassedSecOfToday()));
+
+
+
   Serial.println("Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ "%)");
-  delay(1000);
+  delay(5000);
 }
+
+
+
+
+
+
+
+
+
+
 
 
 
