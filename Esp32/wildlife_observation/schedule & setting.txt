@@ -1,0 +1,17 @@
+00:00, A, 6, 30, B, 100
+00:00, B, 0.5
+00:00, C, 0.5
+00:00, D, 1
+
+#---------
+任務代碼 : 
+A : Sound (INMP441)
+B : temperature & moisture (DHT22)
+C : temperature (DS18B20)
+D : Battery voltage
+
+參數說明 : 
+任務 A
+初始時間, 任務代碼, 執行間隔(hr), 執行時間(min), L/R/B (聲道左/右/兩者), 音量(基準為100%)
+任務 BCD
+初始時間, 任務代碼, 執行間隔(hr)
