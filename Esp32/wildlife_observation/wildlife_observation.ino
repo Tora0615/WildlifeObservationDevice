@@ -3,23 +3,46 @@
 #include "sd_operation.h"
 #include "DS18B20.h"
 #include "utills.h"
+#include "setting.h"
 
 
+String date;
 
 void setup() {
   Serial.begin(115200);  
-  // system init 
+
+  // system basic part init 
   SDInit();
-  batteryMonitorInit();
   RTCInit();
-  DS18B20Init();
-
-
-// time < test or have ACTIVATECODE, pass
 
   // get current time as stander time
   sys_RTC_time_offset = GetHowManySecondsHasPassedTodayFromRtc();
   sys_millis_time_offset = millis();
+
+  // create first folder and file in the 
+  date = getDate();
+  checkAndCreateFolder(date);
+  systemLogPath = date + "/SYSLOG.txt";
+  bool notfirstBoot = sd.exists(systemLogPath);
+  checkAndCreateFile(systemLogPath);
+
+  // print reboot msg if not first boot
+  if (notfirstBoot) writeMsgToPath(systemLogPath, "reboot");
+
+  // check schedule and setting doc
+  checkScheduleFile();
+
+  // system advance part inint
+  batteryMonitorInit();
+  DS18B20Init();
+
+
+  // time < test or have ACTIVATECODE, pass
+
+  
+
+  
+
 }
 
 void loop() {

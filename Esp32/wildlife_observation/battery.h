@@ -1,6 +1,8 @@
 // #include "driver/adc.h"   -->  for cpp dev only; 
 // For arduino, don't need to include anything.
 // The ref code is in esp32-hal-adc.c
+#ifndef BATTERY_H
+#define BATTERY_H
 
 
 #define BATTERY_MONITOR_PIN A0
@@ -9,6 +11,7 @@
 #define EMPTY_BATTERY_VOLTAGE 2.55  // protect board : 2.54 +- 0.1 / battery : 2.5 
 const float voltage_division_factor = 0.2272;  // 150k : 510k -->  150 / (150 + 510) = 0.2272
 
+#include "sd_operation.h"
 #include <SimpleKalmanFilter.h>
 SimpleKalmanFilter simpleKalmanFilter(2, 2, 0.01);
 
@@ -31,6 +34,9 @@ void batteryMonitorInit(){
   for (int i =0; i<10; i++){
     simpleKalmanFilter.updateEstimate(analogReadMilliVolts(BATTERY_MONITOR_PIN));
   }
+
+  // Write log
+  writeMsgToPath(systemLogPath, "Battery monitor init successful");
 }
 
 float getBatteryVoltage(){
@@ -51,4 +57,4 @@ float getBatteryPercentage(){
               
 
 
-              
+#endif

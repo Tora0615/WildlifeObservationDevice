@@ -1,6 +1,11 @@
+#ifndef DS18B20_H
+#define DS18B20_H
+
+
 // Include the libraries we need
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include "sd_operation.h"
 
 // Data wire is plugged into port 12 
 #define ONE_WIRE_BUS 14
@@ -15,6 +20,8 @@ DallasTemperature sensor(&oneWire);
 void DS18B20Init(){
   // Start up the library
   sensor.begin();
+  // Write log
+  writeMsgToPath(systemLogPath, "DS18B20 init successful");
 }
 
 float GetDS18B20Temp(){
@@ -29,3 +36,8 @@ float GetDS18B20Temp(){
     Serial.println("Error: Could not read temperature data");
   }
 }
+
+
+
+
+#endif

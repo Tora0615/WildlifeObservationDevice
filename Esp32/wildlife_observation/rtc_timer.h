@@ -1,3 +1,7 @@
+#ifndef RTC_TIMER_H
+#define RTC_TIMER_H
+
+
 #include "RTClib.h"
 RTC_DS3231 rtc;  // default I2C address is : 0x57 (you can choose 0x57 ~ 0x50)
 DateTime now;
@@ -50,11 +54,6 @@ uint32_t getPassedSecOfToday(){
   return sys_RTC_time_offset + (millis() - sys_millis_time_offset)/1000;  // RTC time when boot + (time counter now - time counter before)
 }
 
-void checkDayChange(){
-  if( getPassedSecOfToday() > 86400){  // a day change
-    sys_RTC_time_offset = GetHowManySecondsHasPassedTodayFromRtc();
-    sys_millis_time_offset = millis();
-    Serial.println("day changed");
-  }
-}
 
+
+#endif
