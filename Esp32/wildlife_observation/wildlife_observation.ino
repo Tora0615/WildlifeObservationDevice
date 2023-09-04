@@ -7,22 +7,15 @@
 
 
 void setup() {
-
-  Serial.begin(115200);
-
-
+  Serial.begin(115200);  
   // system init 
-  // time < test or have ACTIVATECODE, pass
-
-  
-  
+  SDInit();
   batteryMonitorInit();
   RTCInit();
-  SDInit();
   DS18B20Init();
 
 
-
+// time < test or have ACTIVATECODE, pass
 
   // get current time as stander time
   sys_RTC_time_offset = GetHowManySecondsHasPassedTodayFromRtc();
@@ -31,13 +24,14 @@ void setup() {
 
 void loop() {
 
+  checkDayChange();
   Serial.println(getDate() + "_" + secMapTo24Hour(getPassedSecOfToday()));
   Serial.println("today passed sec : " + String(getPassedSecOfToday()));
 
 
 
   Serial.println("Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ "%)");
-  delay(5000);
+  delay(1800000);
 }
 
 

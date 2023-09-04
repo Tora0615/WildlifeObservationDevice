@@ -3,6 +3,8 @@ RTC_DS3231 rtc;  // default I2C address is : 0x57 (you can choose 0x57 ~ 0x50)
 DateTime now;
 
 const char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+uint32_t sys_RTC_time_offset;         // RTC clock. It will only change when first boot or date changed. First day equal the boot time, others day it will allways close to 0
+uint32_t sys_millis_time_offset;    // millis clock.
 
 void RTCInit(){
   if (! rtc.begin()) {
@@ -43,3 +45,16 @@ String secMapTo24Hour(uint32_t sec){
 
   return time;
 }
+
+uint32_t getPassedSecOfToday(){
+  return sys_RTC_time_offset + (millis() - sys_millis_time_offset)/1000;  // RTC time when boot + (time counter now - time counter before)
+}
+
+void checkDayChange(){
+  if( getPassedSecOfToday() > 86400){  // a day change
+    sys_RTC_time_offset = GetHowManySecondsHasPassedTodayFromRtc();
+    sys_millis_time_offset = millis();
+    Serial.println("day changed");
+  }
+}
+
