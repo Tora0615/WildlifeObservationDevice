@@ -55,6 +55,7 @@ void loop() {
 
   Serial.println("Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ "%)");
   delay(1800000);
+  // delay(3000);
 }
 
 
