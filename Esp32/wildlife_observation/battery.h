@@ -5,7 +5,7 @@
 #define BATTERY_H
 
 
-#define BATTERY_MONITOR_PIN A0
+#define BATTERY_MONITOR_PIN A0  // GPIO 36 / VP 
 #define ADC_BIT_12 12
 #define FULL_BATTERY_VOLTAGE 4.2    //battery : 4.2
 #define EMPTY_BATTERY_VOLTAGE 2.55  // protect board : 2.54 +- 0.1 / battery : 2.5 
