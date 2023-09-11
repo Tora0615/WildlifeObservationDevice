@@ -5,8 +5,12 @@
 #include "utills.h"
 #include "setting.h"
 
+#define uS_TO_S_FACTOR 1000000ULL  /* Conversion factor for micro seconds to seconds */
+#define TIME_TO_SLEEP  900        /* Time ESP32 will go to sleep (in seconds) */
 
-String date;
+
+
+String today;
 
 void setup() {
   Serial.begin(115200);  
@@ -20,14 +24,14 @@ void setup() {
   sys_millis_time_offset = millis();
 
   // create first folder and file in the 
-  date = getDate();
-  checkAndCreateFolder(date);
-  systemLogPath = date + "/SYSLOG.txt";
+  today = getDate();
+  checkAndCreateFolder(today);
+  systemLogPath = today + "/SYSLOG.txt";
   bool notfirstBoot = sd.exists(systemLogPath);
   checkAndCreateFile(systemLogPath);
 
   // print reboot msg if not first boot
-  if (notfirstBoot) writeMsgToPath(systemLogPath, "reboot");
+  if (notfirstBoot) writeMsgToPath(systemLogPath, "== reboot (or wake up) ==");
 
   // check schedule and setting doc
   checkScheduleFile();
@@ -51,11 +55,18 @@ void loop() {
   Serial.println(getDate() + "_" + secMapTo24Hour(getPassedSecOfToday()));
   Serial.println("today passed sec : " + String(getPassedSecOfToday()));
 
-
+  
 
   Serial.println("Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ "%)");
-  delay(1800000);
-  // delay(3000);
+
+  writeMsgToPath(systemLogPath, getDate() + "_" + secMapTo24Hour(getPassedSecOfToday()));
+  writeMsgToPath(systemLogPath, "Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ "%)");
+  
+  
+
+  esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+  writeMsgToPath(systemLogPath, "sleep 15 min");
+  esp_deep_sleep_start();
 }
 
 

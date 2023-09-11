@@ -12,10 +12,11 @@ void checkDayChange(){
     sys_RTC_time_offset = GetHowManySecondsHasPassedTodayFromRtc();
     sys_millis_time_offset = millis();
     Serial.println("day changed");
+      // Write log
+    writeMsgToPath(systemLogPath, "Day changed");
   }
 
-  // Write log
-  writeMsgToPath(systemLogPath, "Day changed");
+
 }
 
 
@@ -27,7 +28,7 @@ void checkScheduleFile(){
     writeMsgToPath(systemLogPath, "Init failed! Don't have file : " + SCHEDULE_FILE + ". Please see exampleSchedule.txt");
     
     // write example file
-    writeMsgToPath("exampleSchedule.txt", 
+    writeMsgToPath("example_schedule.txt", 
       "00:00, A, 6, 30, B, 100\n"
       "00:00, B, 0.5\n"
       "00:00, C, 0.5\n"

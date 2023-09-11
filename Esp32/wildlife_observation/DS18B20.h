@@ -7,8 +7,8 @@
 #include <DallasTemperature.h>
 #include "sd_operation.h"
 
-// Data wire is plugged into port 12 
-#define ONE_WIRE_BUS 14
+// Data wire pin
+#define ONE_WIRE_BUS 25
 
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 OneWire oneWire(ONE_WIRE_BUS);
@@ -31,8 +31,7 @@ float GetDS18B20Temp(){
   // Check if reading was successful
   if(tempC != DEVICE_DISCONNECTED_C){
     return tempC;
-  } 
-  else{
+  }else{
     Serial.println("Error: Could not read temperature data");
   }
 }

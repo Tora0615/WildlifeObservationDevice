@@ -1,16 +1,15 @@
 #ifndef SD_OPERATION_H
 #define SD_OPERATION_H
 
-
 #include <SPI.h>
 #include "SdFat.h"
 #include "sdios.h"
 #define SPI_SPEED SD_SCK_MHZ(4)
 #define CHIP_SELECT 5
-
 const int8_t DISABLE_CHIP_SELECT = -1;
 
-// SD_FAT_TYPE 3 (FAT16/FAT32 and exFAT)
+
+// global file pointer / SD_FAT_TYPE 3 (FAT16/FAT32 and exFAT)
 SdFs sd;
 FsFile systemLog;
 FsFile audioFile;
