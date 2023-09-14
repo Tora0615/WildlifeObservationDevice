@@ -1,5 +1,5 @@
-#ifndef DS18B20_H
-#define DS18B20_H
+#ifndef MYDS18B20_H
+#define MYDS18B20_H
 
 
 // Include the libraries we need

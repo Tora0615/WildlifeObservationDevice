@@ -1,9 +1,10 @@
-#ifndef DHT_H
-#define DHT_H
+#ifndef MYDHT_H
+#define MYDHT_H
 
-#include "DHT.h"
+#include <DHT.h>
 #define DHTPIN 33
 #define DHTTYPE DHT22
+
 DHT dht(DHTPIN, DHTTYPE);
 
 void DHT_init(){
