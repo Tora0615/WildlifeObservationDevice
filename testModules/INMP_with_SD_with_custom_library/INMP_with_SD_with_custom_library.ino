@@ -33,9 +33,9 @@ void SDInit(){
 }
 
 
-#include "DFrobot_MSM261.h"
+#include "myMEMS.h"
 
-#define SAMPLE_RATE     (48000)
+#define SAMPLE_RATE     (38000)
 #define DATA_BIT        (16)
 #define CHANNEL         (2)
 
@@ -46,8 +46,8 @@ void SDInit(){
 #define MODE_L_PIN      (2)     // 2 pin weak pull-down / Set LR of that micorphone / Low - L
 #define SOUND_PMOS      (4)
 
-const int record_time = 10;  // 采样时间
-const char filename[] = "/sound.wav";//保存的文件名称
+const int record_time = 180;  // 采样时间
+const char filename[] = "/38KHz_3min_test.wav";//保存的文件名称
 
 const int headerSize = 44;
 const int byteRate = SAMPLE_RATE * CHANNEL * DATA_BIT / 8;   //192000;//一秒采集的字节数量 计算方式：采样速率x声道数量x数据位数/8
@@ -112,13 +112,17 @@ void setup() {
   
   Serial.println("Turn on mic power");
   digitalWrite(SOUND_PMOS,LOW);    // Turn on 
-  delay(1000);
+  delay(2000);
 
   Serial.println("start");
   duration = millis();
+  int I2s_duration = 0;
+  int writeFile_duration = 0;
   for (int j = 0; j < waveDataSize/numCommunicationData; ++j) {
     // read a size
+    int tempreadtime = millis();
     microphone.read(communicationData, numCommunicationData);
+    I2s_duration += millis() - tempreadtime;
     // oprate this size
     // for(uint32_t i = 0; i < numCommunicationData/2; i++){
     //   int16_t originalSound = communicationData[(i*2)] + ((communicationData[(i*2)+1]) * 256);  // 8 bit 平移
@@ -137,9 +141,13 @@ void setup() {
 
     // }
     // write this size
+    int tempwritefiletime = millis();
     soundFile.write((uint8_t*)communicationData, numCommunicationData);
+    writeFile_duration += millis() - tempwritefiletime;
   }
   Serial.println("use time : " + String (millis() - duration));
+  Serial.println("I2s_duration : " + String (I2s_duration));
+  Serial.println("writeFile_duration : " + String (writeFile_duration));
   soundFile.close();
   Serial.println("finish");
 
