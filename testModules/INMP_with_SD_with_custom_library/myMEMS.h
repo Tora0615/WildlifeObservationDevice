@@ -1,6 +1,6 @@
 /*!
- * @file DFRobot_Microphone.h
- * @brief 这是麦克风库的方法实现
+ * @file myMEMS.h
+ * @brief 簡化的 I2S library 
  * @copyright	Copyright (c) 2021 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @license The MIT License (MIT)
  * @author [TangJie](jie.tang@dfrobot.com)
@@ -8,8 +8,8 @@
  * @date 2022-2-18
  * @url https://github.com/DFRobot/DFRobot_MSM261
  */
-#ifndef _DFROBOT_MICROPHONE_H_
-#define _DFROBOT_MICROPHONE_H_
+#ifndef _MYMEMS_H_
+#define _MYMEMS_H_
 
 #include "Arduino.h"
 #include <driver/i2s.h>

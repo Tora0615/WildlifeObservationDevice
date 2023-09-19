@@ -48,7 +48,7 @@ void setup() {
   
 
   
-
+  showInitFinishedLED();
 }
 
 void loop() {

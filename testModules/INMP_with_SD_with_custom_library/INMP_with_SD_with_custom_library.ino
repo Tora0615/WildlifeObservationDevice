@@ -38,7 +38,6 @@ void SDInit(){
 #define SAMPLE_RATE     (38000)
 #define DATA_BIT        (16)
 #define CHANNEL         (2)
-
 #define I2S_SCK_IO      (27)    // SCK, clock
 #define I2S_WS_IO       (26)    // WS, choose LR
 #define I2S_DI_IO       (14)    // SD, I2S data output 
@@ -88,8 +87,8 @@ void setup() {
   }
   
   
-  digitalWrite(MODE_L_PIN,LOW);//将麦克风配置为接收左声道数据
-  digitalWrite(MODE_R_PIN,HIGH);//将麦克风配置为接收右声道数据
+  digitalWrite(MODE_L_PIN,LOW); //将麦克风配置为接收左声道数据
+  digitalWrite(MODE_R_PIN,HIGH); //将麦克风配置为接收右声道数据
   while(microphone.begin(SAMPLE_RATE, DATA_BIT) != 0){
     Serial.println(" I2S init failed");
   }

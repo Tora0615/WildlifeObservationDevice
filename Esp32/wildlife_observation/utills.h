@@ -55,4 +55,24 @@ void checkScheduleFile(){
 
 
 
+void showInitFinishedLED(){
+  pinMode(16, OUTPUT);
+  digitalWrite(16, HIGH); 
+  delay(100);
+  digitalWrite(16, LOW); 
+  delay(100);
+  digitalWrite(16, HIGH); 
+  delay(100);
+  digitalWrite(16, LOW); 
+  delay(100);
+  digitalWrite(16, HIGH); 
+  delay(100);
+  digitalWrite(16, LOW); 
+  delay(100);
+  digitalWrite(16, HIGH); 
+  delay(3000);
+  digitalWrite(16, LOW); 
+}
+
+
 #endif
