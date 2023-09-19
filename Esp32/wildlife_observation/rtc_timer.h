@@ -1,6 +1,8 @@
 #ifndef RTC_TIMER_H
 #define RTC_TIMER_H
 
+#include "setting.h"
+#define RTC_PMOS 17
 
 #include "RTClib.h"
 RTC_DS3231 rtc;  // default I2C address is : 0x57 (you can choose 0x57 ~ 0x50)
@@ -11,6 +13,14 @@ uint32_t sys_RTC_time_offset;         // RTC clock. It will only change when fir
 uint32_t sys_millis_time_offset;    // millis clock.
 
 void RTCInit(){
+  // Power part 
+  pinMode(RTC_PMOS, OUTPUT);
+  #ifdef RTC_DEBUG
+    Serial.println("Turn off DS3231_RTC POWER");
+  #endif 
+  digitalWrite(RTC_PMOS,HIGH);   // Turn off. GPIO default is low ->  will let mic ON
+
+  // init lib part
   if (! rtc.begin()) {
     Serial.println("Couldn't find RTC");
     while (1) delay(1000);
@@ -20,8 +30,23 @@ void RTCInit(){
 
 // use for first boot 
 uint32_t GetHowManySecondsHasPassedTodayFromRtc(){    // since today 0:00
+  // power on
+  #ifdef RTC_DEBUG
+    Serial.println("Turn on DS3231_RTC POWER");
+  #endif 
+  digitalWrite(RTC_PMOS, LOW);   // Turn on.
+  delay(100);
+
   // a day is 86400 sec
   now = rtc.now(); 
+
+  // power off 
+  #ifdef RTC_DEBUG
+    Serial.println("Turn off DS3231_RTC POWER");
+  #endif 
+  digitalWrite(RTC_PMOS, HIGH);   // Turn off. GPIO default is low ->  will let mic ON
+
+  // return part 
   return now.hour() * 60 * 60 + now.minute() * 60 + now.second();
 }
 

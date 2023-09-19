@@ -6,8 +6,6 @@
 
 // if day changed, create new folder
 void checkDayChange(){
-  
-
   if( getPassedSecOfToday() > 86400){  // a day change 86400
     sys_RTC_time_offset = GetHowManySecondsHasPassedTodayFromRtc();
     sys_millis_time_offset = millis();
@@ -15,8 +13,6 @@ void checkDayChange(){
       // Write log
     writeMsgToPath(systemLogPath, "Day changed");
   }
-
-
 }
 
 

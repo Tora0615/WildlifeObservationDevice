@@ -15,7 +15,7 @@ INMP441::INMP441(uint8_t bckIoNum, uint8_t wsIoNum, uint8_t dInNum){
   #ifdef INMP_DEBUG
     Serial.println("Turn off mic power");
   #endif
-  digitalWrite(SOUND_PMOS,HIGH);   // Turn off, gpio default is low -> this will let mic ON
+  digitalWrite(SOUND_PMOS,HIGH);   // Turn off. gpio default is low -> this will let mic ON
   digitalWrite(I2S_DI_IO,LOW);
 }
 

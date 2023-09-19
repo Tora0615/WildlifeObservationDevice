@@ -1,9 +1,9 @@
+#include "setting.h"
 #include "battery.h"
 #include "rtc_timer.h"
 #include "sd_operation.h"
 #include "myDS18B20.h"
 #include "utills.h"
-#include "setting.h"
 #include "myDHT.h"
 
 #define uS_TO_S_FACTOR 1000000ULL  /* Conversion factor for micro seconds to seconds */
@@ -70,6 +70,7 @@ void loop() {
   // esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
   // writeMsgToPath(systemLogPath, "sleep 15 min");
   // esp_deep_sleep_start();
+  Serial.println(" ");
 }
 
 
