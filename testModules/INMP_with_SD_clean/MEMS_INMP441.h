@@ -56,6 +56,16 @@ class INMP441{
     uint32_t read(byte* buffer, size_t len);
 
     /**
+    * @fn 
+    * @brief let sound louder
+    * @param buffer
+    * @param len
+    * @param volume_gain 
+    * @return None 
+    */
+    void louder(byte* buffer, size_t len, float volume_gain);
+
+    /**
     * @fn end
     * @brief uninstall I2S driver and turn off relative pins
     * @return None

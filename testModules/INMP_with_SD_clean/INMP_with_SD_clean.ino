@@ -20,6 +20,13 @@ void SDInit(){
 
 
 
+// void recordAndWrite(char* filename, int recordSeconds, int SAMPLE_RATE, int DATA_BIT, CHANNEL_STEREO){
+
+
+
+
+// }
+
 
 
 #include "MEMS_INMP441.h"
@@ -32,8 +39,9 @@ void SDInit(){
 #define CHANNEL_RIGHT    (1)
 #define CHANNEL_STEREO   (2)
 
-const int recordSeconds = 180;  
-const char filename[] = "/180.wav";
+float volume_gain = 64;  // 32 ~ 128 best
+const int recordSeconds = 10;  
+const char filename[] = "/10.wav";
 const int numOfData = 512; // size of each collection
 byte header[44];  
 byte dataBuffer[numOfData];
@@ -66,40 +74,28 @@ void setup(){
 
 
   Serial.println("start");
-  duration = millis();
-  int I2s_duration = 0;
-  int writeFile_duration = 0;
+  // duration = millis();
+  // int I2s_duration = 0;
+  // int writeFile_duration = 0;
+
   int wavDataSize = recordSeconds * microphone.bytePerSecond; 
   for (int j = 0; j < wavDataSize/numOfData; ++j) {
     // read a size
-    int tempreadtime = millis();
+    // int tempreadtime = millis();
     microphone.read(dataBuffer, numOfData);
-    I2s_duration += millis() - tempreadtime;
-    // oprate this size
-    // for(uint32_t i = 0; i < numOfData/2; i++){
-    //   int16_t originalSound = dataBuffer[(i*2)] + ((dataBuffer[(i*2)+1]) * 256);  // 8 bit 平移
-    //   // larger than the background val, than mulitiply the sound
+    // I2s_duration += millis() - tempreadtime;
 
-    //   int16_t calculated = originalSound * volume_double;
-    //   // limit the min and max
-    //   if (abs(calculated) > 32767 ){
-    //     if (originalSound > 0)
-    //       calculated = 32767;
-    //     else
-    //       calculated = -32767;
-    //   }
-    //   dataBuffer[i*2] =  (byte)(calculated & 0xFF);
-    //   dataBuffer[i*2 + 1] = (byte)((calculated >> 8) & 0xFF);
+    // let it louder of this size
+    microphone.louder(dataBuffer, numOfData, volume_gain);
 
-    // }
     // write this size
-    int tempwritefiletime = millis();
+    // int tempwritefiletime = millis();
     soundFile.write((uint8_t*)dataBuffer, numOfData);
-    writeFile_duration += millis() - tempwritefiletime;
+    // writeFile_duration += millis() - tempwritefiletime;
   }
-  Serial.println("use time : " + String (millis() - duration));
-  Serial.println("I2s_duration : " + String (I2s_duration));
-  Serial.println("writeFile_duration : " + String (writeFile_duration));
+  // Serial.println("use time : " + String (millis() - duration));
+  // Serial.println("I2s_duration : " + String (I2s_duration));
+  // Serial.println("writeFile_duration : " + String (writeFile_duration));
   soundFile.close();
   Serial.println("finish");
 

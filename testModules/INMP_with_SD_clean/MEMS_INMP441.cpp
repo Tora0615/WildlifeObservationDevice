@@ -31,7 +31,7 @@ uint8_t INMP441::begin(uint16_t sampleRate, uint8_t bit, uint8_t channelSetting)
   digitalWrite(MODE_R_PIN, HIGH); // set left microphone with high power level
 
   // wait power stable
-  delay(1000);
+  delay(2000);
 
 	uint8_t state = 0;
 	uint8_t ret = 0;
@@ -80,6 +80,26 @@ uint32_t INMP441::read(byte* buffer,size_t len){
 }
 
 
+void INMP441::louder(byte* buffer, size_t len, float volume_gain){
+  for(uint32_t i = 0; i < len/2; i++){
+    // read 2 byte and conbine 
+    int16_t originalSound = buffer[(i*2)] + ((buffer[(i*2)+1]) * 256);  // 8 bit 平移
+    // calculate
+    int16_t calculated = originalSound * volume_gain;
+    // limit the min and max
+    if (abs(calculated) > 32767 ){
+      if (originalSound > 0)
+        calculated = 32767;
+      else
+        calculated = -32767;
+    }
+    // seperate and write back
+    buffer[i*2] =  (byte)(calculated & 0xFF);
+    buffer[i*2 + 1] = (byte)((calculated >> 8) & 0xFF);
+  }
+}
+
+
 void INMP441::end(){
   Serial.println("Turn off mic power");
   digitalWrite(SOUND_PMOS,HIGH);   // Turn off, gpio default is low -> this will let mic ON
@@ -105,7 +125,7 @@ void INMP441::createWavHeader(byte* header, int recordSeconds, uint16_t longSamp
   }else{
     channelNum = 2;
   }
-  
+
   bytePerSecond = longSampleRate * channelNum * bit / 8;
   totalDataLen = recordSeconds * bytePerSecond;
   blockAlign = channelNum * bit / 8;
