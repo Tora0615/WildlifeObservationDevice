@@ -2,9 +2,9 @@
 #define SETTING_H
 
 // debug part setting 
-#define DS18B20_DEBUG
-#define DHT22_DEBUG
-#define RTC_DEBUG
+// #define DS18B20_DEBUG
+// #define DHT22_DEBUG
+// #define RTC_DEBUG
 
 
 

@@ -30,7 +30,7 @@ float DHT_get_temperature(){
     Serial.println("Turn on DHT POWER");
   #endif 
   digitalWrite(DHT22_PMOS, LOW);   // Turn on.
-  delay(100);
+  delay(200);
 
   // get value 
   const float sample_time = 10.0;
@@ -57,7 +57,7 @@ float DHT_get_Humidity(){
     Serial.println("Turn on DHT POWER");
   #endif 
   digitalWrite(DHT22_PMOS, LOW);   // Turn on.
-  delay(100);
+  delay(200);
 
   // get value 
   const float sample_time = 10.0;

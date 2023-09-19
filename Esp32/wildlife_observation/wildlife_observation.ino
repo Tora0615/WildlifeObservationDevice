@@ -5,6 +5,7 @@
 #include "myDS18B20.h"
 #include "utills.h"
 #include "myDHT.h"
+#include "taskFileReader.h"
 
 #define uS_TO_S_FACTOR 1000000ULL  /* Conversion factor for micro seconds to seconds */
 #define TIME_TO_SLEEP  900        /* Time ESP32 will go to sleep (in seconds) */
@@ -35,7 +36,8 @@ void setup() {
   if (notfirstBoot) writeMsgToPath(systemLogPath, "== reboot (or wake up) ==");
 
   // check schedule and setting doc
-  checkScheduleFile();
+  checkScheduleFileExist();
+  parseTasks();
 
   // system advance part inint
   batteryMonitorInit();
