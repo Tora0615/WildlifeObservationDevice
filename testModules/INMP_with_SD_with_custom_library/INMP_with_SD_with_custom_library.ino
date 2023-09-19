@@ -45,8 +45,8 @@ void SDInit(){
 #define MODE_L_PIN      (2)     // 2 pin weak pull-down / Set LR of that micorphone / Low - L
 #define SOUND_PMOS      (4)
 
-const int record_time = 180;  // 采样时间
-const char filename[] = "/38KHz_3min_test.wav";//保存的文件名称
+const int record_time = 1800;  // 采样时间
+const char filename[] = "/1800.wav";//保存的文件名称
 
 const int headerSize = 44;
 const int byteRate = SAMPLE_RATE * CHANNEL * DATA_BIT / 8;   //192000;//一秒采集的字节数量 计算方式：采样速率x声道数量x数据位数/8
@@ -117,11 +117,32 @@ void setup() {
   duration = millis();
   int I2s_duration = 0;
   int writeFile_duration = 0;
-  for (int j = 0; j < waveDataSize/numCommunicationData; ++j) {
+  unsigned long busyWait_duration = 0;
+  float tempJ = 0;
+  unsigned long intervalTimer;
+  int loopTime = waveDataSize/numCommunicationData;
+  int fix_interval_count = 3;
+
+  Serial.print("interval(s) : ");
+  unsigned long intervalMicros = record_time * 1000.0 * 1000.0 / loopTime;
+  Serial.println(intervalMicros/1000000.0, 8);
+  Serial.println("times count : " + String(loopTime));
+
+  for (int j = 0; j < loopTime; ++j) {
+
+    // print record detail
+    // if( ((j - tempJ)/(loopTime))*100.0 > 5) {
+    //   Serial.println( ((float)j/(loopTime)) *100 );
+    //   tempJ = j;
+    // }
+
+    intervalTimer = micros(); 
+
     // read a size
     int tempreadtime = millis();
     microphone.read(communicationData, numCommunicationData);
     I2s_duration += millis() - tempreadtime;
+
     // oprate this size
     // for(uint32_t i = 0; i < numCommunicationData/2; i++){
     //   int16_t originalSound = communicationData[(i*2)] + ((communicationData[(i*2)+1]) * 256);  // 8 bit 平移
@@ -139,14 +160,23 @@ void setup() {
     //   communicationData[i*2 + 1] = (byte)((calculated >> 8) & 0xFF);
 
     // }
+
     // write this size
     int tempwritefiletime = millis();
     soundFile.write((uint8_t*)communicationData, numCommunicationData);
     writeFile_duration += millis() - tempwritefiletime;
+
+    int busyWaitTime = micros();
+    while ( micros() - intervalTimer < intervalMicros && j % fix_interval_count == 0){
+      // delayMicroseconds(2);  
+    }
+    busyWait_duration += micros() - busyWaitTime;
+    // Serial.println((micros() - intervalTimer)/1000000.0, 8);
   }
-  Serial.println("use time : " + String (millis() - duration));
-  Serial.println("I2s_duration : " + String (I2s_duration));
-  Serial.println("writeFile_duration : " + String (writeFile_duration));
+  Serial.println("use time : " + String ((millis() - duration)/1000.0, 4));
+  Serial.println("I2s_duration : " + String (I2s_duration/1000.0, 4));
+  Serial.println("writeFile_duration : " + String (writeFile_duration/1000.0, 4));
+  Serial.println("busyWait_duration : " + String (busyWait_duration/1000000.0, 4));
   soundFile.close();
   Serial.println("finish");
 
