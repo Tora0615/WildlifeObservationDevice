@@ -138,25 +138,7 @@ int csvReadFloat(File* file, float* num, char delim) {
 //------------------------------------------------------------------------------
 
 
-typedef struct task_t task;
 
-struct task_t{
-  int start_min_of_a_day;
-  char task;
-  float time;
-  int channel;
-  float multiple;
-};
-
-
-void parseTasks(){
-  int time;
-  char task;
-  float time;
-  char channel;
-  float multiple;
-
-}
 
 
 #ENDIF
