@@ -1,15 +1,29 @@
 #define PARSE_TASK_DEBUG
 // #define ADD_REPEAT_WORKS_DEBUG
+// #define SORT_TASK_DEBUG
 
 int arrayMaxSize = 2;
 int arrayUsedIndex = 0;
 
-typedef struct task_t{
+typedef struct complexTask_t{
   int start_min_of_a_day;
   char task;
   float time;
   int channel;
   float multiple;
+}complexTask;
+
+typedef struct simpleTask_t{
+  int start_min_of_a_day;
+  char task;
+}simpleTask;
+
+typedef struct task_t {
+  byte setType;  // 0 for simple, 1 for complex
+  union {
+    simpleTask simple;
+    complexTask complex;
+  } taskType;
 }task;
 
 task *taskArray = (task*)malloc( sizeof(task) * arrayMaxSize );
@@ -35,27 +49,53 @@ void addTask(task **pointerToTaskArray, task *pointerToTask, int *pointerToArray
   *pointerToArrayUsedIndex += 1;
 }
 
+
 void sortTask(task *taskArray, int arrayUsedIndex){
-  // quick sort
-  for (int i = 0; i < arrayUsedIndex; i++) {
-    int j = i;
-    while (j > 0 && taskArray[j - 1].start_min_of_a_day > taskArray[j].start_min_of_a_day) {
-      task temp = taskArray[j];
-      taskArray[j] = taskArray[j - 1];
-      taskArray[j - 1] = temp;
-      j--;
+  // bubbleSort
+	int i, j;
+  task temp;
+	bool exchanged = true;
+	
+	for (i=0; exchanged && i<arrayUsedIndex-1; i++){ 
+    exchanged = false;
+		for (j=0; j<arrayUsedIndex-1-i; j++){ 
+      // read value depend on struct type
+      int a = taskArray[j].setType == 0 ? taskArray[j].taskType.simple.start_min_of_a_day : taskArray[j].taskType.complex.start_min_of_a_day;
+      int b = taskArray[j+1].setType == 0 ? taskArray[j+1].taskType.simple.start_min_of_a_day : taskArray[j+1].taskType.complex.start_min_of_a_day;
+      
+      #ifdef SORT_TASK_DEBUG
+        Serial.println(a);
+        Serial.println(b);
+      #endif
+
+			if (a>b){ // if statement SHOULDEN'T seperate into two line
+        #ifdef SORT_TASK_DEBUG
+          Serial.println("swap");
+        #endif
+				temp = taskArray[j];
+				taskArray[j] = taskArray[j+1];
+				taskArray[j+1] = temp;
+				exchanged = true; 
+			}
     }
   }
 }
 
+
+
 void printAllTask(task *taskArray, int inputArrayUsedIndex){
   for(int index = 0; index < inputArrayUsedIndex; index++){
     // Serial.println("Address : " + String( (int)(taskArray+index)) );
-    Serial.print("start_min_of_a_day : " + String( (taskArray+index)->start_min_of_a_day ) + "(" + String( minConvertTohour24((taskArray+index)->start_min_of_a_day) ) + ")");
-    Serial.print(" / task : " + String( (taskArray+index)->task ));
-    Serial.print(" / time : " + String( (taskArray+index)->time ));
-    Serial.print(" / channel : " + String( (taskArray+index)->channel ));
-    Serial.println(" / multiple : " + String( (taskArray+index)->multiple ));
+    if((taskArray+index)->setType == 0){  // simple task
+      Serial.print("start_min_of_a_day : " + String( (taskArray+index)->taskType.simple.start_min_of_a_day ) + "(" + String( minConvertTohour24( (taskArray+index)->taskType.simple.start_min_of_a_day ) ) + ")");
+      Serial.println(" / task : " + String( (taskArray+index)->taskType.simple.task ));
+    }else{  // complex task
+      Serial.print("start_min_of_a_day : " + String( (taskArray+index)->taskType.complex.start_min_of_a_day ) + "(" + String( minConvertTohour24((taskArray+index)->taskType.complex.start_min_of_a_day) ) + ")");
+      Serial.print(" / task : " + String( (taskArray+index)->taskType.complex.task ));
+      Serial.print(" / time : " + String( (taskArray+index)->taskType.complex.time ));
+      Serial.print(" / channel : " + String( (taskArray+index)->taskType.complex.channel ));
+      Serial.println(" / multiple : " + String( (taskArray+index)->taskType.complex.multiple ));
+    }
   }
 }
 
@@ -85,18 +125,19 @@ task parseTasks(String input){
   #endif
 
   task tempTask;
+  tempTask.setType = 1;
   if(lenCount == 3){
-    tempTask.start_min_of_a_day = hour24ConvetToMin(atoi(temp[0]));
-    tempTask.task = temp[1][0];
-    tempTask.time = atof(temp[2]);
-    tempTask.channel = ' ';
-    tempTask.multiple = 0.0;
+    tempTask.taskType.complex.start_min_of_a_day = hour24ConvetToMin(atoi(temp[0]));
+    tempTask.taskType.complex.task = temp[1][0];
+    tempTask.taskType.complex.time = atof(temp[2]);
+    tempTask.taskType.complex.channel = ' ';
+    tempTask.taskType.complex.multiple = 0.0;
   }else{
-    tempTask.start_min_of_a_day = hour24ConvetToMin(atoi(temp[0]));
-    tempTask.task = temp[1][0];
-    tempTask.time = atof(temp[2]);
-    tempTask.channel = atoi(temp[3][0]);
-    tempTask.multiple = atof(temp[4]);
+    tempTask.taskType.complex.start_min_of_a_day = hour24ConvetToMin(atoi(temp[0]));
+    tempTask.taskType.complex.task = temp[1][0];
+    tempTask.taskType.complex.time = atof(temp[2]);
+    tempTask.taskType.complex.channel = atoi(temp[3][0]);
+    tempTask.taskType.complex.multiple = atof(temp[4]);
   }
   return tempTask;
 }
@@ -109,7 +150,7 @@ void addRepeatWorks(task *inputTaskArray){
   task *temptaskArray = (task*)malloc( sizeof(task) * tempArrayMaxSize );
 
   for (int i=0; i<arrayUsedIndex; i++){
-    if((inputTaskArray+i)->task == 'A'){
+    if((inputTaskArray+i)->taskType.complex.task == 'A'){
       // direct copy 
       addTask(&temptaskArray, (inputTaskArray+i), &tempArrayMaxSize, &tempArrayUsedIndex);
       #ifdef ADD_REPEAT_WORKS_DEBUG
@@ -119,7 +160,7 @@ void addRepeatWorks(task *inputTaskArray){
       #endif
     }else{
       // count repeat time
-      int repeatTime = 24.0 / ((inputTaskArray+i)->time);
+      int repeatTime = 24.0 / ((inputTaskArray+i)->taskType.complex.time);
       #ifdef ADD_REPEAT_WORKS_DEBUG
         Serial.println("repeatTime : " + String(repeatTime));
       #endif
@@ -127,11 +168,9 @@ void addRepeatWorks(task *inputTaskArray){
       // repeat N times to add task to temp array
       for (int j=0; j<repeatTime; j++){
         task tempTask;        // !!same address, if malloc will be different!!
-        tempTask.time = 0.0;
-        tempTask.channel = 0;
-        tempTask.multiple = 0.0;
-        tempTask.task = ( (inputTaskArray+i)->task );
-        tempTask.start_min_of_a_day = ( (inputTaskArray+i)->start_min_of_a_day) + j * ((inputTaskArray+i)->time) * 60;
+        tempTask.setType = 0;
+        tempTask.taskType.simple.task = ( (inputTaskArray+i)->taskType.complex.task );
+        tempTask.taskType.simple.start_min_of_a_day = ( (inputTaskArray+i)->taskType.complex.start_min_of_a_day) + j * ((inputTaskArray+i)->taskType.complex.time) * 60;
         addTask(&temptaskArray, &tempTask, &tempArrayMaxSize, &tempArrayUsedIndex);
 
         #ifdef ADD_REPEAT_WORKS_DEBUG
@@ -157,13 +196,23 @@ void setup() {
   Serial.begin(115200);
 
   String testInput[] = {
-    "0000,A,30,L,1",
-    "0325,A,15,R,2",
+    /*
+    // 0.083hr, 5 min, total 288
+    // 0.166hr, 10min, total 144
+    // 0.25hr, 15 min, total 96
+    // 3hr, total 8 
+    // 6hr, total 4
+    // 12hr, total 2 
+    // 24hr, total 1
+    */
+
     "1345,A,10,B,1",
+    "0000,A,30,L,1",
     "1900,A,20,B,0.5",
-    // "0000,B,0.083",  // 5 min, total 288
-    "0000,C,0.25",  // 15 min, total 96
-    "0000,D,3"  // 3hr, total 8 
+    "0325,A,15,R,2",
+    "0000,B,0.166",  
+    "0000,C,0.25",   
+    "0000,D,3"       
   };
 
 
