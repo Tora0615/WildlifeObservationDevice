@@ -1,4 +1,4 @@
-// #define PARSE_TASK_DEBUG
+#define PARSE_TASK_DEBUG
 // #define ADD_REPEAT_WORKS_DEBUG
 
 int arrayMaxSize = 2;
@@ -131,7 +131,7 @@ void addRepeatWorks(task *inputTaskArray){
         tempTask.channel = 0;
         tempTask.multiple = 0.0;
         tempTask.task = ( (inputTaskArray+i)->task );
-        tempTask.start_min_of_a_day = ( (inputTaskArray+i)->start_min_of_a_day) + j * (int)((inputTaskArray+i)->time) * 60;
+        tempTask.start_min_of_a_day = ( (inputTaskArray+i)->start_min_of_a_day) + j * ((inputTaskArray+i)->time) * 60;
         addTask(&temptaskArray, &tempTask, &tempArrayMaxSize, &tempArrayUsedIndex);
 
         #ifdef ADD_REPEAT_WORKS_DEBUG
@@ -161,9 +161,9 @@ void setup() {
     "0325,A,15,R,2",
     "1345,A,10,B,1",
     "1900,A,20,B,0.5",
-    "0000,B,12",
-    "0000,C,24",
-    "0000,D,6"
+    // "0000,B,0.083",  // 5 min, total 288
+    "0000,C,0.25",  // 15 min, total 96
+    "0000,D,3"  // 3hr, total 8 
   };
 
 
@@ -177,6 +177,7 @@ void setup() {
   sortTask(taskArray, arrayUsedIndex);
   Serial.println("After sort");
   printAllTask(taskArray, arrayUsedIndex);
+  Serial.println("arrayUsedIndex : " + String(arrayUsedIndex));
   Serial.println("");
 }
 
