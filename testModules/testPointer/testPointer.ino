@@ -1,4 +1,4 @@
-#define PARSE_TASK_DEBUG
+// #define PARSE_TASK_DEBUG
 
 
 int arrayMaxSize = 2;
@@ -14,7 +14,9 @@ typedef struct task_t{
 
 task *taskArray = (task*)malloc( sizeof(task) * arrayMaxSize );
 
-void addTask(task **pointerToTaskArray, task InputTask, int *pointerToArrayMaxSize, int *pointerToArrayUsedIndex){
+void addTask(task **pointerToTaskArray, task *pointerToTask, int *pointerToArrayMaxSize, int *pointerToArrayUsedIndex){
+  Serial.println("pointerToTask : " + String(int(pointerToTask)));
+
   // if array size is not enough
   if(*pointerToArrayUsedIndex == *pointerToArrayMaxSize){
     // create a temp array with double size
@@ -25,12 +27,14 @@ void addTask(task **pointerToTaskArray, task InputTask, int *pointerToArrayMaxSi
     free(*pointerToTaskArray);
     // new array pointer give to old name
     *pointerToTaskArray = tempTaskArray;
-    // double the variable
+    // double variable
     *pointerToArrayMaxSize = *pointerToArrayMaxSize * 2;
   }
 
   // give value to that array slot
-  *(taskArray + *pointerToArrayUsedIndex) = InputTask;
+  // Serial.println("*pointerToArrayUsedIndex : " + String(*pointerToArrayUsedIndex));
+  *(*pointerToTaskArray + *pointerToArrayUsedIndex) = *pointerToTask;
+  // memcpy(*pointerToTaskArray + *pointerToArrayUsedIndex, pointerToTask, sizeof(task) );
   // index + 1
   *pointerToArrayUsedIndex += 1;
 }
@@ -48,15 +52,14 @@ void sortTask(task *taskArray, int arrayUsedIndex){
   }
 }
 
-void printAllTask(task *taskArray, int arrayUsedIndex){
-  int index = 0;
-  while(index != arrayUsedIndex){
+void printAllTask(task *taskArray, int inputArrayUsedIndex){
+  for(int index = 0; index < inputArrayUsedIndex; index++){
+    Serial.println("Address : " + String( (int)(taskArray+index)) );
     Serial.print("start_min_of_a_day : " + String( (taskArray+index)->start_min_of_a_day ));
     Serial.print(" / task : " + String( (taskArray+index)->task ));
     Serial.print(" / time : " + String( (taskArray+index)->time ));
     Serial.print(" / channel : " + String( (taskArray+index)->channel ));
     Serial.println(" / multiple : " + String( (taskArray+index)->multiple ));
-    index += 1;
   }
 }
 
@@ -99,38 +102,56 @@ task parseTasks(String input){
 }
 
 
-void addRepeatWorks(task *taskArray){
+void addRepeatWorks(task **taskArray){
   int tempArrayMaxSize = 2;
   int tempArrayUsedIndex = 0;
   task *temptaskArray = (task*)malloc( sizeof(task) * tempArrayMaxSize );
 
-  // Serial.println();
+  Serial.println("arrayUsedIndex" + String(arrayUsedIndex));
   for (int i=0; i<arrayUsedIndex; i++){
-    if((taskArray+i)->task == 'A'){
-      Serial.println("direct copy");
-      // direct copy
-      addTask(&temptaskArray, *(taskArray+i), &tempArrayMaxSize, &tempArrayUsedIndex);
+    if((*taskArray+i)->task == 'A'){
+      Serial.println("direct copy" + String(i));
+      addTask(&temptaskArray, (*taskArray+i), &tempArrayMaxSize, &tempArrayUsedIndex);
+      Serial.println("tempArrayMaxSize : " + String(tempArrayMaxSize));
+      Serial.println("tempArrayUsedIndex : " + String(tempArrayUsedIndex));
     }else{
       // count repeat time
-      int repeatTime = 24 / ((taskArray+i)->time);
-      Serial.println("repeatTime : " + String(repeatTime));
+      int repeatTime = 24.0 / ((*taskArray+i)->time);
+      // Serial.println("repeatTime : " + String(repeatTime));
 
-      task tempTask;
       for (int j=0; j<repeatTime; j++){
-        tempTask.start_min_of_a_day = ((taskArray+i)->start_min_of_a_day) + j*((taskArray+i)->time)*60;
-        tempTask.task = ((taskArray+i)->task);
-        addTask(&temptaskArray, tempTask, &tempArrayMaxSize, &tempArrayUsedIndex);
+        Serial.println("loop create: " + String(j+1));
+        task tempTask;
+        Serial.println("Address : " + String((int)(&tempTask)));  // same address, malloc different
+
+        tempTask.time = 0.0;
+        tempTask.channel = 0;
+        tempTask.multiple = 0.0;
+        tempTask.task = ( (*taskArray+i)->task );
+        tempTask.start_min_of_a_day = ( (*taskArray+i)->start_min_of_a_day) + j * (int)((*taskArray+i)->time) * 60;
+
+        // Serial.println("(taskArray+i)->task" + String((taskArray+i)->task));
+        // Serial.println("(taskArray+i)->start_min_of_a_day)" + String((taskArray+i)->start_min_of_a_day) );
+
+        // int s_time = ((taskArray+i)->start_min_of_a_day);
+        // float cutt_time = ((taskArray+i)->time);
+        // Serial.println( s_time + j * cutt_time * 60 );
+
+        
+        addTask(&temptaskArray, &tempTask, &tempArrayMaxSize, &tempArrayUsedIndex);
+        Serial.println("tempArrayMaxSize : " + String(tempArrayMaxSize));
+        Serial.println("tempArrayUsedIndex : " + String(tempArrayUsedIndex));
       }
     }
   }
-  // addTask(&temptaskArray, parseTasks(testInput[i]));
 
-  printAllTask(temptaskArray, arrayUsedIndex);
+  printAllTask(temptaskArray, tempArrayUsedIndex);
 
-  // replace with new file
+
+  // replace with new array
   arrayMaxSize = tempArrayMaxSize;
   arrayUsedIndex = tempArrayUsedIndex;
-  taskArray = temptaskArray;
+  taskArray = &temptaskArray;
 }
 
 
@@ -162,22 +183,22 @@ void setup() {
     "0325,A,15,R,2",
     "1345,A,10,B,1",
     "1900,A,20,B,0.5",
-    "0000,B,24",
-    "0000,C,6",
-    "0000,D,12"
+    "0000,B,12",
+    "0010,C,24",
+    "0020,D,24"
   };
 
 
   for(int i=0; i<7; i++){
-    addTask(&taskArray, parseTasks(testInput[i]), &arrayMaxSize, &arrayUsedIndex);
+    addTask(&taskArray, &parseTasks(testInput[i]), &arrayMaxSize, &arrayUsedIndex);
   }
-  // addRepeatWorks(taskArray);
+  addRepeatWorks(&taskArray);
 
-  Serial.println("Before sort");
-  printAllTask(taskArray, arrayUsedIndex);
-  sortTask(taskArray, arrayUsedIndex);
-  Serial.println("After sort");
-  printAllTask(taskArray, arrayUsedIndex);
+  // Serial.println("Before sort");
+  // printAllTask(taskArray, arrayUsedIndex);
+  // sortTask(taskArray, arrayUsedIndex);
+  // Serial.println("After sort");
+  // printAllTask(taskArray, arrayUsedIndex);
   Serial.println("");
 }
 
