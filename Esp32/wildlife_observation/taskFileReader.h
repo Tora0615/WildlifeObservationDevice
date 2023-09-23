@@ -8,7 +8,7 @@
 // #define PARSE_TASK_DEBUG
 // #define ADD_REPEAT_WORKS_DEBUG
 // #define SORT_TASK_DEBUG
-
+#define GET_COMMAND_STRING_ARRAY_DEBUG
 
 
 void checkScheduleFileExist(){
@@ -49,6 +49,7 @@ void checkScheduleFileExist(){
 }
 
 /* read info from file */
+int commandStringSize = 0;
 char** getCommandStringArray(){
   int tempArrayMaxSize = 2;
   int tempArrayUsedIndex = 0;
@@ -76,7 +77,9 @@ char** getCommandStringArray(){
       index += 1;
     }
 
-    Serial.println(String(buffer) + " : " + String(index));
+    #ifdef GET_COMMAND_STRING_ARRAY_DEBUG
+      Serial.println(String(buffer) + " : " + String(index));
+    #endif
     
     // char *tempSortenChar = (char*)malloc( sizeof(char) * (index+1) );
     // memset(tempSortenChar, '\0', sizeof(tempSortenChar));     // clean the buffer 
@@ -100,41 +103,39 @@ char** getCommandStringArray(){
       tempArrayMaxSize = tempArrayMaxSize * 2;
     }
 
-  
-    // save to array 
-    // give value to that array slot (copy value, not copy address)
-    *(*commandStringArray + tempArrayUsedIndex) = *buffer;
-    // index + 1
-    tempArrayUsedIndex += 1;
-
     // loop end condition 
     if(String(buffer) == "#---------"){
       break;
     }
+
+    // save to array 
+    // give value to that array slot (copy value, not copy address)
+    *commandStringArray + tempArrayUsedIndex = &buffer;
+    // memcpy(*commandStringArray + tempArrayUsedIndex, buffer, index+1);
+    // index + 1
+    tempArrayUsedIndex += 1;
+
+
+    #ifdef GET_COMMAND_STRING_ARRAY_DEBUG
+      Serial.println(String(*(*commandStringArray + tempArrayUsedIndex)));
+    #endif
   }
   
   // read finished, close file
   taskFile.close();
-  Serial.println("Done");
+  #ifdef GET_COMMAND_STRING_ARRAY_DEBUG
+    Serial.println("Done");
+  #endif
 
-
+  commandStringSize = tempArrayUsedIndex;
   return commandStringArray;
 }
 
 
-// void addTaskFrom(String[] input){
 
-//   for (int i=0; i<len; i++){
-//     addTask(&taskArray, &parseTasks(input[i]), &arrayMaxSize, &arrayUsedIndex);
-//   }
-//   free(input);
-
-//   addRepeatWorks(taskArray);
-// }
 
 
 /* process task command */
-
 int arrayMaxSize = 2;      // task array max 
 int arrayUsedIndex = 0;    // task array used
 int arrayReadIndex = 0;    // read position, re-zero when day change
@@ -182,6 +183,8 @@ void addTask(task **pointerToTaskArray, task *pointerToTask, int *pointerToArray
   // index + 1
   *pointerToArrayUsedIndex += 1;
 }
+
+
 
 
 void sortTask(task *taskArray, int arrayUsedIndex){
@@ -326,7 +329,21 @@ void addRepeatWorks(task *inputTaskArray){
 
 
 
+// do add task from just one call 
+void addTaskFrom(char **input){
+  Serial.println("commandStringSize" + String(commandStringSize));
 
+  for (int i=0; i<commandStringSize; i++){
+    Serial.println("here");
+
+    String command = String( *(input + i) );
+    Serial.println(command);
+    // task tempTask = parseTasks(command);
+    // addTask(&taskArray, &tempTask, &arrayMaxSize, &arrayUsedIndex);
+  }
+  // free(input);
+  // addRepeatWorks(taskArray);
+}
 
 
 
