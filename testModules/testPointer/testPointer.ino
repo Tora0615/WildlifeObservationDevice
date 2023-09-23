@@ -1,6 +1,4 @@
-#define PARSE_TASK_DEBUG
-// #define ADD_REPEAT_WORKS_DEBUG
-// #define SORT_TASK_DEBUG
+
 
 int arrayMaxSize = 2;
 int arrayUsedIndex = 0;

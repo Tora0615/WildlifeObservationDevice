@@ -1,6 +1,15 @@
 #ifndef TASKFILEREADER_H
 #define TASKFILEREADER_H
 
+#include "sd_operation.h"
+
+
+// debug setting part
+// #define PARSE_TASK_DEBUG
+// #define ADD_REPEAT_WORKS_DEBUG
+// #define SORT_TASK_DEBUG
+
+
 
 void checkScheduleFileExist(){
   if (!sd.exists(SCHEDULE_FILE.c_str())){
@@ -39,106 +48,292 @@ void checkScheduleFileExist(){
   }
 }
 
-#define CSV_DELIM ','
+/* read info from file */
+char** getCommandStringArray(){
+  int tempArrayMaxSize = 2;
+  int tempArrayUsedIndex = 0;
+  char **commandStringArray = (char**)malloc( sizeof(char*) * tempArrayMaxSize );
 
-int csvReadText(File* file, char* str, size_t size, char delim) {
-  char ch;
-  int rtn;
-  size_t n = 0;
-  while (true) {
-    // check for EOF
-    if (!file->available()) {
-      rtn = 0;
-      break;
-    }
-    if (file->read(&ch, 1) != 1) {
-      // read error
-      rtn = -1;
-      break;
-    }
-    // Delete CR.
-    if (ch == '\r') {
-      continue;
-    }
-    if (ch == delim || ch == '\n') {
-      rtn = ch;
-      break;
-    }
-    if ((n + 1) >= size) {
-      // string too long
-      rtn = -2;
-      n--;
-      break;
-    }
-    str[n++] = ch;
+  // open file 
+  FsFile taskFile;  
+  if (!taskFile.open(SCHEDULE_FILE.c_str(), FILE_READ)) {
+    Serial.println("open failed");
   }
-  str[n] = '\0';
-  return rtn;
+
+  const int lenOfLine = 40;
+  while (taskFile.available()) {
+    char buffer[lenOfLine];                   // create buffer
+    memset(buffer, 0, sizeof(buffer));     // clean the buffer 
+
+    // save char one by one untill meet '\n' ('\n' will be ignore)
+    int index = 0;
+    while(1){
+      char tempChar = taskFile.read();        // save to buffer 
+      if(tempChar == '\n'){
+        break;
+      }
+      buffer[index] = tempChar;
+      index += 1;
+    }
+
+    Serial.println(String(buffer) + " : " + String(index));
+    
+    // char *tempSortenChar = (char*)malloc( sizeof(char) * (index+1) );
+    // memset(tempSortenChar, '\0', sizeof(tempSortenChar));     // clean the buffer 
+    // memcpy(tempSortenChar, buffer, sizeof(tempSortenChar) );
+    // tempSortenChar[index] = '\0';
+    // Serial.println(String(tempSortenChar));
+
+
+    // check array size
+    // if array size is not enough
+    if(tempArrayUsedIndex == tempArrayMaxSize){
+      // create a temp array with double size
+      char **tempCommandStringArray = (char**)malloc( sizeof(char*) * tempArrayMaxSize * 2);
+      // copy data to new array
+      memcpy(tempCommandStringArray, commandStringArray, tempArrayMaxSize * sizeof(char*) );
+      // release old array ram space
+      free(commandStringArray);
+      // new array pointer give to old name
+      commandStringArray = tempCommandStringArray;
+      // double variable
+      tempArrayMaxSize = tempArrayMaxSize * 2;
+    }
+
+  
+    // save to array 
+    // give value to that array slot (copy value, not copy address)
+    *(*commandStringArray + tempArrayUsedIndex) = *buffer;
+    // index + 1
+    tempArrayUsedIndex += 1;
+
+    // loop end condition 
+    if(String(buffer) == "#---------"){
+      break;
+    }
+  }
+  
+  // read finished, close file
+  taskFile.close();
+  Serial.println("Done");
+
+
+  return commandStringArray;
 }
-//------------------------------------------------------------------------------
-int csvReadInt32(File* file, int32_t* num, char delim) {
-  char buf[20];
-  char* ptr;
-  int rtn = csvReadText(file, buf, sizeof(buf), delim);
-  if (rtn < 0) return rtn;
-  *num = strtol(buf, &ptr, 10);
-  if (buf == ptr) return -3;
-  while(isspace(*ptr)) ptr++;
-  return *ptr == 0 ? rtn : -4;
+
+
+// void addTaskFrom(String[] input){
+
+//   for (int i=0; i<len; i++){
+//     addTask(&taskArray, &parseTasks(input[i]), &arrayMaxSize, &arrayUsedIndex);
+//   }
+//   free(input);
+
+//   addRepeatWorks(taskArray);
+// }
+
+
+/* process task command */
+
+int arrayMaxSize = 2;      // task array max 
+int arrayUsedIndex = 0;    // task array used
+int arrayReadIndex = 0;    // read position, re-zero when day change
+
+typedef struct complexTask_t{
+  int start_min_of_a_day;
+  char task;
+  float time;
+  int channel;
+  float multiple;
+}complexTask;
+
+typedef struct simpleTask_t{
+  int start_min_of_a_day;
+  char task;
+}simpleTask;
+
+typedef struct task_t {
+  byte setType;  // 0 for simple, 1 for complex
+  union {
+    simpleTask simple;
+    complexTask complex;
+  } taskType;
+}task;
+
+task *taskArray = (task*)malloc( sizeof(task) * arrayMaxSize );
+
+void addTask(task **pointerToTaskArray, task *pointerToTask, int *pointerToArrayMaxSize, int *pointerToArrayUsedIndex){
+  // if array size is not enough
+  if(*pointerToArrayUsedIndex == *pointerToArrayMaxSize){
+    // create a temp array with double size
+    task *tempTaskArray = (task*)malloc( sizeof(task) * *pointerToArrayMaxSize * 2);
+    // copy data to new array
+    memcpy(tempTaskArray, *pointerToTaskArray, *pointerToArrayMaxSize * sizeof(task) );
+    // release old array ram space
+    free(*pointerToTaskArray);
+    // new array pointer give to old name
+    *pointerToTaskArray = tempTaskArray;
+    // double variable
+    *pointerToArrayMaxSize = *pointerToArrayMaxSize * 2;
+  }
+
+  // give value to that array slot (copy value, not copy address)
+  *(*pointerToTaskArray + *pointerToArrayUsedIndex) = *pointerToTask;
+  // index + 1
+  *pointerToArrayUsedIndex += 1;
 }
-//------------------------------------------------------------------------------
-int csvReadInt16(File* file, int16_t* num, char delim) {
-  int32_t tmp;
-  int rtn = csvReadInt32(file, &tmp, delim);
-  if (rtn < 0) return rtn;
-  if (tmp < INT_MIN || tmp > INT_MAX) return -5;
-  *num = tmp;
-  return rtn;
+
+
+void sortTask(task *taskArray, int arrayUsedIndex){
+  // bubbleSort
+	int i, j;
+  task temp;
+	bool exchanged = true;
+	
+	for (i=0; exchanged && i<arrayUsedIndex-1; i++){ 
+    exchanged = false;
+		for (j=0; j<arrayUsedIndex-1-i; j++){ 
+      // read value depend on struct type
+      int a = taskArray[j].setType == 0 ? taskArray[j].taskType.simple.start_min_of_a_day : taskArray[j].taskType.complex.start_min_of_a_day;
+      int b = taskArray[j+1].setType == 0 ? taskArray[j+1].taskType.simple.start_min_of_a_day : taskArray[j+1].taskType.complex.start_min_of_a_day;
+      
+      #ifdef SORT_TASK_DEBUG
+        Serial.println(a);
+        Serial.println(b);
+      #endif
+
+			if (a>b){ // if statement SHOULDEN'T seperate into two line
+        #ifdef SORT_TASK_DEBUG
+          Serial.println("swap");
+        #endif
+				temp = taskArray[j];
+				taskArray[j] = taskArray[j+1];
+				taskArray[j+1] = temp;
+				exchanged = true; 
+			}
+    }
+  }
 }
-//------------------------------------------------------------------------------
-int csvReadUint32(File* file, uint32_t* num, char delim) {
-  char buf[20];
-  char* ptr;
-  int rtn = csvReadText(file, buf, sizeof(buf), delim);
-  if (rtn < 0) return rtn;
-  *num = strtoul(buf, &ptr, 10);
-  if (buf == ptr) return -3;
-  while(isspace(*ptr)) ptr++;
-  return *ptr == 0 ? rtn : -4;
+
+
+int hour24ConvetToMin(int input){
+  return (input/100)*60 + input %100 ;
 }
-//------------------------------------------------------------------------------
-int csvReadUint16(File* file, uint16_t* num, char delim) {
-  uint32_t tmp;
-  int rtn = csvReadUint32(file, &tmp, delim);
-  if (rtn < 0) return rtn;
-  if (tmp > UINT_MAX) return -5;
-  *num = tmp;
-  return rtn;
+
+int minConvertTohour24(int input){
+  return (input/60)*100 + input % 60;
 }
-//------------------------------------------------------------------------------
-int csvReadDouble(File* file, double* num, char delim) {
-  char buf[20];
-  char* ptr;
-  int rtn = csvReadText(file, buf, sizeof(buf), delim);
-  if (rtn < 0) return rtn;
-  *num = strtod(buf, &ptr);
-  if (buf == ptr) return -3;
-  while(isspace(*ptr)) ptr++;
-  return *ptr == 0 ? rtn : -4;
+
+void printAllTask(task *taskArray, int inputArrayUsedIndex){
+  for(int index = 0; index < inputArrayUsedIndex; index++){
+    // Serial.println("Address : " + String( (int)(taskArray+index)) );
+    if((taskArray+index)->setType == 0){  // simple task
+      Serial.print("start_min_of_a_day : " + String( (taskArray+index)->taskType.simple.start_min_of_a_day ) + "(" + String( minConvertTohour24( (taskArray+index)->taskType.simple.start_min_of_a_day ) ) + ")");
+      Serial.println(" / task : " + String( (taskArray+index)->taskType.simple.task ));
+    }else{  // complex task
+      Serial.print("start_min_of_a_day : " + String( (taskArray+index)->taskType.complex.start_min_of_a_day ) + "(" + String( minConvertTohour24((taskArray+index)->taskType.complex.start_min_of_a_day) ) + ")");
+      Serial.print(" / task : " + String( (taskArray+index)->taskType.complex.task ));
+      Serial.print(" / time : " + String( (taskArray+index)->taskType.complex.time ));
+      Serial.print(" / channel : " + String( (taskArray+index)->taskType.complex.channel ));
+      Serial.println(" / multiple : " + String( (taskArray+index)->taskType.complex.multiple ));
+    }
+  }
 }
-//------------------------------------------------------------------------------
-int csvReadFloat(File* file, float* num, char delim) {
-  double tmp;
-  int rtn = csvReadDouble(file, &tmp, delim);
-  if (rtn < 0)return rtn;
-  // could test for too large.
-  *num = tmp;
-  return rtn;
+
+task parseTasks(String input){
+  int lenCount = 0;
+  char *temp[5];  // a pointer point to a value which can storage 5 char array pointer
+
+  char *token;
+  temp[lenCount] = strtok((char *)input.c_str(), ",");  // remove error "invalid conversion from 'const char*' to 'char*' ""
+  while( temp[lenCount] != NULL){   // if still can parse, keep running
+    #ifdef PARSE_TASK_DEBUG
+      Serial.print(String(temp[lenCount]) + " / ");
+    #endif
+    lenCount += 1;
+    temp[lenCount] = strtok(NULL, ",");
+  }
+  #ifdef PARSE_TASK_DEBUG
+    Serial.println("");
+  #endif
+
+  task tempTask;
+  tempTask.setType = 1;
+  if(lenCount == 3){
+    tempTask.taskType.complex.start_min_of_a_day = hour24ConvetToMin(atoi(temp[0]));
+    tempTask.taskType.complex.task = temp[1][0];
+    tempTask.taskType.complex.time = atof(temp[2]);
+    tempTask.taskType.complex.channel = ' ';
+    tempTask.taskType.complex.multiple = 0.0;
+  }else{
+    tempTask.taskType.complex.start_min_of_a_day = hour24ConvetToMin(atoi(temp[0]));
+    tempTask.taskType.complex.task = temp[1][0];
+    tempTask.taskType.complex.time = atof(temp[2]);
+    tempTask.taskType.complex.channel = atoi(String(temp[3][0]).c_str());
+    tempTask.taskType.complex.multiple = atof(temp[4]);
+  }
+  return tempTask;
 }
-//------------------------------------------------------------------------------
+
+
+void addRepeatWorks(task *inputTaskArray){
+  // new variable and larger size array
+  int tempArrayMaxSize = 2;
+  int tempArrayUsedIndex = 0;
+  task *temptaskArray = (task*)malloc( sizeof(task) * tempArrayMaxSize );
+
+  for (int i=0; i<arrayUsedIndex; i++){
+    if((inputTaskArray+i)->taskType.complex.task == 'A'){
+      // direct copy 
+      addTask(&temptaskArray, (inputTaskArray+i), &tempArrayMaxSize, &tempArrayUsedIndex);
+      #ifdef ADD_REPEAT_WORKS_DEBUG
+        Serial.println("direct copy" + String(i));
+        Serial.println("tempArrayMaxSize : " + String(tempArrayMaxSize));
+        Serial.println("tempArrayUsedIndex : " + String(tempArrayUsedIndex));
+      #endif
+    }else{
+      // count repeat time
+      int repeatTime = 24.0 / ((inputTaskArray+i)->taskType.complex.time);
+      #ifdef ADD_REPEAT_WORKS_DEBUG
+        Serial.println("repeatTime : " + String(repeatTime));
+      #endif
+
+      // repeat N times to add task to temp array
+      for (int j=0; j<repeatTime; j++){
+        task tempTask;        // !!same address, if malloc will be different!!
+        tempTask.setType = 0;
+        tempTask.taskType.simple.task = ( (inputTaskArray+i)->taskType.complex.task );
+        tempTask.taskType.simple.start_min_of_a_day = ( (inputTaskArray+i)->taskType.complex.start_min_of_a_day) + j * ((inputTaskArray+i)->taskType.complex.time) * 60;
+        addTask(&temptaskArray, &tempTask, &tempArrayMaxSize, &tempArrayUsedIndex);
+
+        #ifdef ADD_REPEAT_WORKS_DEBUG
+          Serial.println("loop create: " + String(j+1));
+          Serial.println("tempArrayMaxSize : " + String(tempArrayMaxSize));
+          Serial.println("tempArrayUsedIndex : " + String(tempArrayUsedIndex));
+        #endif
+      }
+    }
+  }
+
+  // here can confirm change success or not
+  // printAllTask(temptaskArray, tempArrayUsedIndex);
+
+  // replace with new array
+  arrayMaxSize = tempArrayMaxSize;
+  arrayUsedIndex = tempArrayUsedIndex;
+  taskArray = temptaskArray;   // local variable SHOULD NOT same as gloable, or replace will not be success
+}
 
 
 
 
 
-#ENDIF
+
+
+
+
+
+
+
+
+#endif

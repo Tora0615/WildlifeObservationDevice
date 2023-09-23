@@ -1,11 +1,11 @@
-#include "setting.h"
+#include "setting.h"   // put at the first line
+#include "taskFileReader.h"
 #include "battery.h"
 #include "rtc_timer.h"
 #include "sd_operation.h"
 #include "myDS18B20.h"
 #include "utills.h"
 #include "myDHT.h"
-#include "taskFileReader.h"
 
 #define uS_TO_S_FACTOR 1000000ULL  /* Conversion factor for micro seconds to seconds */
 #define TIME_TO_SLEEP  900        /* Time ESP32 will go to sleep (in seconds) */
@@ -37,7 +37,20 @@ void setup() {
 
   // check schedule and setting doc
   checkScheduleFileExist();
-  parseTasks();
+  char **commandStringArray = getCommandStringArray();
+  // addTaskFrom(commandStringArray);
+  while(1) delay(1000);
+
+  Serial.println("Before sort");
+  printAllTask(taskArray, arrayUsedIndex);
+  sortTask(taskArray, arrayUsedIndex);
+  Serial.println("After sort");
+  printAllTask(taskArray, arrayUsedIndex);
+  Serial.println("arrayUsedIndex : " + String(arrayUsedIndex));
+  Serial.println("");
+
+  
+
 
   // system advance part inint
   batteryMonitorInit();
@@ -52,6 +65,8 @@ void setup() {
   
   showInitFinishedLED();
 }
+
+
 
 void loop() {
 
