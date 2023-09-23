@@ -15,6 +15,9 @@
 String today;
 
 void setup() {
+  // To indicate setup status, it will allway on if failed
+  turnOnLed();
+
   Serial.begin(115200);  
 
   // system basic part init 
@@ -39,21 +42,12 @@ void setup() {
   checkScheduleFileExist();
   addAllTaskFromFile();
 
-
-  while(1) delay(1000);
-
-
   // system advance part inint
   batteryMonitorInit();
   DS18B20Init();
   DHT_init();
 
-
-  // time < test or have ACTIVATECODE, pass
-
-  
-
-  
+  // shine and close
   showInitFinishedLED();
 }
 

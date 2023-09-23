@@ -8,13 +8,7 @@
 // #define PARSE_TASK_DEBUG
 // #define ADD_REPEAT_WORKS_DEBUG
 // #define SORT_TASK_DEBUG
-#define ADD_ALL_TASK_FROM_FILE_DEBUG
-
-
-
-
-
-
+// #define ADD_ALL_TASK_FROM_FILE_DEBUG
 
 
 /* process task command */
