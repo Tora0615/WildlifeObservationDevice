@@ -8,128 +8,10 @@
 // #define PARSE_TASK_DEBUG
 // #define ADD_REPEAT_WORKS_DEBUG
 // #define SORT_TASK_DEBUG
-#define GET_COMMAND_STRING_ARRAY_DEBUG
+#define ADD_ALL_TASK_FROM_FILE_DEBUG
 
 
-void checkScheduleFileExist(){
-  if (!sd.exists(SCHEDULE_FILE.c_str())){
-    // print error
-    Serial.println("Init failed! Don't have file : " + SCHEDULE_FILE );
-    writeMsgToPath(systemLogPath, "Init failed! Don't have file : " + SCHEDULE_FILE + ". Please see exampleSchedule.txt");
-    
-    // write example file
-    writeMsgToPath("example_schedule.txt", 
-      "0000,A,30,L,1\n"
-      "0000,A,15,R,2\n"
-      "0000,A,10,B,1\n"
-      "0000,A,20,B,0.5\n"
-      "0000,B,0.5\n"
-      "0000,C,0.5\n"
-      "0000,D,1\n"
-      "#---------\n"
-      "任務代碼 : \n"
-      "A : Sound (INMP441)\n"
-      "B : temperature & moisture (DHT22)\n"
-      "C : temperature (DS18B20)\n"
-      "D : Battery voltage\n"
-      "\n"
-      "參數說明 : \n"
-      "任務 A\n"
-      "初始時間, 任務代碼, 執行時間(min), L/R/B (聲道左/右/兩者), 音量幾倍(基準為1，建議範圍 : 0.5 ~ 2倍)\n"
-      "任務 BCD\n"
-      "初始時間, 任務代碼, 執行間隔(hr)\n"
-      "\n"
-      "其他 : \n"
-      "請將 example_schedule.txt 重新命名成 schedule.txt，程式才能正確執行\n"
-    , true);
 
-    // delay 
-    while(1) delay(10000);
-  }
-}
-
-/* read info from file */
-int commandStringSize = 0;
-char** getCommandStringArray(){
-  int tempArrayMaxSize = 2;
-  int tempArrayUsedIndex = 0;
-  char **commandStringArray = (char**)malloc( sizeof(char*) * tempArrayMaxSize );
-
-  // open file 
-  FsFile taskFile;  
-  if (!taskFile.open(SCHEDULE_FILE.c_str(), FILE_READ)) {
-    Serial.println("open failed");
-  }
-
-  const int lenOfLine = 40;
-  while (taskFile.available()) {
-    char buffer[lenOfLine];                   // create buffer
-    memset(buffer, 0, sizeof(buffer));     // clean the buffer 
-
-    // save char one by one untill meet '\n' ('\n' will be ignore)
-    int index = 0;
-    while(1){
-      char tempChar = taskFile.read();        // save to buffer 
-      if(tempChar == '\n'){
-        break;
-      }
-      buffer[index] = tempChar;
-      index += 1;
-    }
-
-    #ifdef GET_COMMAND_STRING_ARRAY_DEBUG
-      Serial.println(String(buffer) + " : " + String(index));
-    #endif
-    
-    // char *tempSortenChar = (char*)malloc( sizeof(char) * (index+1) );
-    // memset(tempSortenChar, '\0', sizeof(tempSortenChar));     // clean the buffer 
-    // memcpy(tempSortenChar, buffer, sizeof(tempSortenChar) );
-    // tempSortenChar[index] = '\0';
-    // Serial.println(String(tempSortenChar));
-
-
-    // check array size
-    // if array size is not enough
-    if(tempArrayUsedIndex == tempArrayMaxSize){
-      // create a temp array with double size
-      char **tempCommandStringArray = (char**)malloc( sizeof(char*) * tempArrayMaxSize * 2);
-      // copy data to new array
-      memcpy(tempCommandStringArray, commandStringArray, tempArrayMaxSize * sizeof(char*) );
-      // release old array ram space
-      free(commandStringArray);
-      // new array pointer give to old name
-      commandStringArray = tempCommandStringArray;
-      // double variable
-      tempArrayMaxSize = tempArrayMaxSize * 2;
-    }
-
-    // loop end condition 
-    if(String(buffer) == "#---------"){
-      break;
-    }
-
-    // save to array 
-    // give value to that array slot (copy value, not copy address)
-    *commandStringArray + tempArrayUsedIndex = &buffer;
-    // memcpy(*commandStringArray + tempArrayUsedIndex, buffer, index+1);
-    // index + 1
-    tempArrayUsedIndex += 1;
-
-
-    #ifdef GET_COMMAND_STRING_ARRAY_DEBUG
-      Serial.println(String(*(*commandStringArray + tempArrayUsedIndex)));
-    #endif
-  }
-  
-  // read finished, close file
-  taskFile.close();
-  #ifdef GET_COMMAND_STRING_ARRAY_DEBUG
-    Serial.println("Done");
-  #endif
-
-  commandStringSize = tempArrayUsedIndex;
-  return commandStringArray;
-}
 
 
 
@@ -329,28 +211,107 @@ void addRepeatWorks(task *inputTaskArray){
 
 
 
-// do add task from just one call 
-void addTaskFrom(char **input){
-  Serial.println("commandStringSize" + String(commandStringSize));
+void checkScheduleFileExist(){
+  if (!sd.exists(SCHEDULE_FILE.c_str())){
+    // print error
+    Serial.println("Init failed! Don't have file : " + SCHEDULE_FILE );
+    writeMsgToPath(systemLogPath, "Init failed! Don't have file : " + SCHEDULE_FILE + ". Please see exampleSchedule.txt");
+    
+    // write example file
+    writeMsgToPath("example_schedule.txt", 
+      "0000,A,30,L,1\n"
+      "0000,A,15,R,2\n"
+      "0000,A,10,B,1\n"
+      "0000,A,20,B,0.5\n"
+      "0000,B,0.5\n"
+      "0000,C,0.5\n"
+      "0000,D,1\n"
+      "#---------\n"
+      "任務代碼 : \n"
+      "A : Sound (INMP441)\n"
+      "B : temperature & moisture (DHT22)\n"
+      "C : temperature (DS18B20)\n"
+      "D : Battery voltage\n"
+      "\n"
+      "參數說明 : \n"
+      "任務 A\n"
+      "初始時間, 任務代碼, 執行時間(min), L/R/B (聲道左/右/兩者), 音量幾倍(基準為1，建議範圍 : 0.5 ~ 2倍)\n"
+      "任務 BCD\n"
+      "初始時間, 任務代碼, 執行間隔(hr)\n"
+      "\n"
+      "其他 : \n"
+      "請將 example_schedule.txt 重新命名成 schedule.txt，程式才能正確執行\n"
+    , true);
 
-  for (int i=0; i<commandStringSize; i++){
-    Serial.println("here");
-
-    String command = String( *(input + i) );
-    Serial.println(command);
-    // task tempTask = parseTasks(command);
-    // addTask(&taskArray, &tempTask, &arrayMaxSize, &arrayUsedIndex);
+    // delay 
+    while(1) delay(10000);
   }
-  // free(input);
-  // addRepeatWorks(taskArray);
 }
 
+/* read info from file and process*/
+void addAllTaskFromFile(){
+  // open file 
+  FsFile taskFile;  
+  if (!taskFile.open(SCHEDULE_FILE.c_str(), FILE_READ)) {
+    Serial.println("open failed");
+  }
 
+  const int lenOfLine = 40;
+  while (taskFile.available()) {
+    char buffer[lenOfLine];                   // create buffer
+    memset(buffer, 0, sizeof(buffer));        // clean the buffer 
 
+    // save char one by one untill meet '\n' ('\n' will be ignore)
+    int index = 0;
+    while(1){
+      char tempChar = taskFile.read();        // save to buffer 
+      if(tempChar == '\n'){
+        break;
+      }
+      buffer[index] = tempChar;
+      index += 1;
+    }
+    buffer[index] = '\0';                     // add postfix
 
+    // info 
+    #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
+      Serial.println(String(buffer) + " : " + String(index));
+    #endif
 
+    // End loop condition 
+    if(String(buffer) == "#---------"){
+      break;
+    }
 
+    // if not last line, add task
+    task tempTask = parseTasks(String(buffer));
+    addTask(&taskArray, &tempTask, &arrayMaxSize, &arrayUsedIndex);
+  }
+  
+  // read finished, close file
+  taskFile.close();
 
+  // info 
+  #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
+    Serial.println("Done");
+  #endif
+
+  // calculate repeat
+  addRepeatWorks(taskArray);
+
+  // sort 
+  #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
+    Serial.println("Before sort");
+    printAllTask(taskArray, arrayUsedIndex);
+  #endif
+  sortTask(taskArray, arrayUsedIndex);
+  #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
+    Serial.println("After sort");
+    printAllTask(taskArray, arrayUsedIndex);
+    Serial.println("arrayUsedIndex : " + String(arrayUsedIndex));
+    Serial.println("");
+  #endif
+}
 
 
 #endif

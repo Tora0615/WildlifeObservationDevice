@@ -37,19 +37,10 @@ void setup() {
 
   // check schedule and setting doc
   checkScheduleFileExist();
-  char **commandStringArray = getCommandStringArray();
-  // addTaskFrom(commandStringArray);
+  addAllTaskFromFile();
+
+
   while(1) delay(1000);
-
-  Serial.println("Before sort");
-  printAllTask(taskArray, arrayUsedIndex);
-  sortTask(taskArray, arrayUsedIndex);
-  Serial.println("After sort");
-  printAllTask(taskArray, arrayUsedIndex);
-  Serial.println("arrayUsedIndex : " + String(arrayUsedIndex));
-  Serial.println("");
-
-  
 
 
   // system advance part inint
