@@ -9,8 +9,9 @@
 
 
 const String SCHEDULE_FILE = "schedule.txt";
-
-
+String today;
+String systemLogPath;
+String sensorDataPath;
 
 
 

@@ -2,13 +2,13 @@
 #define TASKFILEREADER_H
 
 #include "sd_operation.h"
-
+#include "rtc_timer.h"
 
 // debug setting part
 // #define PARSE_TASK_DEBUG
 // #define ADD_REPEAT_WORKS_DEBUG
 // #define SORT_TASK_DEBUG
-// #define ADD_ALL_TASK_FROM_FILE_DEBUG
+#define ADD_ALL_TASK_FROM_FILE_DEBUG
 
 
 /* process task command */
@@ -307,5 +307,28 @@ void addAllTaskFromFile(){
   #endif
 }
 
+
+void findTheMatchedArrayReadIndex(){
+  int startTimeOfNext = 0;
+
+  while(1){
+    // check 
+    if( getPassedSecOfToday() < startTimeOfNext * 60 ){
+      break;
+    }
+
+    // get next 
+    if((taskArray + arrayReadIndex)->setType == 0){  // simple task
+      startTimeOfNext = (taskArray + arrayReadIndex)->taskType.simple.start_min_of_a_day;
+    }else{
+      startTimeOfNext = (taskArray + arrayReadIndex)->taskType.complex.start_min_of_a_day;
+    }
+
+    // index add
+    arrayReadIndex += 1;
+  }
+
+  Serial.println( "Now : " + String(secMapTo24Hour(getPassedSecOfToday())) + ", next : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+}
 
 #endif

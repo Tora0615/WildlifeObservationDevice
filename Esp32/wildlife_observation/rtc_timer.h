@@ -7,6 +7,7 @@
 #include "RTClib.h"
 RTC_DS3231 rtc;  // default I2C address is : 0x57 (you can choose 0x57 ~ 0x50)
 DateTime now;
+bool isInit = true;
 
 const char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 uint32_t sys_RTC_time_offset;         // RTC clock. It will only change when first boot or date changed. First day equal the boot time, others day it will allways close to 0
@@ -28,15 +29,26 @@ void RTCInit(){
 }
 
 
-// use for first boot 
-uint32_t GetHowManySecondsHasPassedTodayFromRtc(){    // since today 0:00
+void turnOnRtcPower(){
   // power on
   #ifdef RTC_DEBUG
     Serial.println("Turn on DS3231_RTC POWER");
   #endif 
   digitalWrite(RTC_PMOS, LOW);   // Turn on.
-  delay(100);
 
+  if(isInit){
+    delay(100);  // by task_scheduler
+  }
+}
+
+// use for first boot or day change 
+uint32_t GetHowManySecondsHasPassedTodayFromRtc(){    // since today 0:00
+  // power on
+  if(isInit){
+    turnOnRtcPower();  // by task_scheduler
+    isInit = !isInit;
+  }
+  
   // a day is 86400 sec
   now = rtc.now(); 
 

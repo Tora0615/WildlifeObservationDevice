@@ -14,10 +14,6 @@ SdFs sd;
 FsFile systemLog;
 FsFile sensorData;
 
-String systemLogPath = ""; 
-String sensorDataPath = ""; 
-
-
 void SDInit(){
   if (!sd.begin(CHIP_SELECT, SPI_SPEED)) {
     Serial.println("SD card init error");
@@ -29,12 +25,6 @@ void SDInit(){
 
 void writeMsgToPath(String path, String msg, bool replace = false){
   FsFile tempfile;
-
-  if(path == systemLogPath){
-    tempfile = systemLog;
-  }else if(path == sensorDataPath){
-    tempfile = sensorData;
-  }
   
   if(replace){
     if (!tempfile.open(path.c_str(), O_WRONLY | O_CREAT)) {     // open need char array, not string. So use c_str to convert

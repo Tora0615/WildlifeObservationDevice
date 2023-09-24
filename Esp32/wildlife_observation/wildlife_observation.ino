@@ -7,13 +7,8 @@
 #include "utills.h"
 #include "myDHT.h"
 #include "myINMP441.h"
+#include "myScheduler.h"
 
-#define uS_TO_S_FACTOR 1000000ULL  /* Conversion factor for micro seconds to seconds */
-#define TIME_TO_SLEEP  900        /* Time ESP32 will go to sleep (in seconds) */
-
-
-
-String today;
 
 void setup() {
   // To indicate setup status, it will allway on if failed
@@ -33,15 +28,19 @@ void setup() {
   today = getDate();
   checkAndCreateFolder(today);
   systemLogPath = today + "/SYSLOG.txt";
-  bool notfirstBoot = sd.exists(systemLogPath);
   checkAndCreateFile(systemLogPath);
+  sensorDataPath = today + "/SENSOR_DATA.txt";
+  checkAndCreateFile(sensorDataPath);
+  
 
   // print reboot msg if not first boot
+  bool notfirstBoot = sd.exists(systemLogPath);
   if (notfirstBoot) writeMsgToPath(systemLogPath, "== reboot (or wake up) ==");
 
   // check schedule and setting doc
   checkScheduleFileExist();
   addAllTaskFromFile();
+  findTheMatchedArrayReadIndex();
 
   // system advance part inint
   batteryMonitorInit();
@@ -50,36 +49,41 @@ void setup() {
 
   // shine and close
   showInitFinishedLED();
+
+  // top level task add
+  runner.init();
+  runner.addTask(t_checkDayChange);
+  t_checkDayChange.enable();
+  runner.addTask(t_checkIsNeedToRunTask);
+  t_checkIsNeedToRunTask.enable();
 }
 
 
 
 void loop() {
 
-  checkDayChange();
-  Serial.println(getDate() + "_" + secMapTo24Hour(getPassedSecOfToday()));
+  // checkDayChange();
+  // Serial.println(getDate() + "_" + secMapTo24Hour(getPassedSecOfToday()));
 
-  Serial.println("today passed sec : " + String(getPassedSecOfToday()));
-  Serial.println("Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ "%)");
-  Serial.println("DS18B20 : " + String(GetDS18B20Temp()));
-  Serial.println("DHT temperature : " + String(DHT_get_temperature()) + " / DHT Humidity : " + String(DHT_get_Humidity()));
+  // Serial.println("today passed sec : " + String(getPassedSecOfToday()));
+  // Serial.println("Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ "%)");
+  // Serial.println("DS18B20 : " + String(getDS18B20Temp()));
+  // Serial.println("DHT temperature : " + String(DHT_get_temperature()) + " / DHT Humidity : " + String(DHT_get_Humidity()));
 
-  writeMsgToPath(systemLogPath, getDate() + "_" + secMapTo24Hour(getPassedSecOfToday()));
-  writeMsgToPath(systemLogPath, "Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ "%)");
-  writeMsgToPath(systemLogPath, "DS18B20 : " + String(GetDS18B20Temp()));
-  writeMsgToPath(systemLogPath, "DHT temperature : " + String(DHT_get_temperature()) + " / DHT Humidity : " + String(DHT_get_Humidity()));
+  // writeMsgToPath(sensorDataPath, getDate() + "_" + secMapTo24Hour(getPassedSecOfToday()));
+  // writeMsgToPath(sensorDataPath, "Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ "%)");
+  // writeMsgToPath(sensorDataPath, "DS18B20 : " + String(getDS18B20Temp()));
+  // writeMsgToPath(sensorDataPath, "DHT temperature : " + String(DHT_get_temperature()) + " / DHT Humidity : " + String(DHT_get_Humidity()));
   
 
-  // esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-  // writeMsgToPath(systemLogPath, "sleep 15 min");
-  // esp_deep_sleep_start();
-
-  recordWithDualChannel(10, "/10secDual2X.wav", 2);
-
-  Serial.println(" ");
 
 
+  // recordWithDualChannel(10, "/10secDual2X.wav", 2);
 
+  // Serial.println(" ");
+
+
+  runner.execute(); 
 }
 
 

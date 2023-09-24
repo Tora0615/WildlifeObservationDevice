@@ -18,7 +18,6 @@ OneWire oneWire(ONE_WIRE_BUS);
 // Pass our oneWire reference to Dallas Temperature. 
 DallasTemperature sensor(&oneWire);
 
-
 void DS18B20Init(){
   // Power part (32 Pin)
   pinMode(DS18B20_PMOS, OUTPUT);
@@ -33,13 +32,21 @@ void DS18B20Init(){
   writeMsgToPath(systemLogPath, "DS18B20 init successful");
 }
 
-float GetDS18B20Temp(){
+
+void turnOnDs18b20Power(){
   // power on
   #ifdef DS18B20_DEBUG
     Serial.println("Turn on DS18B20 POWER");
   #endif 
   digitalWrite(DS18B20_PMOS, LOW);   // Turn on.
-  delay(100);
+  // delay(100);  // by task_scheduler
+}
+
+
+
+float getDS18B20Temp(){
+  // power on
+  // turnOnDs18b20Power();  // by task_scheduler
 
   // get data 
   sensor.requestTemperatures(); // Send the command to get temperatures

@@ -313,17 +313,17 @@ void setup(){
   delay(1000);
   recordWithMonoChannel(10, "/10secRight.wav", 1, CHANNEL_RIGHT);
 
-  Serial.println("Dual");
-  delay(1000);
-  recordWithDualChannel(10, "/10secDual.wav", 1);
+  // Serial.println("Dual");
+  // delay(1000);
+  // recordWithDualChannel(10, "/10secDual.wav", 1);
 
-  Serial.println("Dual_2X");
-  delay(1000);
-  recordWithDualChannel(10, "/10secDual2X.wav", 2);
+  // Serial.println("Dual_2X");
+  // delay(1000);
+  // recordWithDualChannel(10, "/10secDual2X.wav", 2);
 
-  Serial.println("Dual_05X");
-  delay(1000);
-  recordWithDualChannel(10, "/10secDual05X.wav", 0.5);
+  // Serial.println("Dual_05X");
+  // delay(1000);
+  // recordWithDualChannel(10, "/10secDual05X.wav", 0.5);
 }
 
 

@@ -1,16 +1,11 @@
 #ifndef UTILLS_H
 #define UTILLS_H
 
-
-
-
-
 void turnOnLed(){
   pinMode(16, OUTPUT);
   digitalWrite(16, HIGH); 
   delay(100);
 }
-
 
 
 void showInitFinishedLED(){
