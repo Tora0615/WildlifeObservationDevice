@@ -48,7 +48,7 @@ Task t_recordDHT(0, TASK_FOREVER, &recordDHT);
 
 // global variable for record 
 float recordTime;
-int channel;
+char channel_tag;
 float gain_ratio;
 
 void checkIsNeedToRunTask(){
@@ -81,10 +81,10 @@ void checkIsNeedToRunTask(){
       Serial.println(String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task A (sound record )." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
       writeMsgToPath(systemLogPath, "Run Task A (sound record), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
       recordTime = (taskArray + arrayReadIndex)->taskType.complex.time;
-      channel = (taskArray + arrayReadIndex)->taskType.complex.channel;
+      channel_tag = (taskArray + arrayReadIndex)->taskType.complex.channel;
       gain_ratio = (taskArray + arrayReadIndex)->taskType.complex.multiple;
-      // runner.addTask(t_recordSound);
-      // t_recordSound.enable();
+      runner.addTask(t_recordSound);
+      t_recordSound.enable();
     }else if (task_code == 'B'){
       // DHT
       Serial.println( String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task B (DHT)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
@@ -117,9 +117,27 @@ void checkIsNeedToRunTask(){
 
 
 void recordSound(){
+  
+  // calculate filename
+  String recordPath = "/" + String(today) + "/" + String(secMapTo24Hour(getPassedSecOfToday()) + ".wav");
+  char filename[30];
+  strcpy(filename, recordPath.c_str());
+
   #ifdef RECORD_SOUND_DEBUG
-    Serial.println("");
+    Serial.println(recordPath);
   #endif
+
+  // recognize channel tag
+  if(channel_tag == 'B'){
+    recordWithDualChannel(recordTime, filename, gain_ratio);
+  }else if(channel_tag == 'L'){
+    recordWithMonoChannel(recordTime, filename, gain_ratio, CHANNEL_LEFT);
+  }else if(channel_tag == 'R'){
+    recordWithMonoChannel(recordTime, filename, gain_ratio, CHANNEL_RIGHT);
+  }
+
+  // avoid infinite loop
+  runner.deleteTask(t_recordSound);
 }
 
 

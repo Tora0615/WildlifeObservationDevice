@@ -7,7 +7,7 @@ typedef struct complexTask_t{
   int start_min_of_a_day;
   char task;
   float time;
-  int channel;
+  char channel;
   float multiple;
 }complexTask;
 
@@ -134,7 +134,7 @@ task parseTasks(String input){
     tempTask.taskType.complex.start_min_of_a_day = hour24ConvetToMin(atoi(temp[0]));
     tempTask.taskType.complex.task = temp[1][0];
     tempTask.taskType.complex.time = atof(temp[2]);
-    tempTask.taskType.complex.channel = atoi(temp[3][0]);
+    tempTask.taskType.complex.channel = temp[3][0];
     tempTask.taskType.complex.multiple = atof(temp[4]);
   }
   return tempTask;
