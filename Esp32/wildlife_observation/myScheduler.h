@@ -29,6 +29,7 @@ void recordBattery();
 void f_turnOnDs18b20Power();
 void f_getDS18B20Temp();
 void f_turnOnDhtPower();
+void f_turnOnDhtPower2();
 void f_DHT_get_temperature();
 void f_DHT_get_Humidity();
 void f_turnOnRtcPower();
@@ -78,7 +79,7 @@ void checkIsNeedToRunTask(){
     if (task_code == 'A'){
       // sound record 
       Serial.println(String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task A (sound record )." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
-      writeMsgToPath(systemLogPath, String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task A (sound record )." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+      writeMsgToPath(systemLogPath, "Run Task A (sound record), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
       recordTime = (taskArray + arrayReadIndex)->taskType.complex.time;
       channel = (taskArray + arrayReadIndex)->taskType.complex.channel;
       gain_ratio = (taskArray + arrayReadIndex)->taskType.complex.multiple;
@@ -87,20 +88,20 @@ void checkIsNeedToRunTask(){
     }else if (task_code == 'B'){
       // DHT
       Serial.println( String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task B (DHT)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
-      writeMsgToPath(systemLogPath, String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task B (DHT)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+      writeMsgToPath(systemLogPath, "Run Task B (DHT), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
       runner.addTask(t_recordDHT);
       t_recordDHT.enable();
     }else if (task_code == 'C'){
       // DS18B20
       Serial.println(String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task C (DS18B20)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
-      writeMsgToPath(systemLogPath, String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task C (DS18B20)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+      writeMsgToPath(systemLogPath, "Run Task C (DS18B20), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
       runner.addTask(t_recordDS18B20);
       t_recordDS18B20.enable();
     }else if (task_code == 'D'){
       // battery 
       Serial.println(String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task D (battery)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
       // Write log
-      writeMsgToPath(systemLogPath, String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task D (battery)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+      writeMsgToPath(systemLogPath, "Run Task D (battery), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
       runner.addTask(t_recordBattery);
       t_recordBattery.enable();
     }
@@ -146,7 +147,7 @@ void f_getDS18B20Temp(){
     Serial.println("DS18B20 : " + String(temperature));
   #endif
   // write SD 
-  writeMsgToPath(sensorDataPath, "DS18B20 : " + String(temperature) );
+  writeMsgToPath(sensorDataPath, "DS18B20 : " + String(temperature) + " C");
   t_recordDS18B20.setCallback(&recordDS18B20);
   runner.deleteTask(t_recordDS18B20);
 }
@@ -158,7 +159,7 @@ void recordDHT(){
 void f_turnOnDhtPower(){
   turnOnDhtPower();
   t_recordDHT.setCallback(&f_DHT_get_temperature);
-  t_recordDHT.delay(200);
+  t_recordDHT.delay(250);
 }
 void f_DHT_get_temperature(){
   float temperature = DHT_get_temperature();
@@ -167,7 +168,12 @@ void f_DHT_get_temperature(){
   #endif
   // write SD 
   writeMsgToPath(sensorDataPath, "DHT temperature : " + String(temperature) );
+  t_recordDHT.setCallback(&f_turnOnDhtPower2);
+}
+void f_turnOnDhtPower2(){
+  turnOnDhtPower();
   t_recordDHT.setCallback(&f_DHT_get_Humidity);
+  t_recordDHT.delay(250);
 }
 void f_DHT_get_Humidity(){
   float humidity = DHT_get_Humidity();

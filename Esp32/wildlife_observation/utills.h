@@ -20,7 +20,7 @@ void showInitFinishedLED(){
   digitalWrite(16, LOW); 
   delay(100);
   digitalWrite(16, HIGH); 
-  delay(3000);
+  delay(1000);
   digitalWrite(16, LOW); 
 }
 

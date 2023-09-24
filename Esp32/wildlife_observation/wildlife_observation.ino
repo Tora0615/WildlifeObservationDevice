@@ -35,7 +35,7 @@ void setup() {
 
   // print reboot msg if not first boot
   bool notfirstBoot = sd.exists(systemLogPath);
-  if (notfirstBoot) writeMsgToPath(systemLogPath, "== reboot (or wake up) ==");
+  if (notfirstBoot) writeMsgToPath(systemLogPath, "== reboot (or first time powered up) ==");
 
   // check schedule and setting doc
   checkScheduleFileExist();
