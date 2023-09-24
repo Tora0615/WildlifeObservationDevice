@@ -12,11 +12,9 @@ const int8_t DISABLE_CHIP_SELECT = -1;
 // global file pointer / SD_FAT_TYPE 3 (FAT16/FAT32 and exFAT)
 SdFs sd;
 FsFile systemLog;
-FsFile audioFile;
 FsFile sensorData;
 
 String systemLogPath = ""; 
-String audioFilePath = ""; 
 String sensorDataPath = ""; 
 
 
@@ -34,8 +32,6 @@ void writeMsgToPath(String path, String msg, bool replace = false){
 
   if(path == systemLogPath){
     tempfile = systemLog;
-  }else if(path == audioFilePath){
-    tempfile = audioFile;
   }else if(path == sensorDataPath){
     tempfile = sensorData;
   }

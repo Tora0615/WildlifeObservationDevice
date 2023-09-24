@@ -29,23 +29,23 @@ typedef struct simpleTask_t{
   char task;
 }simpleTask;
 
-typedef struct task_t {
+typedef struct myTask_t {
   byte setType;  // 0 for simple, 1 for complex
   union {
     simpleTask simple;
     complexTask complex;
   } taskType;
-}task;
+}myTask;
 
-task *taskArray = (task*)malloc( sizeof(task) * arrayMaxSize );
+myTask *taskArray = (myTask*)malloc( sizeof(myTask) * arrayMaxSize );
 
-void addTask(task **pointerToTaskArray, task *pointerToTask, int *pointerToArrayMaxSize, int *pointerToArrayUsedIndex){
+void addTask(myTask **pointerToTaskArray, myTask *pointerToTask, int *pointerToArrayMaxSize, int *pointerToArrayUsedIndex){
   // if array size is not enough
   if(*pointerToArrayUsedIndex == *pointerToArrayMaxSize){
     // create a temp array with double size
-    task *tempTaskArray = (task*)malloc( sizeof(task) * *pointerToArrayMaxSize * 2);
+    myTask *tempTaskArray = (myTask*)malloc( sizeof(myTask) * *pointerToArrayMaxSize * 2);
     // copy data to new array
-    memcpy(tempTaskArray, *pointerToTaskArray, *pointerToArrayMaxSize * sizeof(task) );
+    memcpy(tempTaskArray, *pointerToTaskArray, *pointerToArrayMaxSize * sizeof(myTask) );
     // release old array ram space
     free(*pointerToTaskArray);
     // new array pointer give to old name
@@ -63,10 +63,10 @@ void addTask(task **pointerToTaskArray, task *pointerToTask, int *pointerToArray
 
 
 
-void sortTask(task *taskArray, int arrayUsedIndex){
+void sortTask(myTask *taskArray, int arrayUsedIndex){
   // bubbleSort
 	int i, j;
-  task temp;
+  myTask temp;
 	bool exchanged = true;
 	
 	for (i=0; exchanged && i<arrayUsedIndex-1; i++){ 
@@ -103,7 +103,7 @@ int minConvertTohour24(int input){
   return (input/60)*100 + input % 60;
 }
 
-void printAllTask(task *taskArray, int inputArrayUsedIndex){
+void printAllTask(myTask *taskArray, int inputArrayUsedIndex){
   for(int index = 0; index < inputArrayUsedIndex; index++){
     // Serial.println("Address : " + String( (int)(taskArray+index)) );
     if((taskArray+index)->setType == 0){  // simple task
@@ -119,7 +119,7 @@ void printAllTask(task *taskArray, int inputArrayUsedIndex){
   }
 }
 
-task parseTasks(String input){
+myTask parseTasks(String input){
   int lenCount = 0;
   char *temp[5];  // a pointer point to a value which can storage 5 char array pointer
 
@@ -136,7 +136,7 @@ task parseTasks(String input){
     Serial.println("");
   #endif
 
-  task tempTask;
+  myTask tempTask;
   tempTask.setType = 1;
   if(lenCount == 3){
     tempTask.taskType.complex.start_min_of_a_day = hour24ConvetToMin(atoi(temp[0]));
@@ -155,11 +155,11 @@ task parseTasks(String input){
 }
 
 
-void addRepeatWorks(task *inputTaskArray){
+void addRepeatWorks(myTask *inputTaskArray){
   // new variable and larger size array
   int tempArrayMaxSize = 2;
   int tempArrayUsedIndex = 0;
-  task *temptaskArray = (task*)malloc( sizeof(task) * tempArrayMaxSize );
+  myTask *temptaskArray = (myTask*)malloc( sizeof(myTask) * tempArrayMaxSize );
 
   for (int i=0; i<arrayUsedIndex; i++){
     if((inputTaskArray+i)->taskType.complex.task == 'A'){
@@ -179,7 +179,7 @@ void addRepeatWorks(task *inputTaskArray){
 
       // repeat N times to add task to temp array
       for (int j=0; j<repeatTime; j++){
-        task tempTask;        // !!same address, if malloc will be different!!
+        myTask tempTask;        // !!same address, if malloc will be different!!
         tempTask.setType = 0;
         tempTask.taskType.simple.task = ( (inputTaskArray+i)->taskType.complex.task );
         tempTask.taskType.simple.start_min_of_a_day = ( (inputTaskArray+i)->taskType.complex.start_min_of_a_day) + j * ((inputTaskArray+i)->taskType.complex.time) * 60;
@@ -278,7 +278,7 @@ void addAllTaskFromFile(){
     }
 
     // if not last line, add task
-    task tempTask = parseTasks(String(buffer));
+    myTask tempTask = parseTasks(String(buffer));
     addTask(&taskArray, &tempTask, &arrayMaxSize, &arrayUsedIndex);
   }
   

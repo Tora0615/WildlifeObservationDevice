@@ -6,6 +6,7 @@
 #include "myDS18B20.h"
 #include "utills.h"
 #include "myDHT.h"
+#include "myINMP441.h"
 
 #define uS_TO_S_FACTOR 1000000ULL  /* Conversion factor for micro seconds to seconds */
 #define TIME_TO_SLEEP  900        /* Time ESP32 will go to sleep (in seconds) */
@@ -72,7 +73,13 @@ void loop() {
   // esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
   // writeMsgToPath(systemLogPath, "sleep 15 min");
   // esp_deep_sleep_start();
+
+  recordWithDualChannel(10, "/10secDual2X.wav", 2);
+
   Serial.println(" ");
+
+
+
 }
 
 
