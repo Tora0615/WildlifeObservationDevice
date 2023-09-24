@@ -30,9 +30,6 @@ uint8_t INMP441::begin(uint16_t sampleRate, uint8_t bit, uint8_t channelSetting)
   digitalWrite(MODE_L_PIN, LOW);  // set left microphone with low power level
   digitalWrite(MODE_R_PIN, HIGH); // set left microphone with high power level
 
-  // wait power stable
-  delay(2000);
-
 	uint8_t state = 0;
 	uint8_t ret = 0;
 
@@ -69,6 +66,10 @@ uint8_t INMP441::begin(uint16_t sampleRate, uint8_t bit, uint8_t channelSetting)
 		ret = state;
 	else
 		ret = 0;
+
+  // wait power and signal stable
+  delay(2000);
+
   return ret;
 }
 
