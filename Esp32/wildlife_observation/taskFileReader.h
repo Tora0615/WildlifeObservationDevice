@@ -3,13 +3,7 @@
 
 #include "sd_operation.h"
 #include "rtc_timer.h"
-
-// debug setting part
-// #define PARSE_TASK_DEBUG
-// #define ADD_REPEAT_WORKS_DEBUG
-// #define SORT_TASK_DEBUG
-#define ADD_ALL_TASK_FROM_FILE_DEBUG
-
+#include "setting.h"
 
 /* process task command */
 int arrayMaxSize = 2;      // task array max 
@@ -39,7 +33,7 @@ typedef struct myTask_t {
 
 myTask *taskArray = (myTask*)malloc( sizeof(myTask) * arrayMaxSize );
 
-void addTask(myTask **pointerToTaskArray, myTask *pointerToTask, int *pointerToArrayMaxSize, int *pointerToArrayUsedIndex){
+void addTask(myTask **pointerToTaskArray, myTask *pointerToTask, int *pointerToArrayMaxSize, int *pointerToArrayUsedIndex){  
   // if array size is not enough
   if(*pointerToArrayUsedIndex == *pointerToArrayMaxSize){
     // create a temp array with double size
@@ -64,6 +58,9 @@ void addTask(myTask **pointerToTaskArray, myTask *pointerToTask, int *pointerToA
 
 
 void sortTask(myTask *taskArray, int arrayUsedIndex){
+  // write log
+  writeMsgToPath(systemLogPath, "Start to sort all tasks");
+
   // bubbleSort
 	int i, j;
   myTask temp;
@@ -92,6 +89,9 @@ void sortTask(myTask *taskArray, int arrayUsedIndex){
 			}
     }
   }
+
+  // Write log
+  writeMsgToPath(systemLogPath, "|-- Sort all tasks successful!");
 }
 
 
@@ -120,6 +120,9 @@ void printAllTask(myTask *taskArray, int inputArrayUsedIndex){
 }
 
 myTask parseTasks(String input){
+  // write log
+  writeMsgToPath(systemLogPath, "|-- Start to parse task command");
+
   int lenCount = 0;
   char *temp[5];  // a pointer point to a value which can storage 5 char array pointer
 
@@ -151,11 +154,15 @@ myTask parseTasks(String input){
     tempTask.taskType.complex.channel = atoi(String(temp[3][0]).c_str());
     tempTask.taskType.complex.multiple = atof(temp[4]);
   }
+  writeMsgToPath(systemLogPath, "   |-- Parse task command successful!");
   return tempTask;
 }
 
 
 void addRepeatWorks(myTask *inputTaskArray){
+  // write log
+  writeMsgToPath(systemLogPath, "|-- Start to add repeat works");
+
   // new variable and larger size array
   int tempArrayMaxSize = 2;
   int tempArrayUsedIndex = 0;
@@ -201,6 +208,9 @@ void addRepeatWorks(myTask *inputTaskArray){
   arrayMaxSize = tempArrayMaxSize;
   arrayUsedIndex = tempArrayUsedIndex;
   taskArray = temptaskArray;   // local variable SHOULD NOT same as gloable, or replace will not be success
+
+  // Write log
+  writeMsgToPath(systemLogPath, "|---- Add repeat works successful!");
 }
 
 
@@ -209,6 +219,7 @@ void checkScheduleFileExist(){
   if (!sd.exists(SCHEDULE_FILE.c_str())){
     // print error
     Serial.println("Init failed! Don't have file : " + SCHEDULE_FILE );
+    // write log
     writeMsgToPath(systemLogPath, "Init failed! Don't have file : " + SCHEDULE_FILE + ". Please see exampleSchedule.txt");
     
     // write example file
@@ -240,10 +251,15 @@ void checkScheduleFileExist(){
     // delay 
     while(1) delay(10000);
   }
+  // Write log
+  writeMsgToPath(systemLogPath, "ScheduleFile found!");
 }
 
 /* read info from file and process*/
 void addAllTaskFromFile(){
+  // Write log
+  writeMsgToPath(systemLogPath, "Start to add all tasks");
+
   // open file 
   FsFile taskFile;  
   if (!taskFile.open(SCHEDULE_FILE.c_str(), FILE_READ)) {
@@ -305,6 +321,9 @@ void addAllTaskFromFile(){
     Serial.println("arrayUsedIndex : " + String(arrayUsedIndex));
     Serial.println("");
   #endif
+
+  // Write log
+  writeMsgToPath(systemLogPath, "Add all tasks successful!");
 }
 
 
@@ -314,6 +333,8 @@ void findTheMatchedArrayReadIndex(){
   while(1){
     // check 
     if( getPassedSecOfToday() < startTimeOfNext * 60 ){
+      // rewind 1 index
+      arrayReadIndex -= 1;
       break;
     }
 
@@ -329,6 +350,7 @@ void findTheMatchedArrayReadIndex(){
   }
 
   Serial.println( "Now : " + String(secMapTo24Hour(getPassedSecOfToday())) + ", next : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+  writeMsgToPath(systemLogPath, "Now : " + String(secMapTo24Hour(getPassedSecOfToday())) + ", next : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
 }
 
 #endif

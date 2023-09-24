@@ -1,3 +1,5 @@
+#include "rtc_timer.h"
+
 #ifndef SD_OPERATION_H
 #define SD_OPERATION_H
 
@@ -25,16 +27,23 @@ void SDInit(){
 
 void writeMsgToPath(String path, String msg, bool replace = false){
   FsFile tempfile;
+  msg = "[" + String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + "] " + msg; 
   
   if(replace){
     if (!tempfile.open(path.c_str(), O_WRONLY | O_CREAT)) {     // open need char array, not string. So use c_str to convert
       Serial.println(" --> open " + path + " failed");
+      while(1){
+        delay(1000);
+      }
     }else{
       tempfile.println(msg.c_str());
     }
   }else{
     if (!tempfile.open(path.c_str(), O_WRONLY | O_CREAT | O_APPEND)) {     // open need char array, not string. So use c_str to convert
       Serial.println(" --> open " + path + " failed");
+      while(1){
+        delay(1000);
+      }
     }else{
       tempfile.println(msg.c_str());
     }

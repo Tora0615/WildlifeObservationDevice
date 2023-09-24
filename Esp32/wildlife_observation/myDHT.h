@@ -21,6 +21,9 @@ void DHT_init(){
 
   // init library 
   dht.begin();
+
+  // Write log
+  writeMsgToPath(systemLogPath, "DHT init successful!");
 }
 
 

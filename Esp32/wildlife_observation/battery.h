@@ -36,7 +36,7 @@ void batteryMonitorInit(){
   }
 
   // Write log
-  writeMsgToPath(systemLogPath, "Battery monitor init successful");
+  writeMsgToPath(systemLogPath, "Battery monitor init successful!");
 }
 
 float getBatteryVoltage(){

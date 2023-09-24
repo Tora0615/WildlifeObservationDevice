@@ -51,7 +51,9 @@ int channel;
 float gain_ratio;
 
 void checkIsNeedToRunTask(){
-  Serial.println("checkIsNeedToRunTask");
+  #ifdef CHECK_IS_NEED_TO_RUN_TASK
+    Serial.println("checkIsNeedToRunTask");
+  #endif
   // get next task's start time 
   int startTimeOfNext = 0;
   if((taskArray + arrayReadIndex)->setType == 0){  // simple task
@@ -76,6 +78,7 @@ void checkIsNeedToRunTask(){
     if (task_code == 'A'){
       // sound record 
       Serial.println(String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task A (sound record )." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+      writeMsgToPath(systemLogPath, String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task A (sound record )." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
       recordTime = (taskArray + arrayReadIndex)->taskType.complex.time;
       channel = (taskArray + arrayReadIndex)->taskType.complex.channel;
       gain_ratio = (taskArray + arrayReadIndex)->taskType.complex.multiple;
@@ -84,18 +87,22 @@ void checkIsNeedToRunTask(){
     }else if (task_code == 'B'){
       // DHT
       Serial.println( String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task B (DHT)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
-      // runner.addTask(t_recordDHT);
-      // t_recordDHT.enable();
+      writeMsgToPath(systemLogPath, String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task B (DHT)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+      runner.addTask(t_recordDHT);
+      t_recordDHT.enable();
     }else if (task_code == 'C'){
       // DS18B20
       Serial.println(String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task C (DS18B20)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
-      // runner.addTask(t_recordDS18B20);
-      // t_recordDS18B20.enable();
+      writeMsgToPath(systemLogPath, String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task C (DS18B20)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+      runner.addTask(t_recordDS18B20);
+      t_recordDS18B20.enable();
     }else if (task_code == 'D'){
       // battery 
       Serial.println(String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task D (battery)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
-      // runner.addTask(t_recordBattery);
-      // t_recordBattery.enable();
+      // Write log
+      writeMsgToPath(systemLogPath, String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task D (battery)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+      runner.addTask(t_recordBattery);
+      t_recordBattery.enable();
     }
 
     // plus index or re-zero 
@@ -109,13 +116,18 @@ void checkIsNeedToRunTask(){
 
 
 void recordSound(){
-  
+  #ifdef RECORD_SOUND_DEBUG
+    Serial.println("");
+  #endif
 }
 
 
 void recordBattery(){
-  Serial.println("Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ "%)");
-  writeMsgToPath(systemLogPath, "Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ "%)");
+  #ifdef RECORD_BATTERY_DEBUG
+    Serial.println("Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ " %)");
+  #endif
+  writeMsgToPath(sensorDataPath, "Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ "%)");
+  runner.deleteTask(t_recordBattery);
 }
 
 
@@ -130,10 +142,11 @@ void f_turnOnDs18b20Power(){
 }
 void f_getDS18B20Temp(){
   float temperature = getDS18B20Temp();
-  // print 
-  Serial.println("DS18B20 : " + String(temperature));
+  #ifdef GET_DS18B20_TEMP_DEBUG
+    Serial.println("DS18B20 : " + String(temperature));
+  #endif
   // write SD 
-  writeMsgToPath(systemLogPath, "DS18B20 : " + String(temperature) );
+  writeMsgToPath(sensorDataPath, "DS18B20 : " + String(temperature) );
   t_recordDS18B20.setCallback(&recordDS18B20);
   runner.deleteTask(t_recordDS18B20);
 }
@@ -149,12 +162,20 @@ void f_turnOnDhtPower(){
 }
 void f_DHT_get_temperature(){
   float temperature = DHT_get_temperature();
+  #ifdef DHT_GET_TEMPERATURE_DEBUG
+    Serial.println("DHT temperature : " + String(temperature) );
+  #endif
   // write SD 
+  writeMsgToPath(sensorDataPath, "DHT temperature : " + String(temperature) );
   t_recordDHT.setCallback(&f_DHT_get_Humidity);
 }
 void f_DHT_get_Humidity(){
   float humidity = DHT_get_Humidity();
+  #ifdef DHT_GET_HUMIDITY_DEBUG
+    Serial.println("DHT Humidity : " + String(humidity) );
+  #endif
   // write SD 
+  writeMsgToPath(sensorDataPath, "DHT Humidity : " + String(humidity) );
   t_recordDHT.setCallback(&recordDHT);
   runner.deleteTask(t_recordDHT);
 }
@@ -163,7 +184,9 @@ void f_DHT_get_Humidity(){
 
 // if day changed, create new folder
 void checkDayChange(){
-  Serial.println("check day change");
+  #ifdef CHECK_DAY_CHANGE_DEBUG
+    Serial.println("check day change");
+  #endif
   t_checkDayChange.setCallback(&f_turnOnRtcPower);
 }
 void f_turnOnRtcPower(){
@@ -179,41 +202,17 @@ void f_GetHowManySecondsHasPassedTodayFromRtc(){
     Serial.println("day changed");
     // Write log
     writeMsgToPath(systemLogPath, "Day changed");
+
+    // update value and create new
+    today = getDate();
+    checkAndCreateFolder(today);
+    systemLogPath = today + "/SYSLOG.txt";
+    checkAndCreateFile(systemLogPath);
+    sensorDataPath = today + "/SENSOR_DATA.txt";
+    checkAndCreateFile(sensorDataPath);
   }
   t_checkDayChange.setCallback(&checkDayChange);
-  runner.deleteTask(t_checkDayChange);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-// taskArray
-
-// arrayReadIndex
-
-
-
-// if((taskArray+arrayReadIndex)->setType == 0){  // simple task
-//       Serial.print("start_min_of_a_day : " + String( (taskArray+index)->taskType.simple.start_min_of_a_day ) + "(" + String( minConvertTohour24( (taskArray+index)->taskType.simple.start_min_of_a_day ) ) + ")");
-//       Serial.println(" / task : " + String( (taskArray+index)->taskType.simple.task ));
-//     }else{  // complex task
-//       Serial.print("start_min_of_a_day : " + String( (taskArray+index)->taskType.complex.start_min_of_a_day ) + "(" + String( minConvertTohour24((taskArray+index)->taskType.complex.start_min_of_a_day) ) + ")");
-//       Serial.print(" / task : " + String( (taskArray+index)->taskType.complex.task ));
-//       Serial.print(" / time : " + String( (taskArray+index)->taskType.complex.time ));
-//       Serial.print(" / channel : " + String( (taskArray+index)->taskType.complex.channel ));
-//       Serial.println(" / multiple : " + String( (taskArray+index)->taskType.complex.multiple ));
-//     }
-
-
-
 
 
 #endif
