@@ -51,25 +51,29 @@ Task t_recordDHT(0, TASK_FOREVER, &recordDHT);
 #define OTHER_TASK_CPU 1
 TaskHandle_t tINMP;
 TaskHandle_t tTaskScheduler;
+TaskHandle_t tHeaderChecker;
+TaskHandle_t tRecordWriteDataChecker;
 bool isNeedToRecord = false;
 
 void checkIfNeedToRecord(void* pvParameters){   // void* pvParameters : don't accept any value
+  Serial.println("checkIfNeedToRecord : created");
   while(1){
     if(isNeedToRecord){
       isNeedToRecord = !isNeedToRecord;
       recordSound();
     }
-    vTaskDelay(100);
+    vTaskDelay(50);
   }
 }
 
 void taskSchedulerThread(void* pvParameters){   // void* pvParameters : don't accept any value
+  Serial.println("taskSchedulerThread : created");
   #ifdef _TASK_SLEEP_ON_IDLE_RUN
     runner.allowSleep(false);
   #endif
   while(1){
     runner.execute();
-    vTaskDelay(100);
+    vTaskDelay(50);
   }
 }
 
@@ -134,17 +138,19 @@ void checkIsNeedToRunTask(){
     // TODO : write log  
     // start the task according to task code. A is record, will get more info.
     if (task_code == 'A'){
-      // sound record 
-      Serial.println(String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task A (sound record)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
-      writeMsgToPath(systemLogPath, "Run Task A (sound record), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
-      // set variable 
-      recordTime = (taskArray + arrayReadIndex)->taskType.complex.time;
-      channel_tag = (taskArray + arrayReadIndex)->taskType.complex.channel;
-      gain_ratio = (taskArray + arrayReadIndex)->taskType.complex.multiple;
-      // then active status 
-      isNeedToRecord = true;
-      // runner.addTask(t_recordSound);
-      // t_recordSound.enable();
+      if(!isNeedToRecord){
+        // sound record 
+        Serial.println(String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task A (sound record)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+        writeMsgToPath(systemLogPath, "Run Task A (sound record), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+        // set variable 
+        recordTime = (taskArray + arrayReadIndex)->taskType.complex.time;
+        channel_tag = (taskArray + arrayReadIndex)->taskType.complex.channel;
+        gain_ratio = (taskArray + arrayReadIndex)->taskType.complex.multiple;
+        // then active status 
+        isNeedToRecord = true;
+        // runner.addTask(t_recordSound);
+        // t_recordSound.enable();
+      }
     }else if (task_code == 'B'){
       // DHT
       Serial.println( String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task B (DHT)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
@@ -179,7 +185,7 @@ void checkIsNeedToRunTask(){
 void recordSound(){
   
   // calculate filename
-  String recordPath = "/" + String(today) + "/" + String(secMapTo24Hour(getPassedSecOfToday()) + ".wav");
+  String recordPath = "/" + String(today) + "/" + String(secMapTo24Hour(getPassedSecOfToday()) + "_" + String(channel_tag) + ".wav");
   char filename[30];
   strcpy(filename, recordPath.c_str());
 
