@@ -40,11 +40,11 @@ void getResetReason(){
     case ESP_RST_SDIO : reason_text = "ESP_RST_SDIO"; break;
     default : reason_text = "ESP_RST_UNKNOWN"; break;
   }
-  Serial.println(reason_text);
-  writeMsgToPath(systemLogPath, reason_text);
+  Serial.println("== " + reason_text + " ==");
+  writeMsgToPath(systemLogPath, "== " + reason_text + " ==");
 }
 
-void get_wakeup_reason(){
+void getWakeupReason(){
   esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
 
   String reason_text;
@@ -56,8 +56,8 @@ void get_wakeup_reason(){
     case ESP_SLEEP_WAKEUP_ULP : reason_text = "Wakeup caused by ULP program"; break;
     default : reason_text = "Wakeup was not caused by deep sleep"; break;
   }
-  Serial.println(reason_text);
-  writeMsgToPath(systemLogPath, reason_text);
+  Serial.println("== " + reason_text + " ==");
+  writeMsgToPath(systemLogPath, "== " + reason_text + " ==");
 }
 
 
