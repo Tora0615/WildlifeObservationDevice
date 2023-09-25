@@ -51,12 +51,15 @@ void setup() {
   // shine and close
   showInitFinishedLED();
 
-  // top level task add
+  // task Schduler top level task add
   runner.init();
   runner.addTask(t_checkDayChange);
   t_checkDayChange.enable();
   runner.addTask(t_checkIsNeedToRunTask);
   t_checkIsNeedToRunTask.enable();
+
+  // use dual core by RTOS 
+  createRTOSTasks();
 }
 
 
@@ -84,7 +87,7 @@ void loop() {
   // Serial.println(" ");
 
 
-  runner.execute(); 
+  
 }
 
 

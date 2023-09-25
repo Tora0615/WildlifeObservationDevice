@@ -14,7 +14,7 @@
 #define MYSCHEDULER_H
 
 // scheduler involve
-#define _TASK_SLEEP_ON_IDLE_RUN
+// #define _TASK_SLEEP_ON_IDLE_RUN
 #include <TaskScheduler.h>
 Scheduler runner;
 
@@ -40,13 +40,63 @@ void f_GetHowManySecondsHasPassedTodayFromRtc();
 Task t_checkDayChange(5000, TASK_FOREVER, &checkDayChange);
 Task t_checkIsNeedToRunTask(10000, TASK_FOREVER, &checkIsNeedToRunTask);
 // second level 
-Task t_recordSound(0, TASK_FOREVER, &recordSound);
+// Task t_recordSound(0, TASK_FOREVER, &recordSound);
 Task t_recordBattery(0, TASK_FOREVER, &recordBattery);
 Task t_recordDS18B20(0, TASK_FOREVER, &recordDS18B20);
 Task t_recordDHT(0, TASK_FOREVER, &recordDHT);
 
 
 /* free RTOS*/
+#define INMP_CPU 0
+#define OTHER_TASK_CPU 1
+TaskHandle_t tINMP;
+TaskHandle_t tTaskScheduler;
+bool isNeedToRecord = false;
+
+void checkIfNeedToRecord(void* pvParameters){   // void* pvParameters : don't accept any value
+  while(1){
+    if(isNeedToRecord){
+      isNeedToRecord = !isNeedToRecord;
+      recordSound();
+    }
+    vTaskDelay(100);
+  }
+}
+
+void taskSchedulerThread(void* pvParameters){   // void* pvParameters : don't accept any value
+  #ifdef _TASK_SLEEP_ON_IDLE_RUN
+    runner.allowSleep(false);
+  #endif
+  while(1){
+    runner.execute();
+    vTaskDelay(100);
+  }
+}
+
+void createRTOSTasks() {
+  Serial.println("RTOS : createCoreTasks");
+
+  xTaskCreatePinnedToCore(
+    checkIfNeedToRecord,
+    "INMPThreadAtCore0",
+    49152,                                  /* Stack size of task */
+    NULL,                                   /* parameter of the task */
+    2,                                      /* priority of the task */
+    &tINMP,                                 /* task handle */
+    INMP_CPU                                /* CPU core */
+  );
+
+  xTaskCreatePinnedToCore(
+    taskSchedulerThread,                    /* Task function. */
+    "TaskSchedulerThreadAtCore1",           /* name of task. */
+    16384,                                  /* Stack size of task */
+    NULL,                                   /* parameter of the task */
+    2,                                      /* priority of the task */
+    &tTaskScheduler,                        /* task handle */
+    OTHER_TASK_CPU                          /* CPU core */
+  );
+}
+
 
 
 
@@ -87,11 +137,14 @@ void checkIsNeedToRunTask(){
       // sound record 
       Serial.println(String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task A (sound record)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
       writeMsgToPath(systemLogPath, "Run Task A (sound record), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+      // set variable 
       recordTime = (taskArray + arrayReadIndex)->taskType.complex.time;
       channel_tag = (taskArray + arrayReadIndex)->taskType.complex.channel;
       gain_ratio = (taskArray + arrayReadIndex)->taskType.complex.multiple;
-      runner.addTask(t_recordSound);
-      t_recordSound.enable();
+      // then active status 
+      isNeedToRecord = true;
+      // runner.addTask(t_recordSound);
+      // t_recordSound.enable();
     }else if (task_code == 'B'){
       // DHT
       Serial.println( String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task B (DHT)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
@@ -144,7 +197,7 @@ void recordSound(){
   }
 
   // avoid infinite loop
-  runner.deleteTask(t_recordSound);
+  // runner.deleteTask(t_recordSound);
 }
 
 
