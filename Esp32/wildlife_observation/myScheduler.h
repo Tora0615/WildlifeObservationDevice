@@ -1,11 +1,3 @@
-#ifndef MYSCHEDULER_H
-#define MYSCHEDULER_H
-
-// scheduler involve
-#define _TASK_SLEEP_ON_IDLE_RUN
-#include <TaskScheduler.h>
-Scheduler runner;
-
 // others involve 
 #include "setting.h"
 #include "sd_operation.h"
@@ -17,6 +9,14 @@ Scheduler runner;
 #include "myDHT.h"
 #include "myINMP441.h"
 
+
+#ifndef MYSCHEDULER_H
+#define MYSCHEDULER_H
+
+// scheduler involve
+#define _TASK_SLEEP_ON_IDLE_RUN
+#include <TaskScheduler.h>
+Scheduler runner;
 
 // some global variable for task use 
 
@@ -85,7 +85,7 @@ void checkIsNeedToRunTask(){
     // start the task according to task code. A is record, will get more info.
     if (task_code == 'A'){
       // sound record 
-      Serial.println(String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task A (sound record )." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+      Serial.println(String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task A (sound record)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
       writeMsgToPath(systemLogPath, "Run Task A (sound record), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
       recordTime = (taskArray + arrayReadIndex)->taskType.complex.time;
       channel_tag = (taskArray + arrayReadIndex)->taskType.complex.channel;

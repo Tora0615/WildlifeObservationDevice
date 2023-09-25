@@ -1,7 +1,8 @@
+#include "setting.h"
+
 #ifndef RTC_TIMER_H
 #define RTC_TIMER_H
 
-#include "setting.h"
 #define RTC_PMOS 17
 
 #include "RTClib.h"

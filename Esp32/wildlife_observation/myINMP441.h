@@ -1,3 +1,5 @@
+#include "setting.h"
+
 #ifndef MYINMP441_H
 #define MYINMP441_H
 
@@ -8,7 +10,7 @@
 
 #include "MEMS_INMP441.h"
 INMP441 microphone(I2S_SCK_IO, I2S_WS_IO, I2S_DI_IO);
-bool isRecording = false;
+
 
 // debug switch
 // #define RECORD_TIME_DEBUG
