@@ -11,6 +11,11 @@
 const int8_t DISABLE_CHIP_SELECT = -1;
 
 
+void showErrorLed(){
+  digitalWrite(16, HIGH); 
+}
+
+
 // global file pointer / SD_FAT_TYPE 3 (FAT16/FAT32 and exFAT)
 SdFs sd;
 FsFile systemLog;
@@ -36,6 +41,7 @@ void writeMsgToPath(String path, String msg, bool replace = false, bool timeStam
   if(replace){
     if (!tempfile.open(path.c_str(), O_WRONLY | O_CREAT)) {     // open need char array, not string. So use c_str to convert
       Serial.println(" --> open " + path + " failed");
+      showErrorLed();
       while(1){
         delay(1000);
       }
@@ -45,6 +51,7 @@ void writeMsgToPath(String path, String msg, bool replace = false, bool timeStam
   }else{
     if (!tempfile.open(path.c_str(), O_WRONLY | O_CREAT | O_APPEND)) {     // open need char array, not string. So use c_str to convert
       Serial.println(" --> open " + path + " failed");
+      showErrorLed();
       while(1){
         delay(1000);
       }

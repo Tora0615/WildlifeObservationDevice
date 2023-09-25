@@ -2,7 +2,6 @@
 #define SETTING_H
 
 /*----- debug part setting -----*/ 
-
 // #define DS18B20_DEBUG
 // #define DHT22_DEBUG
 // #define RTC_DEBUG
@@ -12,8 +11,8 @@
 // #define RECORD_SOUND_DEBUG
 // #define RECORD_BATTERY_DEBUG
 // #define GET_DS18B20_TEMP_DEBUG
-#define DHT_GET_TEMPERATURE_DEBUG
-#define DHT_GET_HUMIDITY_DEBUG
+// #define DHT_GET_TEMPERATURE_DEBUG
+// #define DHT_GET_HUMIDITY_DEBUG
 /*--- taskFileReader ---*/
 // #define PARSE_TASK_DEBUG
 // #define ADD_REPEAT_WORKS_DEBUG

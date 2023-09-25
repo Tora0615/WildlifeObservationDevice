@@ -134,6 +134,10 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
     // flag switch
     isRecording = !isRecording; 
   }
+  // if INMP was occupied 
+  else{
+    writeMsgToPath(systemLogPath, "Now INMP sensor is recording, skip this task");
+  }
 }
 
 
@@ -252,6 +256,10 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
 
     // flag switch
     isRecording = !isRecording; 
+  }
+  // if INMP was occupied 
+  else{
+    writeMsgToPath(systemLogPath, "Now INMP sensor is recording, skip this task");
   }
 }
 

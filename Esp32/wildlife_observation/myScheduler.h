@@ -169,7 +169,7 @@ void f_turnOnDs18b20Power(){
 void f_getDS18B20Temp(){
   float temperature = getDS18B20Temp();
   #ifdef GET_DS18B20_TEMP_DEBUG
-    Serial.println("DS18B20 : " + String(temperature));
+    Serial.println("DS18B20 : " + String(temperature) + " C");
   #endif
   // write SD 
   writeMsgToPath(sensorDataPath, "DS18B20 : " + String(temperature) + " C");
@@ -184,29 +184,29 @@ void recordDHT(){
 void f_turnOnDhtPower(){
   turnOnDhtPower();
   t_recordDHT.setCallback(&f_DHT_get_temperature);
-  t_recordDHT.delay(250);
+  t_recordDHT.delay(500);
 }
 void f_DHT_get_temperature(){
   float temperature = DHT_get_temperature();
   #ifdef DHT_GET_TEMPERATURE_DEBUG
-    Serial.println("DHT temperature : " + String(temperature) );
+    Serial.println("DHT temperature : " + String(temperature) + " C");
   #endif
   // write SD 
-  writeMsgToPath(sensorDataPath, "DHT temperature : " + String(temperature) );
+  writeMsgToPath(sensorDataPath, "DHT temperature : " + String(temperature) + " C");
   t_recordDHT.setCallback(&f_turnOnDhtPower2);
 }
 void f_turnOnDhtPower2(){
   turnOnDhtPower();
   t_recordDHT.setCallback(&f_DHT_get_Humidity);
-  t_recordDHT.delay(250);
+  t_recordDHT.delay(500);
 }
 void f_DHT_get_Humidity(){
   float humidity = DHT_get_Humidity();
   #ifdef DHT_GET_HUMIDITY_DEBUG
-    Serial.println("DHT Humidity : " + String(humidity) );
+    Serial.println("DHT Humidity : " + String(humidity) + " %");
   #endif
   // write SD 
-  writeMsgToPath(sensorDataPath, "DHT Humidity : " + String(humidity) );
+  writeMsgToPath(sensorDataPath, "DHT Humidity : " + String(humidity) + " %");
   t_recordDHT.setCallback(&recordDHT);
   runner.deleteTask(t_recordDHT);
 }

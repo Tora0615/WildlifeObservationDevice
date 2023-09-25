@@ -7,7 +7,6 @@ void turnOnLed(){
   delay(100);
 }
 
-
 void showInitFinishedLED(){
   digitalWrite(16, LOW); 
   delay(100);
