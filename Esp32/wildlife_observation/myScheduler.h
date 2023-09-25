@@ -35,7 +35,7 @@ void f_DHT_get_Humidity();
 void f_turnOnRtcPower();
 void f_GetHowManySecondsHasPassedTodayFromRtc();
 
-
+/* task scheduler */
 // top level
 Task t_checkDayChange(5000, TASK_FOREVER, &checkDayChange);
 Task t_checkIsNeedToRunTask(10000, TASK_FOREVER, &checkIsNeedToRunTask);
@@ -44,6 +44,13 @@ Task t_recordSound(0, TASK_FOREVER, &recordSound);
 Task t_recordBattery(0, TASK_FOREVER, &recordBattery);
 Task t_recordDS18B20(0, TASK_FOREVER, &recordDS18B20);
 Task t_recordDHT(0, TASK_FOREVER, &recordDHT);
+
+
+/* free RTOS*/
+
+
+
+
 
 
 // global variable for record 
@@ -238,5 +245,19 @@ void f_GetHowManySecondsHasPassedTodayFromRtc(){
   t_checkDayChange.setCallback(&checkDayChange);
 }
 
+#if defined( ARDUINO_ARCH_ESP32 )
+  #define uS_TO_mS_FACTOR 1000ULL
+  void sleepFor(int ms) {
+    // if no task is running 
+    if ( 1 ) {
+      writeMsgToPath(systemLogPath, "Start to sleep");
+      esp_sleep_enable_timer_wakeup(ms * uS_TO_mS_FACTOR);
+      esp_light_sleep_start();
+    }
+  }
+#else
+  void SleepMethod( unsigned long aDuration ) {
+  }
+#endif
 
 #endif

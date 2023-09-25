@@ -33,9 +33,9 @@ void setup() {
   checkAndCreateFile(sensorDataPath);
   
 
-  // print reboot msg if not first boot
+  // print reboot msg if not first boot (sd is new)
   bool notfirstBoot = sd.exists(systemLogPath);
-  if (notfirstBoot) writeMsgToPath(systemLogPath, "== reboot (or first time powered up) ==");
+  if (notfirstBoot) get_wakeup_reason();
 
   // check schedule and setting doc
   checkScheduleFileExist();

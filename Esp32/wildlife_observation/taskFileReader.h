@@ -225,12 +225,12 @@ void checkScheduleFileExist(){
     // write example file
     writeMsgToPath("example_schedule.txt", 
       "0000,A,30,L,1\n"
-      "0000,A,15,R,2\n"
-      "0000,A,10,B,1\n"
-      "0000,A,20,B,0.5\n"
+      "0800,A,15,R,2\n"
+      "1200,A,10,B,1\n"
+      "1735,A,20,B,0.5\n"
       "0000,B,0.5\n"
-      "0000,C,0.5\n"
-      "0000,D,1\n"
+      "0001,C,0.5\n"
+      "0002,D,1\n"
       "#---------\n"
       "任務代碼 : \n"
       "A : Sound (INMP441)\n"
@@ -246,7 +246,7 @@ void checkScheduleFileExist(){
       "\n"
       "其他 : \n"
       "請將 example_schedule.txt 重新命名成 schedule.txt，程式才能正確執行\n"
-    , true);
+    , true, false);
 
     // delay 
     while(1) delay(10000);

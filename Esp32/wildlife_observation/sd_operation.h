@@ -25,9 +25,13 @@ void SDInit(){
   }
 }
 
-void writeMsgToPath(String path, String msg, bool replace = false){
+void writeMsgToPath(String path, String msg, bool replace = false, bool timeStamp = true){
   FsFile tempfile;
-  msg = "[" + String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + "] " + msg; 
+  
+  if(timeStamp){
+    msg = "[" + String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + "] " + msg; 
+  }
+  
   
   if(replace){
     if (!tempfile.open(path.c_str(), O_WRONLY | O_CREAT)) {     // open need char array, not string. So use c_str to convert
