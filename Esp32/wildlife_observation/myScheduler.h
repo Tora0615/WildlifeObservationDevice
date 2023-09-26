@@ -91,7 +91,7 @@ void createRTOSTasks() {
     "INMPThreadAtCore0",
     49152,                                  /* Stack size of task */
     NULL,                                   /* parameter of the task */
-    1,                                      /* priority of the task */    
+    2,                                      /* priority of the task */    
     &tINMP,                                 /* task handle */
     INMP_CPU                                /* CPU core */
   );
@@ -102,7 +102,7 @@ void createRTOSTasks() {
     "TaskSchedulerThreadAtCore1",           /* name of task. */
     16384,                                  /* Stack size of task */
     NULL,                                   /* parameter of the task */
-    1,                                      /* priority of the task */
+    2,                                      /* priority of the task */
     &tTaskScheduler,                        /* task handle */
     OTHER_TASK_CPU                          /* CPU core */
   );
@@ -118,6 +118,9 @@ void createRTOSTasks() {
 float recordTime;
 char channel_tag;
 float gain_ratio;
+String DHT_TimeStamp;
+String DS18B20_TimeStamp;
+String Battery_TimeStamp;
 
 void checkIsNeedToRunTask(){
   vTaskDelay(500 / portTICK_PERIOD_MS);
@@ -144,7 +147,6 @@ void checkIsNeedToRunTask(){
       task_code = (taskArray + arrayReadIndex)->taskType.complex.task;
     }
 
-    // TODO : write log  
     // start the task according to task code. A is record, will get more info.
     if (task_code == 'A'){
       if(!isNeedToRecord){
@@ -163,20 +165,25 @@ void checkIsNeedToRunTask(){
     }else if (task_code == 'B'){
       // DHT
       Serial.println( String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task B (DHT)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
-      writeMsgToPath(systemLogPath, "Run Task B (DHT), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+      // Write log
+      DHT_TimeStamp = String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday()));
+      writeMsgToPath(systemLogPath, "Run Task B (DHT), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")", DHT_TimeStamp);  // write with same timestamp before/after get the data
       runner.addTask(t_recordDHT);
       t_recordDHT.enable();
     }else if (task_code == 'C'){
       // DS18B20
       Serial.println(String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task C (DS18B20)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
-      writeMsgToPath(systemLogPath, "Run Task C (DS18B20), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+      // Write log
+      DS18B20_TimeStamp = String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday()));
+      writeMsgToPath(systemLogPath, "Run Task C (DS18B20), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")", DS18B20_TimeStamp);
       runner.addTask(t_recordDS18B20);
       t_recordDS18B20.enable();
     }else if (task_code == 'D'){
       // battery 
       Serial.println(String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task D (battery)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
       // Write log
-      writeMsgToPath(systemLogPath, "Run Task D (battery), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+      Battery_TimeStamp = String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday()));
+      writeMsgToPath(systemLogPath, "Run Task D (battery), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")", Battery_TimeStamp);
       runner.addTask(t_recordBattery);
       t_recordBattery.enable();
     }
@@ -220,7 +227,7 @@ void recordBattery(){
   #ifdef RECORD_BATTERY_DEBUG
     Serial.println("Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ " %)");
   #endif
-  writeMsgToPath(sensorDataPath, "Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ "%)");
+  writeMsgToPath(sensorDataPath, "Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ "%)", Battery_TimeStamp);
   runner.deleteTask(t_recordBattery);
 }
 
@@ -240,7 +247,7 @@ void f_getDS18B20Temp(){
     Serial.println("DS18B20 : " + String(temperature) + " C");
   #endif
   // write SD 
-  writeMsgToPath(sensorDataPath, "DS18B20 : " + String(temperature) + " C");
+  writeMsgToPath(sensorDataPath, "DS18B20 : " + String(temperature) + " C", DS18B20_TimeStamp);
   t_recordDS18B20.setCallback(&recordDS18B20);
   runner.deleteTask(t_recordDS18B20);
 }
@@ -260,7 +267,7 @@ void f_DHT_get_temperature(){
     Serial.println("DHT temperature : " + String(temperature) + " C");
   #endif
   // write SD 
-  writeMsgToPath(sensorDataPath, "DHT temperature : " + String(temperature) + " C");
+  writeMsgToPath(sensorDataPath, "DHT temperature : " + String(temperature) + " C", DHT_TimeStamp);
   t_recordDHT.setCallback(&f_turnOnDhtPower2);
 }
 void f_turnOnDhtPower2(){
@@ -274,7 +281,7 @@ void f_DHT_get_Humidity(){
     Serial.println("DHT Humidity : " + String(humidity) + " %");
   #endif
   // write SD 
-  writeMsgToPath(sensorDataPath, "DHT Humidity : " + String(humidity) + " %");
+  writeMsgToPath(sensorDataPath, "DHT Humidity : " + String(humidity) + " %", DHT_TimeStamp);
   t_recordDHT.setCallback(&recordDHT);
   runner.deleteTask(t_recordDHT);
 }

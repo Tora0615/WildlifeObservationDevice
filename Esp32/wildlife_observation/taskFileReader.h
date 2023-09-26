@@ -251,7 +251,7 @@ void checkScheduleFileExist(){
       "5 min = 0.083 hr\n"
       "10 min = 0.166 hr\n"
       "15 min = 0.25 hr\n"
-    , true, false);
+    ,"", true, false);   // custem timestamp msg, append, timestamp
 
     // delay and show light
     while(1) {
@@ -271,7 +271,12 @@ void addAllTaskFromFile(){
   writeMsgToPath(systemLogPath, "Start to add all tasks");
 
   // open file 
-  FsFile taskFile;  
+  #ifdef SD_USE_NORMAL
+    FsFile taskFile;
+  #else
+    ExFile taskFile;
+  #endif 
+
   if (!taskFile.open(SCHEDULE_FILE.c_str(), FILE_READ)) {
     Serial.println("open failed");
   }

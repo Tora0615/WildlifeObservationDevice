@@ -26,6 +26,8 @@
 #define INMP_CPU 0
 #define OTHER_TASK_CPU 1
 
+/*--- SD ---*/
+
 
 const String SCHEDULE_FILE = "schedule.txt";
 String today;
@@ -41,5 +43,6 @@ bool isDS18B20Recording = false;
 // RTOS for SD
 SemaphoreHandle_t xSemaphore_SD = xSemaphoreCreateMutex();
 
+#define SD_USE_NORMAL
 
 #endif

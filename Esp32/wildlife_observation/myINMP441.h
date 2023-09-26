@@ -13,15 +13,7 @@ INMP441 microphone(I2S_SCK_IO, I2S_WS_IO, I2S_DI_IO);
 
 
 
-
-
-
-
-
 void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain_ratio){
-
-  
-
   #ifdef INMP_COMMON_DEBUG
     Serial.println("Dual record");
   #endif
@@ -45,8 +37,8 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
     byte header[44];  
     byte dataBuffer[numOfData];
     // SD setting 
-    FsFile soundFile;
-
+    // FsFile soundFile;
+    ExFile soundFile;
 
     /*--- execute part ---*/
     // remove old file 
@@ -200,7 +192,8 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
     byte header[44];  
     byte dataBuffer[numOfData];
     // SD setting 
-    FsFile soundFile;
+    // FsFile soundFile;
+    ExFile soundFile;
 
     /*--- execute part ---*/
     // remove old file 

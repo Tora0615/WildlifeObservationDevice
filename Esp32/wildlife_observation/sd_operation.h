@@ -6,10 +6,13 @@
 #include <SPI.h>
 #include "SdFat.h"
 #include "sdios.h"
-#define SPI_SPEED SD_SCK_MHZ(4)
+#define SPI_SPEED SD_SCK_MHZ(15)
 #define CHIP_SELECT 5
 const int8_t DISABLE_CHIP_SELECT = -1;
 
+
+
+// #define SD_WRITE_MSG_DEBUG
 
 void showErrorLed(){
   digitalWrite(16, HIGH); 
@@ -17,31 +20,75 @@ void showErrorLed(){
 
 
 // global file pointer / SD_FAT_TYPE 3 (FAT16/FAT32 and exFAT)
-SdFs sd;
-FsFile systemLog;
-FsFile sensorData;
+
+#ifdef SD_USE_NORMAL
+  SdFs sd;
+  FsFile systemLog;
+  FsFile sensorData;
+#else
+  SdExFat sd;
+  ExFile systemLog;
+  ExFile sensorData;
+#endif 
 
 void SDInit(){
-  if (!sd.begin(CHIP_SELECT, SPI_SPEED)) {
-    Serial.println("SD card init error");
+  // byte SPI_SPEED = 20;
+
+  // // auto detect speed
+  // while (1) {
+  //   bool isSDInit = sd.begin(CHIP_SELECT, SPI_SPEED);
+  //   if(isSDInit){
+  //     break;
+  //   }
+  //   if(SPI_SPEED == 0){
+  //     Serial.println("SD card init error : NO SD card");
+  //     while(1){
+  //       delay(1000);
+  //     }
+  //   }else{
+  //     Serial.println("SD card init error, speed : " + String(SPI_SPEED) + ", retry...");
+  //     SPI_SPEED -= 1;
+  //   }
+  // }
+
+  if(!sd.begin(CHIP_SELECT, SPI_SPEED)){
+    Serial.println("SD card init error : NO SD card");
     while(1){
       delay(1000);
     }
   }
+
+  // show
+  #ifdef SD_WRITE_MSG_DEBUG
+    Serial.println("SPI_SPEED : " + String(SPI_SPEED));
+  #endif
 }
 
-void writeMsgToPath(String path, String msg, bool replace = false, bool timeStamp = true){
+void writeMsgToPath(String path, String msg, String customTimeStamp = "", bool replace = false, bool timeStamp = true){
   
-  Serial.println("writeMsgToPath called : " + String(millis()));
+  #ifdef SD_WRITE_MSG_DEBUG
+    Serial.println("writeMsgToPath called : " + String(millis()));
+  #endif
 
-  FsFile tempfile;
+  #ifdef SD_USE_NORMAL
+    FsFile tempfile;
+  #else
+    ExFile tempfile;
+  #endif 
+
   if(timeStamp){
-    msg = "[" + String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + "] " + msg; 
+    if(customTimeStamp == ""){
+      msg = "[" + String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + "] " + msg; 
+    }else{
+      msg = "[" + customTimeStamp + "] " + msg; 
+    }
   }
   
   // lock SD opreation 
   if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
-    Serial.println("Got Semaphore : " + String(millis()));
+    #ifdef SD_WRITE_MSG_DEBUG
+      Serial.println("Got Semaphore : " + String(millis()));
+    #endif
     if(replace){
       if (!tempfile.open(path.c_str(), O_WRONLY | O_CREAT)) {     // open need char array, not string. So use c_str to convert
         Serial.println(" --> open " + path + " failed");
@@ -97,7 +144,11 @@ void checkAndCreateFolder(String path){
 
 
 void checkAndCreateFile(String path){
-  FsFile createFile;
+  #ifdef SD_USE_NORMAL
+    FsFile createFile;
+  #else
+    ExFile createFile;
+  #endif 
 
   bool isExist;
   // lock sd 

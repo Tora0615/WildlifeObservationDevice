@@ -63,43 +63,8 @@ void setup() {
 }
 
 
-
 void loop() {
-
-  // checkDayChange();
-  // Serial.println(getDate() + "_" + secMapTo24Hour(getPassedSecOfToday()));
-
-  // Serial.println("today passed sec : " + String(getPassedSecOfToday()));
-  // Serial.println("Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ "%)");
-  // Serial.println("DS18B20 : " + String(getDS18B20Temp()));
-  // Serial.println("DHT temperature : " + String(DHT_get_temperature()) + " / DHT Humidity : " + String(DHT_get_Humidity()));
-
-  // writeMsgToPath(sensorDataPath, getDate() + "_" + secMapTo24Hour(getPassedSecOfToday()));
-  // writeMsgToPath(sensorDataPath, "Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ "%)");
-  // writeMsgToPath(sensorDataPath, "DS18B20 : " + String(getDS18B20Temp()));
-  // writeMsgToPath(sensorDataPath, "DHT temperature : " + String(DHT_get_temperature()) + " / DHT Humidity : " + String(DHT_get_Humidity()));
-  
-
-
-
-  // recordWithDualChannel(10, "/10secDual2X.wav", 2);
-
-  // Serial.println(" ");
-
-
-  
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 /*
