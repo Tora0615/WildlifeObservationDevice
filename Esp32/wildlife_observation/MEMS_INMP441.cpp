@@ -22,11 +22,15 @@ INMP441::INMP441(uint8_t bckIoNum, uint8_t wsIoNum, uint8_t dInNum){
 
 uint8_t INMP441::begin(uint16_t sampleRate, uint8_t bit, uint8_t channelSetting){
   // power on INMP
-  Serial.println("Turn on mic power");
+  #ifdef INMP_DEBUG
+    Serial.println("Turn on mic power");
+  #endif
   digitalWrite(SOUND_PMOS,LOW);    // Turn on 
 
   // set INMP left and right
-  Serial.println("Set INMP L/R");
+  #ifdef INMP_DEBUG
+    Serial.println("Set INMP L/R");
+  #endif
   digitalWrite(MODE_L_PIN, LOW);  // set left microphone with low power level
   digitalWrite(MODE_R_PIN, HIGH); // set left microphone with high power level
 
@@ -102,7 +106,9 @@ void INMP441::louder(byte* buffer, size_t len, float volume_gain){
 
 
 void INMP441::end(){
-  Serial.println("Turn off mic power");
+  #ifdef INMP_DEBUG
+    Serial.println("Turn off mic power");
+  #endif
   digitalWrite(SOUND_PMOS,HIGH);   // Turn off, gpio default is low -> this will let mic ON
   digitalWrite(MODE_R_PIN,LOW);    // Turn off LR setpin to save power.
   digitalWrite(I2S_DI_IO,LOW);

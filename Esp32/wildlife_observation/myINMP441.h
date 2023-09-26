@@ -12,12 +12,21 @@
 INMP441 microphone(I2S_SCK_IO, I2S_WS_IO, I2S_DI_IO);
 
 
-// debug switch
-// #define RECORD_TIME_DEBUG
-// #define PERCENTAGE_DEBUG
-// #define INMP_COMMON_DEBUG
+
+
+
+#include "soc/timer_group_reg.h"
+#include "soc/timer_group_struct.h"
+void feedDogOfThisCore(){
+  // feed dog 0
+  TIMERG0.wdt_wprotect = TIMG_WDT_WKEY_VALUE; // write enable
+  TIMERG0.wdt_feed = 1;                     // feed dog
+  TIMERG0.wdt_wprotect = 0;                 // write protect
+}
 
 void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain_ratio){
+  feedDogOfThisCore();
+
   if(!isRecording){
     // flag switch
     isRecording = !isRecording; 
@@ -51,6 +60,7 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
     Serial.println("I2S init success");
     microphone.createWavHeader(header, recordSeconds, SAMPLE_RATE, DATA_BIT, CHANNEL);
     soundFile.write(header, 44);
+    feedDogOfThisCore();
 
 
 
@@ -76,6 +86,8 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
       Serial.println("loopCount : " + String(loopCount));
     #endif
     for (int j = 0; j < loopCount; ++j) {
+      feedDogOfThisCore();
+
       // print process percentage 
       #ifdef PERCENTAGE_DEBUG
         if( ((j - tempJ)/(loopCount))*100.0 > 5) {
@@ -144,6 +156,7 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
 
 
 void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain_ratio, uint8_t CHANNEL){
+  feedDogOfThisCore();
   if(!isRecording){
     // flag switch
     isRecording = !isRecording; 
@@ -174,7 +187,7 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
     Serial.println("I2S init success");
     microphone.createWavHeader(header, recordSeconds, SAMPLE_RATE, DATA_BIT, CHANNEL);
     soundFile.write(header, 44);
-
+    feedDogOfThisCore();
 
 
     Serial.println("start");
@@ -199,6 +212,8 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
       Serial.println("loopCount : " + String(loopCount));
     #endif
     for (int j = 0; j < loopCount; ++j) {
+      feedDogOfThisCore();
+
       // print process percentage 
       #ifdef PERCENTAGE_DEBUG
         if( ((j - tempJ)/(loopCount))*100.0 > 5) {

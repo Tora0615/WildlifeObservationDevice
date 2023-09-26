@@ -18,8 +18,12 @@
 // #define ADD_REPEAT_WORKS_DEBUG
 // #define SORT_TASK_DEBUG
 // #define ADD_ALL_TASK_FROM_FILE_DEBUG
-
-
+/*--- MEMS_INMP441  ---*/
+// #define INMP_DEBUG 
+/*--- myINMP441 ---*/
+#define RECORD_TIME_DEBUG
+// #define PERCENTAGE_DEBUG
+#define INMP_COMMON_DEBUG
 
 const String SCHEDULE_FILE = "schedule.txt";
 String today;

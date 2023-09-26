@@ -47,6 +47,8 @@ Task t_recordDHT(0, TASK_FOREVER, &recordDHT);
 
 
 /* free RTOS*/
+#define configUSE_PREEMPTION 
+#define configUSE_TIME_SLICING
 #define INMP_CPU 0
 #define OTHER_TASK_CPU 1
 TaskHandle_t tINMP;
@@ -85,7 +87,7 @@ void createRTOSTasks() {
     "INMPThreadAtCore0",
     49152,                                  /* Stack size of task */
     NULL,                                   /* parameter of the task */
-    2,                                      /* priority of the task */
+    2,                                      /* priority of the task */    // 0 : idel, I2S : 2
     &tINMP,                                 /* task handle */
     INMP_CPU                                /* CPU core */
   );

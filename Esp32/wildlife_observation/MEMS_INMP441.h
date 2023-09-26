@@ -14,7 +14,7 @@
 #define SOUND_PMOS    (4)
 
 
-#define INMP_DEBUG 
+
 
 
 
