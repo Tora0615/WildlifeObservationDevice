@@ -15,19 +15,23 @@ INMP441 microphone(I2S_SCK_IO, I2S_WS_IO, I2S_DI_IO);
 
 
 
-#include "soc/timer_group_reg.h"
-#include "soc/timer_group_struct.h"
-void feedDogOfThisCore(){
-  // feed dog 0
-  TIMERG0.wdt_wprotect = TIMG_WDT_WKEY_VALUE; // write enable
-  TIMERG0.wdt_feed = 1;                     // feed dog
-  TIMERG0.wdt_wprotect = 0;                 // write protect
-}
+
+
 
 void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain_ratio){
-  feedDogOfThisCore();
+
+  
+
+  #ifdef INMP_COMMON_DEBUG
+    Serial.println("Dual record");
+  #endif
+
+  feedDogOfCore(INMP_CPU);
 
   if(!isRecording){
+
+    if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
+
     // flag switch
     isRecording = !isRecording; 
 
@@ -61,17 +65,17 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
     microphone.createWavHeader(header, recordSeconds, SAMPLE_RATE, DATA_BIT, CHANNEL);
 
     // lock sd 
-    if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
+    // if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
       if (!soundFile.open(filenameWithPath, O_WRONLY | O_CREAT )) {     // open need char array, not string. So use c_str to convert
         Serial.println(" --> open file failed");
       }
       soundFile.write(header, 44);
-      soundFile.close();
-    }xSemaphoreGive( xSemaphore_SD );
+      // soundFile.close();
+    // }xSemaphoreGive( xSemaphore_SD );
     
 
     // RESET WATCHDOG
-    feedDogOfThisCore();
+    feedDogOfCore(INMP_CPU);
 
 
 
@@ -97,7 +101,7 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
       Serial.println("loopCount : " + String(loopCount));
     #endif
     for (int j = 0; j < loopCount; ++j) {
-      feedDogOfThisCore();
+      feedDogOfCore(INMP_CPU);
 
       // print process percentage 
       #ifdef PERCENTAGE_DEBUG
@@ -131,13 +135,18 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
       #endif
 
       // lock sd 
-      if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
-        if (!soundFile.open(filenameWithPath, O_WRONLY | O_CREAT | O_APPEND)) {     // open need char array, not string. So use c_str to convert
-          Serial.println(" --> open file failed during recording");
-        }
+      // int tmmmmp = millis();
+      
+        // Serial.println(millis() - tmmmmp);  //0
+        // if (!soundFile.open(filenameWithPath, O_WRONLY | O_CREAT | O_APPEND)) {     // open need char array, not string. So use c_str to convert
+        //   Serial.println(" --> open file failed during recording");
+        // }
+        // Serial.println(millis() - tmmmmp);  //9
         soundFile.write((uint8_t*)dataBuffer, numOfData);
-        soundFile.close();
-      }xSemaphoreGive( xSemaphore_SD );
+        // Serial.println(millis() - tmmmmp);  //13
+        // soundFile.close();
+        // Serial.println(millis() - tmmmmp);  //22
+      
 
       #ifdef RECORD_TIME_DEBUG
         writeFile_duration += millis() - tempwritefiletime;
@@ -152,7 +161,7 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
         busyWait_duration += micros() - busyWaitTime;
       #endif
     }
-    // soundFile.close();
+    soundFile.close();
     microphone.end();
     #ifdef INMP_COMMON_DEBUG
       Serial.println("finish");
@@ -167,6 +176,8 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
 
     // flag switch
     isRecording = !isRecording; 
+
+    }xSemaphoreGive( xSemaphore_SD );
   }
   // if INMP was occupied 
   else{
@@ -176,7 +187,7 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
 
 
 void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain_ratio, uint8_t CHANNEL){
-  feedDogOfThisCore();
+  feedDogOfCore(INMP_CPU);
   if(!isRecording){
     // flag switch
     isRecording = !isRecording; 
@@ -213,7 +224,7 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
     #endif
     microphone.createWavHeader(header, recordSeconds, SAMPLE_RATE, DATA_BIT, CHANNEL);
     soundFile.write(header, 44);
-    feedDogOfThisCore();
+    feedDogOfCore(INMP_CPU);
 
     #ifdef INMP_COMMON_DEBUG
       Serial.println("start");
@@ -240,7 +251,7 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
       Serial.println("loopCount : " + String(loopCount));
     #endif
     for (int j = 0; j < loopCount; ++j) {
-      feedDogOfThisCore();
+      feedDogOfCore(INMP_CPU);
 
       // print process percentage 
       #ifdef PERCENTAGE_DEBUG

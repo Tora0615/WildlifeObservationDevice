@@ -37,8 +37,8 @@ void f_GetHowManySecondsHasPassedTodayFromRtc();
 
 /* task scheduler */
 // top level
-Task t_checkDayChange(5000, TASK_FOREVER, &checkDayChange);
-Task t_checkIsNeedToRunTask(10000, TASK_FOREVER, &checkIsNeedToRunTask);
+Task t_checkDayChange(0, TASK_FOREVER, &checkDayChange);  
+Task t_checkIsNeedToRunTask(0, TASK_FOREVER, &checkIsNeedToRunTask);
 // second level 
 // Task t_recordSound(0, TASK_FOREVER, &recordSound);
 Task t_recordBattery(0, TASK_FOREVER, &recordBattery);
@@ -49,8 +49,7 @@ Task t_recordDHT(0, TASK_FOREVER, &recordDHT);
 /* free RTOS*/
 #define configUSE_PREEMPTION 
 #define configUSE_TIME_SLICING
-#define INMP_CPU 0
-#define OTHER_TASK_CPU 1
+
 TaskHandle_t tINMP;
 TaskHandle_t tTaskScheduler;
 TaskHandle_t tHeaderChecker;
@@ -60,11 +59,14 @@ bool isNeedToRecord = false;
 void checkIfNeedToRecord(void* pvParameters){   // void* pvParameters : don't accept any value
   Serial.println("checkIfNeedToRecord : created");
   while(1){
+    feedDogOfCore(INMP_CPU);
+
     if(isNeedToRecord){
       isNeedToRecord = !isNeedToRecord;
       recordSound();
     }
-    vTaskDelay(50);
+    // vTaskDelay(500 / portTICK_PERIOD_MS);
+    // vTaskDelay(10);
   }
 }
 
@@ -74,8 +76,9 @@ void taskSchedulerThread(void* pvParameters){   // void* pvParameters : don't ac
     runner.allowSleep(false);
   #endif
   while(1){
+    feedDogOfCore(OTHER_TASK_CPU);
     runner.execute();
-    vTaskDelay(50);
+    // vTaskDelay(500 / portTICK_PERIOD_MS);
   }
 }
 
@@ -83,21 +86,23 @@ void createRTOSTasks() {
   Serial.println("RTOS : createCoreTasks");
 
   xTaskCreatePinnedToCore(
+  // xTaskCreate(
     checkIfNeedToRecord,
     "INMPThreadAtCore0",
     49152,                                  /* Stack size of task */
     NULL,                                   /* parameter of the task */
-    2,                                      /* priority of the task */    
+    1,                                      /* priority of the task */    
     &tINMP,                                 /* task handle */
     INMP_CPU                                /* CPU core */
   );
 
+  // xTaskCreate(
   xTaskCreatePinnedToCore(
     taskSchedulerThread,                    /* Task function. */
     "TaskSchedulerThreadAtCore1",           /* name of task. */
     16384,                                  /* Stack size of task */
     NULL,                                   /* parameter of the task */
-    2,                                      /* priority of the task */
+    1,                                      /* priority of the task */
     &tTaskScheduler,                        /* task handle */
     OTHER_TASK_CPU                          /* CPU core */
   );
@@ -115,6 +120,8 @@ char channel_tag;
 float gain_ratio;
 
 void checkIsNeedToRunTask(){
+  vTaskDelay(500 / portTICK_PERIOD_MS);
+
   #ifdef CHECK_IS_NEED_TO_RUN_TASK
     Serial.println("checkIsNeedToRunTask");
   #endif
@@ -276,10 +283,13 @@ void f_DHT_get_Humidity(){
 
 // if day changed, create new folder
 void checkDayChange(){
+  vTaskDelay(500 / portTICK_PERIOD_MS);
   #ifdef CHECK_DAY_CHANGE_DEBUG
     Serial.println("check day change");
   #endif
-  t_checkDayChange.setCallback(&f_turnOnRtcPower);
+  if( getPassedSecOfToday() > 86400){  // a day : 86400 sec
+    t_checkDayChange.setCallback(&f_turnOnRtcPower);
+  }
 }
 void f_turnOnRtcPower(){
   turnOnRtcPower();
@@ -287,38 +297,38 @@ void f_turnOnRtcPower(){
   t_checkDayChange.delay(100);
 }
 void f_GetHowManySecondsHasPassedTodayFromRtc(){
-  if( getPassedSecOfToday() > 86400){  // a day : 86400 sec
-    // if > a day, calibrate with RTC timer
-    sys_RTC_time_offset = GetHowManySecondsHasPassedTodayFromRtc();
-    sys_millis_time_offset = millis();
-    Serial.println("day changed");
-    // Write log
-    writeMsgToPath(systemLogPath, "Day changed");
 
-    // update value and create new
-    today = getDate();
-    checkAndCreateFolder(today);
-    systemLogPath = today + "/SYSLOG.txt";
-    checkAndCreateFile(systemLogPath);
-    sensorDataPath = today + "/SENSOR_DATA.txt";
-    checkAndCreateFile(sensorDataPath);
-  }
+  // if > a day, calibrate with RTC timer
+  sys_RTC_time_offset = GetHowManySecondsHasPassedTodayFromRtc();
+  sys_millis_time_offset = millis();
+  Serial.println("day changed");
+  // Write log
+  writeMsgToPath(systemLogPath, "Day changed");
+
+  // update value and create new
+  today = getDate();
+  checkAndCreateFolder(today);
+  systemLogPath = today + "/SYSLOG.txt";
+  checkAndCreateFile(systemLogPath);
+  sensorDataPath = today + "/SENSOR_DATA.txt";
+  checkAndCreateFile(sensorDataPath);
+
   t_checkDayChange.setCallback(&checkDayChange);
 }
 
-#if defined( ARDUINO_ARCH_ESP32 )
-  #define uS_TO_mS_FACTOR 1000ULL
-  void sleepFor(int ms) {
-    // if no task is running 
-    if ( 1 ) {
-      writeMsgToPath(systemLogPath, "Start to sleep");
-      esp_sleep_enable_timer_wakeup(ms * uS_TO_mS_FACTOR);
-      esp_light_sleep_start();
-    }
-  }
-#else
-  void SleepMethod( unsigned long aDuration ) {
-  }
-#endif
+// #if defined( ARDUINO_ARCH_ESP32 )
+//   #define uS_TO_mS_FACTOR 1000ULL
+//   void sleepFor(int ms) {
+//     // if no task is running 
+//     if ( 1 ) {
+//       writeMsgToPath(systemLogPath, "Start to sleep");
+//       esp_sleep_enable_timer_wakeup(ms * uS_TO_mS_FACTOR);
+//       esp_light_sleep_start();
+//     }
+//   }
+// #else
+//   void SleepMethod( unsigned long aDuration ) {
+//   }
+// #endif
 
 #endif

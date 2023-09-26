@@ -60,5 +60,12 @@ void getWakeupReason(){
   writeMsgToPath(systemLogPath, "== " + reason_text + " ==");
 }
 
+#include "soc/timer_group_reg.h"
+#include "soc/timer_group_struct.h"
+void feedDogOfCore(byte core){
+  TIMERG0.wdt_wprotect = TIMG_WDT_WKEY_VALUE; // write enable
+  TIMERG0.wdt_feed = core;                     // feed dog
+  TIMERG0.wdt_wprotect = 0;                 // write protect
+}
 
 #endif

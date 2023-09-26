@@ -31,15 +31,17 @@ void SDInit(){
 }
 
 void writeMsgToPath(String path, String msg, bool replace = false, bool timeStamp = true){
-  FsFile tempfile;
   
+  Serial.println("writeMsgToPath called : " + String(millis()));
+
+  FsFile tempfile;
   if(timeStamp){
     msg = "[" + String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + "] " + msg; 
   }
   
   // lock SD opreation 
   if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
-
+    Serial.println("Got Semaphore : " + String(millis()));
     if(replace){
       if (!tempfile.open(path.c_str(), O_WRONLY | O_CREAT)) {     // open need char array, not string. So use c_str to convert
         Serial.println(" --> open " + path + " failed");
