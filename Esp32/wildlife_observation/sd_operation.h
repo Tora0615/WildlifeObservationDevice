@@ -11,15 +11,16 @@
 const int8_t DISABLE_CHIP_SELECT = -1;
 
 
-
+// debug switch
 // #define SD_WRITE_MSG_DEBUG
+
 
 void showErrorLed(){
   digitalWrite(16, HIGH); 
 }
 
 
-// global file pointer / SD_FAT_TYPE 3 (FAT16/FAT32 and exFAT)
+// global file pointer (SD_FAT_TYPE 3 (FAT16/FAT32 and exFAT) )
 
 #ifdef SD_USE_NORMAL
   SdFs sd;

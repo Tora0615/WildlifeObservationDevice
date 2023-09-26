@@ -20,15 +20,15 @@
 // #define ADD_ALL_TASK_FROM_FILE_DEBUG
 /*--- myINMP441 ---*/
 #define RECORD_TIME_DEBUG
-#define PERCENTAGE_DEBUG
+// #define PERCENTAGE_DEBUG
 #define INMP_COMMON_DEBUG
+/*--- MEMS_INMP441 ---*/
+// CAN'T set here, please see MEMS_INMP441.h
+/*--- sd_operation ---*/
+// CAN'T set here, please see that file
 
-#define INMP_CPU 0
-#define OTHER_TASK_CPU 1
 
-/*--- SD ---*/
-
-
+// some global variable
 const String SCHEDULE_FILE = "schedule.txt";
 String today;
 String systemLogPath;
@@ -43,6 +43,15 @@ bool isDS18B20Recording = false;
 // RTOS for SD
 SemaphoreHandle_t xSemaphore_SD = xSemaphoreCreateMutex();
 
+// RTOS Task setting 
+#define INMP_CPU 0
+#define OTHER_TASK_CPU 1
+
+// SD Use setting 
 #define SD_USE_NORMAL
+
+
+
+
 
 #endif

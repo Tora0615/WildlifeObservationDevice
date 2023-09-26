@@ -112,8 +112,6 @@ void createRTOSTasks() {
 
 
 
-
-
 // global variable for record 
 float recordTime;
 char channel_tag;

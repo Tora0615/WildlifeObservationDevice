@@ -15,8 +15,7 @@
 
 
 /*--- MEMS_INMP441  ---*/
-#define INMP_DEBUG 
-
+// #define INMP_DEBUG 
 
 
 class INMP441{
