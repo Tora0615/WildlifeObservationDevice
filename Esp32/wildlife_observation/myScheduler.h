@@ -363,15 +363,15 @@ void f_GetHowManySecondsHasPassedTodayFromRtc(){
       #endif
       writeMsgToPath(systemLogPath, "Go to sleep for : " + String(canSleepMs/1000.0f) + " sec");
 
-      int minTimes = canSleepMs / (1000 * 60);
-      int remainMs = canSleepMs % (1000 * 60);
-      for(int i=0; i<minTimes; i++){
-        esp_sleep_enable_timer_wakeup(1000 * uS_TO_mS_FACTOR);
+      int halfMinTimes = canSleepMs / (1000 * 30);
+      int remainMs = canSleepMs % (1000 * 30);
+      for(int i=0; i<halfMinTimes; i++){
+        esp_sleep_enable_timer_wakeup(500 * uS_TO_mS_FACTOR);
         esp_light_sleep_start();
         // wakeup to feed dog
         feedDogOfCore(OTHER_TASK_CPU);
         #ifdef GOTOSLEEP_DEBUG
-          Serial.println("Have slept for : " + String(minTimes) + " min. Wake up to feed dog.");
+          Serial.println("Have slept for : " + String( (i+1) * 0.5) + " min. Wake up to feed dog.");
         #endif
       }
       #ifdef GOTOSLEEP_DEBUG
@@ -379,6 +379,7 @@ void f_GetHowManySecondsHasPassedTodayFromRtc(){
       #endif
       esp_sleep_enable_timer_wakeup(remainMs * uS_TO_mS_FACTOR);
       esp_light_sleep_start();
+      feedDogOfCore(OTHER_TASK_CPU);
       getWakeupReason();
     }
   }
