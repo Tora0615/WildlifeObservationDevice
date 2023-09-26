@@ -87,7 +87,7 @@ void createRTOSTasks() {
     "INMPThreadAtCore0",
     49152,                                  /* Stack size of task */
     NULL,                                   /* parameter of the task */
-    2,                                      /* priority of the task */    // 0 : idel, I2S : 2
+    2,                                      /* priority of the task */    
     &tINMP,                                 /* task handle */
     INMP_CPU                                /* CPU core */
   );

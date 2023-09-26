@@ -37,35 +37,55 @@ void writeMsgToPath(String path, String msg, bool replace = false, bool timeStam
     msg = "[" + String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + "] " + msg; 
   }
   
-  
-  if(replace){
-    if (!tempfile.open(path.c_str(), O_WRONLY | O_CREAT)) {     // open need char array, not string. So use c_str to convert
-      Serial.println(" --> open " + path + " failed");
-      showErrorLed();
-      while(1){
-        delay(1000);
+  // lock SD opreation 
+  if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
+
+    if(replace){
+      if (!tempfile.open(path.c_str(), O_WRONLY | O_CREAT)) {     // open need char array, not string. So use c_str to convert
+        Serial.println(" --> open " + path + " failed");
+        showErrorLed();
+        while(1){
+          delay(1000);
+        }
+      }else{
+        tempfile.println(msg.c_str());
       }
     }else{
-      tempfile.println(msg.c_str());
-    }
-  }else{
-    if (!tempfile.open(path.c_str(), O_WRONLY | O_CREAT | O_APPEND)) {     // open need char array, not string. So use c_str to convert
-      Serial.println(" --> open " + path + " failed");
-      showErrorLed();
-      while(1){
-        delay(1000);
+      if (!tempfile.open(path.c_str(), O_WRONLY | O_CREAT | O_APPEND)) {     // open need char array, not string. So use c_str to convert
+        Serial.println(" --> open " + path + " failed");
+        showErrorLed();
+        while(1){
+          delay(1000);
+        }
+      }else{
+        tempfile.println(msg.c_str());
       }
-    }else{
-      tempfile.println(msg.c_str());
     }
-  }
+    tempfile.close();
+
+  }xSemaphoreGive( xSemaphore_SD );
 }
 
 
 void checkAndCreateFolder(String path){
-  if (!sd.exists(path)) {
-    sd.mkdir(path);
-    if (sd.exists(systemLogPath)) {
+  bool isExist;
+  // lock sd 
+  if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
+    isExist = sd.exists(path);
+  }xSemaphoreGive( xSemaphore_SD );
+
+  if (!isExist) {
+    // lock sd 
+    if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
+      sd.mkdir(path);
+    }xSemaphoreGive( xSemaphore_SD );
+
+    bool isSysLogExist;
+    if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
+      isSysLogExist = sd.exists(systemLogPath);
+    }xSemaphoreGive( xSemaphore_SD );
+
+    if (isSysLogExist) {
       writeMsgToPath(systemLogPath, "folder at path : " + path + " create successful");
     }else{
       Serial.println("folder at path : " + path + " create successful");
@@ -76,16 +96,37 @@ void checkAndCreateFolder(String path){
 
 void checkAndCreateFile(String path){
   FsFile createFile;
-  if (!sd.exists(path)) {
-    if (!createFile.open(path.c_str(), O_WRONLY | O_CREAT | O_APPEND)) {     // open need char array, not string. So use c_str to convert
-      if (sd.exists(systemLogPath)) {
+
+  bool isExist;
+  // lock sd 
+  if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
+    isExist = sd.exists(path);
+  }xSemaphoreGive( xSemaphore_SD );
+
+  if (!isExist) {
+    bool isCreateFileSuccess;
+    if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
+      isCreateFileSuccess = createFile.open(path.c_str(), O_WRONLY | O_CREAT | O_APPEND);
+    }xSemaphoreGive( xSemaphore_SD );
+    if (!isCreateFileSuccess) {     // open need char array, not string. So use c_str to convert
+      bool isSysLogExist;
+      if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
+        isSysLogExist = sd.exists(systemLogPath);
+      }xSemaphoreGive( xSemaphore_SD );
+      if (isSysLogExist) {
         writeMsgToPath(systemLogPath, "open " + path + " failed");
       }else{
         Serial.println("open " + path + " failed");
       }
     }else{
-      createFile.close();
-      if (sd.exists(systemLogPath)) {
+      if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
+        createFile.close();
+      }xSemaphoreGive( xSemaphore_SD );
+      bool isSysLogExist;
+      if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
+        isSysLogExist = sd.exists(systemLogPath);
+      }xSemaphoreGive( xSemaphore_SD );
+      if (isSysLogExist) {
         writeMsgToPath(systemLogPath, "file : " + path + " create successful");
       }else{
         Serial.println("file : " + path + " create successful");

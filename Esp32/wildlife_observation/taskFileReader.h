@@ -228,9 +228,9 @@ void checkScheduleFileExist(){
       "0800,A,15,R,2\n"
       "1200,A,10,B,1\n"
       "1735,A,20,B,0.5\n"
-      "0000,B,0.5\n"
-      "0001,C,0.5\n"
-      "0002,D,1\n"
+      "0000,B,0.166\n"
+      "0001,C,0.166\n"
+      "0002,D,0.166\n"
       "#---------\n"
       "任務代碼 : \n"
       "A : Sound (INMP441)\n"
@@ -240,16 +240,26 @@ void checkScheduleFileExist(){
       "\n"
       "參數說明 : \n"
       "任務 A\n"
-      "初始時間, 任務代碼, 執行時間(min), L/R/B (聲道左/右/兩者), 音量幾倍(基準為1，建議範圍 : 0.5 ~ 2倍)\n"
+      "初始時間, 任務代碼, 執行時間(min), L/R/B (聲道左/右/兩者), 音量幾倍 (基準為1，建議範圍 : 0.5 ~ 2倍)\n"
       "任務 BCD\n"
       "初始時間, 任務代碼, 執行間隔(hr)\n"
       "\n"
       "其他 : \n"
       "請將 example_schedule.txt 重新命名成 schedule.txt，程式才能正確執行\n"
+      "\n"
+      "常用換算 : \n"
+      "5 min = 0.083 hr\n"
+      "10 min = 0.166 hr\n"
+      "15 min = 0.25 hr\n"
     , true, false);
 
-    // delay 
-    while(1) delay(10000);
+    // delay and show light
+    while(1) {
+      digitalWrite(16, LOW); 
+      delay(500);
+      digitalWrite(16, HIGH); 
+      delay(500);
+    }
   }
   // Write log
   writeMsgToPath(systemLogPath, "ScheduleFile found!");

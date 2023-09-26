@@ -28,8 +28,14 @@ void SDInit(){
 
 
 String writeMsgPath = "system_log.txt";
+String writeMsgPathA = "system_logA.txt";
+String writeMsgPathB = "system_logB.txt";
+String writeMsgPathC = "system_logC.txt";
+String writeMsgPathD = "system_logD.txt";
 String msgA;
 String msgB;
+String msgC;
+String msgD;
 bool replaceFlag = false;
 bool timeStampFlag = false;
 String createFolderPath;
@@ -38,53 +44,63 @@ String createFilePath;
 
 // bool isInCritical = false;
 SemaphoreHandle_t xSemaphore = xSemaphoreCreateMutex();
-portMUX_TYPE writeFile_mutex = portMUX_INITIALIZER_UNLOCKED;
+// SemaphoreHandle_t xSemaphoreOpen = xSemaphoreCreateMutex();
+// SemaphoreHandle_t xSemaphoreWrite = xSemaphoreCreateMutex();
+
+// portMUX_TYPE writeFile_mutex = portMUX_INITIALIZER_UNLOCKED;
 
 void writeMsgToPath(String path, String msg, bool replace = false, bool timeStamp = true){
   // taskENTER_CRITICAL(&writeFile_mutex);
   // isInCritical = !isInCritical;
-  Serial.println("write file");
+  
+  FsFile tempfile;
+  Serial.println("write file, addr : " + String( (int)&tempfile ));
 
-  // wait for release
-  if(xSemaphoreTake( xSemaphore, portMAX_DELAY ) == pdTRUE){
-    FsFile tempfile;
+  if(replace){
     
-    if(replace){
-      
-      int isOpened = tempfile.open(path.c_str(), O_WRONLY | O_CREAT);
+    int isOpened;
+    if(xSemaphoreTake( xSemaphore, portMAX_DELAY ) == pdTRUE){
+      Serial.println("open");
+      isOpened = tempfile.open(path.c_str(), O_WRONLY | O_CREAT);
+    }
+    xSemaphoreGive( xSemaphore );
 
-      if (!isOpened) {     // open need char array, not string. So use c_str to convert
-        Serial.println(" --> open " + path + " failed");
-        showErrorLed();
-        while(1){
-          delay(1000);
-        }
-      }else{
-        tempfile.println(msg.c_str());
+    if (!isOpened) {     // open need char array, not string. So use c_str to convert
+      Serial.println(" --> open " + path + " failed");
+      showErrorLed();
+      while(1){
+        delay(1000);
       }
     }else{
-
-      int isOpened = tempfile.open(path.c_str(), O_WRONLY | O_CREAT | O_APPEND);
-
-      if (!isOpened) {     // open need char array, not string. So use c_str to convert
-        Serial.println(" --> open " + path + " failed");
-        showErrorLed();
-        while(1){
-          delay(1000);
-        }
-      }else{
-
+      if(xSemaphoreTake( xSemaphore, portMAX_DELAY ) == pdTRUE){
+        Serial.println("write");
         tempfile.println(msg.c_str());
-        
+        tempfile.close();
       }
+      xSemaphoreGive( xSemaphore );
     }
-
-    // isInCritical = !isInCritical;
-    // taskEXIT_CRITICAL(&writeFile_mutex);
-
+  }else{
+    int isOpened;
+    if(xSemaphoreTake( xSemaphore, portMAX_DELAY ) == pdTRUE){
+      Serial.println("open");
+      isOpened = tempfile.open(path.c_str(), O_WRONLY | O_CREAT | O_APPEND);
+    }
+    xSemaphoreGive( xSemaphore );
+    if (!isOpened) {     // open need char array, not string. So use c_str to convert
+      Serial.println(" --> open " + path + " failed");
+      showErrorLed();
+      while(1){
+        delay(1000);
+      }
+    }else{
+      if(xSemaphoreTake( xSemaphore, portMAX_DELAY ) == pdTRUE){
+        Serial.println("write");
+        tempfile.println(msg.c_str());
+        tempfile.close();
+      }
+      xSemaphoreGive( xSemaphore );
+    }
   }
-
-  xSemaphoreGive( xSemaphore );
   Serial.println("finished");
 }
 
@@ -93,9 +109,15 @@ TaskHandle_t t1;
 TaskHandle_t t2;
 TaskHandle_t t3;
 
+TaskHandle_t t4;
+TaskHandle_t t5;
+TaskHandle_t t6;
+TaskHandle_t t7;
+
 bool needWriteMSGToPathA = false;
 bool needWriteMSGToPathB = false;
-
+bool needWriteMSGToPathC = false;
+bool needWriteMSGToPathD = false;
 
 void checkNeedWriteMSGToPathA(void* pvParameters){
   Serial.println("checkNeedWriteMSGToPathA : created");
@@ -103,7 +125,7 @@ void checkNeedWriteMSGToPathA(void* pvParameters){
     if(needWriteMSGToPathA){
       Serial.println("needWriteMSGToPathA");
       needWriteMSGToPathA = !needWriteMSGToPathA;
-      writeMsgToPath(writeMsgPath, msgA, replaceFlag, timeStampFlag);
+      writeMsgToPath(writeMsgPathA, msgA, replaceFlag, timeStampFlag);
     }
     vTaskDelay(50);
   }
@@ -115,9 +137,33 @@ void checkNeedWriteMSGToPathB(void* pvParameters){
     if(needWriteMSGToPathB){
       Serial.println("needWriteMSGToPathB");
       needWriteMSGToPathB = !needWriteMSGToPathB;
-      writeMsgToPath(writeMsgPath, msgB, replaceFlag, timeStampFlag);
+      writeMsgToPath(writeMsgPathB, msgB, replaceFlag, timeStampFlag);
     }
     vTaskDelay(500);
+  }
+}
+
+void checkNeedWriteMSGToPathC(void* pvParameters){
+  Serial.println("checkNeedWriteMSGToPathC : created");
+  while(1){
+    if(needWriteMSGToPathC){
+      Serial.println("needWriteMSGToPathC");
+      needWriteMSGToPathC = !needWriteMSGToPathC;
+      writeMsgToPath(writeMsgPathC, msgC, replaceFlag, timeStampFlag);
+    }
+    vTaskDelay(25);
+  }
+}
+
+void checkNeedWriteMSGToPathD(void* pvParameters){
+  Serial.println("checkNeedWriteMSGToPathD : created");
+  while(1){
+    if(needWriteMSGToPathD){
+      Serial.println("needWriteMSGToPathD");
+      needWriteMSGToPathD = !needWriteMSGToPathD;
+      writeMsgToPath(writeMsgPathD, msgD, replaceFlag, timeStampFlag);
+    }
+    vTaskDelay(40);
   }
 }
 
@@ -139,6 +185,28 @@ void createRequestB(void* pvParameters){
     if(!needWriteMSGToPathB){
       needWriteMSGToPathB = !needWriteMSGToPathB;
       msgB = "request_MSG_B";
+    }
+    vTaskDelay(50);
+  }
+}
+
+void createRequestC(void* pvParameters){
+  Serial.println("createRequestC : created");
+  while(1){
+    if(!needWriteMSGToPathC){
+      needWriteMSGToPathC = !needWriteMSGToPathC;
+      msgC = "request_MSG_C";
+    }
+    vTaskDelay(50);
+  }
+}
+
+void createRequestD(void* pvParameters){
+  Serial.println("createRequestD : created");
+  while(1){
+    if(!needWriteMSGToPathD){
+      needWriteMSGToPathD = !needWriteMSGToPathD;
+      msgD = "request_MSG_D";
     }
     vTaskDelay(50);
   }
@@ -185,6 +253,46 @@ void createRTOSTasks() {
     NULL,                                   /* parameter of the task */
     2,                                      /* priority of the task */
     &t3,                        /* task handle */
+    OTHER_TASK_CPU                          /* CPU core */
+  );
+
+    xTaskCreatePinnedToCore(
+    checkNeedWriteMSGToPathC,
+    "checkNeedWriteMSGToPathC",
+    4096,                                   /* Stack size of task */
+    NULL,                                   /* parameter of the task */
+    2,                                      /* priority of the task */    // 0 : idel, I2S : 2
+    &t4,                                 /* task handle */
+    OTHER_TASK_CPU                          /* CPU core */
+  );
+
+  xTaskCreatePinnedToCore(
+    checkNeedWriteMSGToPathD,
+    "checkNeedWriteMSGToPathD",
+    4096,                                   /* Stack size of task */
+    NULL,                                   /* parameter of the task */
+    2,                                      /* priority of the task */    // 0 : idel, I2S : 2
+    &t5,                                 /* task handle */
+    OTHER_TASK_CPU                          /* CPU core */
+  );
+
+  xTaskCreatePinnedToCore(
+    createRequestC,                    /* Task function. */
+    "createRequestC",           /* name of task. */
+    4096,                                   /* Stack size of task */
+    NULL,                                   /* parameter of the task */
+    2,                                      /* priority of the task */
+    &t6,                        /* task handle */
+    OTHER_TASK_CPU                          /* CPU core */
+  );
+
+  xTaskCreatePinnedToCore(
+    createRequestD,                    /* Task function. */
+    "createRequestD",           /* name of task. */
+    4096,                                   /* Stack size of task */
+    NULL,                                   /* parameter of the task */
+    2,                                      /* priority of the task */
+    &t7,                        /* task handle */
     OTHER_TASK_CPU                          /* CPU core */
   );
 }

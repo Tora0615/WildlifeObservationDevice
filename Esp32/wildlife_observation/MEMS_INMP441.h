@@ -14,7 +14,8 @@
 #define SOUND_PMOS    (4)
 
 
-
+/*--- MEMS_INMP441  ---*/
+#define INMP_DEBUG 
 
 
 

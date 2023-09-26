@@ -6,8 +6,8 @@
 // #define DHT22_DEBUG
 // #define RTC_DEBUG
 /*--- myScheduler ---*/
-// #define CHECK_DAY_CHANGE_DEBUG
-// #define CHECK_IS_NEED_TO_RUN_TASK
+#define CHECK_DAY_CHANGE_DEBUG
+#define CHECK_IS_NEED_TO_RUN_TASK
 // #define RECORD_SOUND_DEBUG
 // #define RECORD_BATTERY_DEBUG
 // #define GET_DS18B20_TEMP_DEBUG
@@ -18,8 +18,6 @@
 // #define ADD_REPEAT_WORKS_DEBUG
 // #define SORT_TASK_DEBUG
 // #define ADD_ALL_TASK_FROM_FILE_DEBUG
-/*--- MEMS_INMP441  ---*/
-// #define INMP_DEBUG 
 /*--- myINMP441 ---*/
 #define RECORD_TIME_DEBUG
 // #define PERCENTAGE_DEBUG
@@ -34,6 +32,10 @@ String sensorDataPath;
 bool isRecording = false;
 bool isDHTRecording = false;
 bool isDS18B20Recording = false;
+
+
+// RTOS for SD
+SemaphoreHandle_t xSemaphore_SD = xSemaphoreCreateMutex();
 
 
 #endif
