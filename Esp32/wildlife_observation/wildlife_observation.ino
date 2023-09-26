@@ -35,7 +35,6 @@ void setup() {
 
   // print reboot msg if not first boot (sd is new)
   bool notfirstBoot = sd.exists(systemLogPath);
-  if (notfirstBoot) getWakeupReason();
   if (notfirstBoot) getResetReason();
 
   // check schedule and setting doc

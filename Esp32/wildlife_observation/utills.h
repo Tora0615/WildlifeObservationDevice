@@ -1,6 +1,9 @@
 #ifndef UTILLS_H
 #define UTILLS_H
 
+#define PRINT_RESET_REASON
+#define PRINT_WAKEUP_REASON
+
 void turnOnLed(){
   pinMode(16, OUTPUT);
   digitalWrite(16, HIGH); 
@@ -40,7 +43,9 @@ void getResetReason(){
     case ESP_RST_SDIO : reason_text = "ESP_RST_SDIO"; break;
     default : reason_text = "ESP_RST_UNKNOWN"; break;
   }
-  Serial.println("== " + reason_text + " ==");
+  #ifdef PRINT_RESET_REASON
+    Serial.println("== " + reason_text + " ==");
+  #endif
   writeMsgToPath(systemLogPath, "== " + reason_text + " ==");
 }
 
@@ -56,7 +61,9 @@ void getWakeupReason(){
     case ESP_SLEEP_WAKEUP_ULP : reason_text = "Wakeup caused by ULP program"; break;
     default : reason_text = "Wakeup was not caused by deep sleep"; break;
   }
-  Serial.println("== " + reason_text + " ==");
+  #ifdef PRINT_WAKEUP_REASON
+    Serial.println("== " + reason_text + " ==");
+  #endif
   writeMsgToPath(systemLogPath, "== " + reason_text + " ==");
 }
 

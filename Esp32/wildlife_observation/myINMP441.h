@@ -13,6 +13,8 @@ INMP441 microphone(I2S_SCK_IO, I2S_WS_IO, I2S_DI_IO);
 
 
 void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain_ratio){
+  // isRunningTask += 1;
+
   #ifdef INMP_COMMON_DEBUG
     Serial.println("Dual record");
   #endif
@@ -128,7 +130,7 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
       #ifdef RECORD_TIME_DEBUG
         int busyWaitTime = micros();
       #endif
-      // while (micros() - busy_wait_intervalTimer < intervalTotalLen && j % busy_wait_fix_factor == 0) {}
+      while (micros() - busy_wait_intervalTimer < intervalTotalLen && j % busy_wait_fix_factor == 0) {}
       #ifdef RECORD_TIME_DEBUG
         busyWait_duration += micros() - busyWaitTime;
       #endif
@@ -155,13 +157,16 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
   else{
     writeMsgToPath(systemLogPath, "Now INMP sensor is recording, skip this task");
   }
+
+  // isRunningTask -= 1;
 }
 
 
 
 void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain_ratio, uint8_t CHANNEL){
+  // isRunningTask += 1;
   #ifdef INMP_COMMON_DEBUG
-    Serial.println("Dual record");
+    Serial.println("Mono record");
   #endif
 
   feedDogOfCore(INMP_CPU);
@@ -225,7 +230,7 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
 
     int wavDataSize = recordSeconds * microphone.bytePerSecond; 
     int loopCount = wavDataSize / numOfData;
-    int busy_wait_fix_factor = 4;
+    int busy_wait_fix_factor = 1;
     unsigned long intervalTotalLen = recordSeconds * 1000.0 * 1000.0 / loopCount;
     #ifdef RECORD_TIME_DEBUG
       Serial.print("interval of each task (sec) : ");
@@ -274,7 +279,7 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
       #ifdef RECORD_TIME_DEBUG
         int busyWaitTime = micros();
       #endif
-      // while (micros() - busy_wait_intervalTimer < intervalTotalLen && j % busy_wait_fix_factor == 0) {}
+      while (micros() - busy_wait_intervalTimer < intervalTotalLen && j % busy_wait_fix_factor == 0) {}
       #ifdef RECORD_TIME_DEBUG
         busyWait_duration += micros() - busyWaitTime;
       #endif
@@ -301,6 +306,7 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
   else{
     writeMsgToPath(systemLogPath, "Now INMP sensor is recording, skip this task");
   }
+  // isRunningTask -= 1;
 }
 
 

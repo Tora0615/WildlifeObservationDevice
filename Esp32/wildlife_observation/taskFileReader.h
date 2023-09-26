@@ -364,7 +364,10 @@ void findTheMatchedArrayReadIndex(){
     arrayReadIndex += 1;
   }
 
-  Serial.println( "Now : " + String(secMapTo24Hour(getPassedSecOfToday())) + ", next : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+  nextTaskPreserveTime_min = startTimeOfNext;
+  #ifdef SHOW_NEXT_TASK_WHEN_FIRST_START
+    Serial.println( "Now : " + String(secMapTo24Hour(getPassedSecOfToday())) + ", next : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+  #endif
   writeMsgToPath(systemLogPath, "Now : " + String(secMapTo24Hour(getPassedSecOfToday())) + ", next : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
 }
 

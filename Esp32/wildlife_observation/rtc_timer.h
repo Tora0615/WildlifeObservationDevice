@@ -92,6 +92,10 @@ uint32_t getPassedSecOfToday(){
   return sys_RTC_time_offset + (millis() - sys_millis_time_offset)/1000;  // RTC time when boot + (time counter now - time counter before)
 }
 
+uint32_t getPassedMilliSecOfToday(){
+  return sys_RTC_time_offset * 1000 + (millis() - sys_millis_time_offset);  // RTC time when boot + (time counter now - time counter before)
+}
+
 
 
 #endif

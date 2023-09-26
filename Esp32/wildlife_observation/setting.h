@@ -26,6 +26,12 @@
 // CAN'T set here, please see MEMS_INMP441.h
 /*--- sd_operation ---*/
 // CAN'T set here, please see that file
+/*--- taskFileReader ---*/
+#define SHOW_NEXT_TASK_WHEN_FIRST_START
+/*--- utils ---*/ 
+// CAN'T set here(?), please see that file
+/*--- myScheduler ---*/
+#define GOTOSLEEP_DEBUG
 
 
 // some global variable
@@ -33,11 +39,13 @@ const String SCHEDULE_FILE = "schedule.txt";
 String today;
 String systemLogPath;
 String sensorDataPath;
+int nextTaskPreserveTime_min;
 
 // some status flag
 bool isRecording = false;
 bool isDHTRecording = false;
 bool isDS18B20Recording = false;
+int isRunningTask = 0;
 
 
 // RTOS for SD

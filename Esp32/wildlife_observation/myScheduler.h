@@ -34,6 +34,9 @@ void f_DHT_get_temperature();
 void f_DHT_get_Humidity();
 void f_turnOnRtcPower();
 void f_GetHowManySecondsHasPassedTodayFromRtc();
+void goToSleep();
+void checkIfCanGoToSleep();
+
 
 /* task scheduler */
 // top level
@@ -52,8 +55,9 @@ Task t_recordDHT(0, TASK_FOREVER, &recordDHT);
 
 TaskHandle_t tINMP;
 TaskHandle_t tTaskScheduler;
-TaskHandle_t tHeaderChecker;
-TaskHandle_t tRecordWriteDataChecker;
+// TaskHandle_t tHeaderChecker;
+// TaskHandle_t tRecordWriteDataChecker;
+TaskHandle_t tSleepChecker;
 bool isNeedToRecord = false;
 
 void checkIfNeedToRecord(void* pvParameters){   // void* pvParameters : don't accept any value
@@ -65,8 +69,7 @@ void checkIfNeedToRecord(void* pvParameters){   // void* pvParameters : don't ac
       isNeedToRecord = !isNeedToRecord;
       recordSound();
     }
-    // vTaskDelay(500 / portTICK_PERIOD_MS);
-    // vTaskDelay(10);
+
   }
 }
 
@@ -78,7 +81,18 @@ void taskSchedulerThread(void* pvParameters){   // void* pvParameters : don't ac
   while(1){
     feedDogOfCore(OTHER_TASK_CPU);
     runner.execute();
-    // vTaskDelay(500 / portTICK_PERIOD_MS);
+  }
+}
+
+void checkIfCanGoToSleep(void* pvParameters){
+  Serial.println("taskCheckIfCanGoToSleep : created");
+  // if no task is running 
+  while(1){
+    feedDogOfCore(OTHER_TASK_CPU);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
+    if(isRunningTask == 0){
+      goToSleep();
+    }
   }
 }
 
@@ -86,7 +100,6 @@ void createRTOSTasks() {
   Serial.println("RTOS : createCoreTasks");
 
   xTaskCreatePinnedToCore(
-  // xTaskCreate(
     checkIfNeedToRecord,
     "INMPThreadAtCore0",
     49152,                                  /* Stack size of task */
@@ -96,7 +109,6 @@ void createRTOSTasks() {
     INMP_CPU                                /* CPU core */
   );
 
-  // xTaskCreate(
   xTaskCreatePinnedToCore(
     taskSchedulerThread,                    /* Task function. */
     "TaskSchedulerThreadAtCore1",           /* name of task. */
@@ -104,6 +116,16 @@ void createRTOSTasks() {
     NULL,                                   /* parameter of the task */
     2,                                      /* priority of the task */
     &tTaskScheduler,                        /* task handle */
+    OTHER_TASK_CPU                          /* CPU core */
+  );
+
+  xTaskCreatePinnedToCore(
+    checkIfCanGoToSleep,                    /* Task function. */
+    "checkIfCanGoToSleep",                  /* name of task. */
+    2048,                                   /* Stack size of task */
+    NULL,                                   /* parameter of the task */
+    2,                                      /* priority of the task */
+    &tSleepChecker,                        /* task handle */
     OTHER_TASK_CPU                          /* CPU core */
   );
 }
@@ -120,6 +142,7 @@ String DHT_TimeStamp;
 String DS18B20_TimeStamp;
 String Battery_TimeStamp;
 
+
 void checkIsNeedToRunTask(){
   vTaskDelay(500 / portTICK_PERIOD_MS);
 
@@ -134,8 +157,13 @@ void checkIsNeedToRunTask(){
     startTimeOfNext = (taskArray + arrayReadIndex)->taskType.complex.start_min_of_a_day;
   }
 
+  // save global
+  nextTaskPreserveTime_min = startTimeOfNext;
+  
   // need to run task 
   if( getPassedSecOfToday() > startTimeOfNext * 60 ){  // change to sec and compare
+
+    isRunningTask += 1;
 
     char task_code;
     // get task code 
@@ -192,6 +220,8 @@ void checkIsNeedToRunTask(){
     }else{
       arrayReadIndex += 1;
     }
+
+    isRunningTask -= 1;
   }
 }
 
@@ -321,19 +351,40 @@ void f_GetHowManySecondsHasPassedTodayFromRtc(){
   t_checkDayChange.setCallback(&checkDayChange);
 }
 
-// #if defined( ARDUINO_ARCH_ESP32 )
-//   #define uS_TO_mS_FACTOR 1000ULL
-//   void sleepFor(int ms) {
-//     // if no task is running 
-//     if ( 1 ) {
-//       writeMsgToPath(systemLogPath, "Start to sleep");
-//       esp_sleep_enable_timer_wakeup(ms * uS_TO_mS_FACTOR);
-//       esp_light_sleep_start();
-//     }
-//   }
-// #else
-//   void SleepMethod( unsigned long aDuration ) {
-//   }
-// #endif
+
+#if defined( ARDUINO_ARCH_ESP32 )
+  #define uS_TO_mS_FACTOR 1000ULL
+  void goToSleep() {
+    // have X sec to sleep
+    int canSleepMs =  ((nextTaskPreserveTime_min * 60  * 1000) - getPassedMilliSecOfToday()) - 50;
+    if(canSleepMs > 100){
+      #ifdef GOTOSLEEP_DEBUG
+        Serial.println("Go to sleep for : " + String(canSleepMs/1000.0f) + " sec");
+      #endif
+      writeMsgToPath(systemLogPath, "Go to sleep for : " + String(canSleepMs/1000.0f) + " sec");
+
+      int minTimes = canSleepMs / (1000 * 60);
+      int remainMs = canSleepMs % (1000 * 60);
+      for(int i=0; i<minTimes; i++){
+        esp_sleep_enable_timer_wakeup(1000 * uS_TO_mS_FACTOR);
+        esp_light_sleep_start();
+        // wakeup to feed dog
+        feedDogOfCore(OTHER_TASK_CPU);
+        #ifdef GOTOSLEEP_DEBUG
+          Serial.println("Have slept for : " + String(minTimes) + " min. Wake up to feed dog.");
+        #endif
+      }
+      #ifdef GOTOSLEEP_DEBUG
+        Serial.println("Sleep for remaining milliseconds");
+      #endif
+      esp_sleep_enable_timer_wakeup(remainMs * uS_TO_mS_FACTOR);
+      esp_light_sleep_start();
+      getWakeupReason();
+    }
+  }
+#else
+  void SleepMethod( unsigned long aDuration ) {
+  }
+#endif
 
 #endif
