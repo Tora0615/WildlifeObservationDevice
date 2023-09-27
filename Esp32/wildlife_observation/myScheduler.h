@@ -375,7 +375,7 @@ void f_GetHowManySecondsHasPassedTodayFromRtc(){
         #endif
       }
       #ifdef GOTOSLEEP_DEBUG
-        Serial.println("Sleep for remaining milliseconds");
+        Serial.println("Sleep for remain " + String(remainMs) + " milliseconds");
       #endif
       esp_sleep_enable_timer_wakeup(remainMs * uS_TO_mS_FACTOR);
       esp_light_sleep_start();

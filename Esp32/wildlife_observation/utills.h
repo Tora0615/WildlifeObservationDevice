@@ -70,9 +70,15 @@ void getWakeupReason(){
 #include "soc/timer_group_reg.h"
 #include "soc/timer_group_struct.h"
 void feedDogOfCore(byte core){
-  TIMERG0.wdt_wprotect = TIMG_WDT_WKEY_VALUE; // write enable
-  TIMERG0.wdt_feed = core;                     // feed dog
-  TIMERG0.wdt_wprotect = 0;                 // write protect
+  if(core == 0){
+    TIMERG0.wdt_wprotect = TIMG_WDT_WKEY_VALUE; // write enable
+    TIMERG0.wdt_feed = 1;                     // feed dog, any value will trigger this 
+    TIMERG0.wdt_wprotect = 0;                 // write protect
+  }else if(core == 1){
+    TIMERG1.wdt_wprotect = TIMG_WDT_WKEY_VALUE; // write enable
+    TIMERG1.wdt_feed = 1;                     // feed dog, any value will trigger this 
+    TIMERG1.wdt_wprotect = 0;                 // write protect
+  }
 }
 
 #endif
