@@ -63,8 +63,8 @@ bool isNeedToRecord = false;
 void checkIfNeedToRecord(void* pvParameters){   // void* pvParameters : don't accept any value
   Serial.println("checkIfNeedToRecord : created");
   while(1){
-    feedDogOfCore(INMP_CPU);
-
+    // feedDogOfCore(INMP_CPU);
+    vTaskDelay(10 / portTICK_PERIOD_MS);
     if(isNeedToRecord){
       isNeedToRecord = !isNeedToRecord;
       recordSound();
@@ -79,7 +79,8 @@ void taskSchedulerThread(void* pvParameters){   // void* pvParameters : don't ac
     runner.allowSleep(false);
   #endif
   while(1){
-    feedDogOfCore(OTHER_TASK_CPU);
+    // feedDogOfCore(OTHER_TASK_CPU);
+    vTaskDelay(10);
     runner.execute();
   }
 }
@@ -88,8 +89,8 @@ void checkIfCanGoToSleep(void* pvParameters){
   Serial.println("taskCheckIfCanGoToSleep : created");
   // if no task is running 
   while(1){
-    feedDogOfCore(OTHER_TASK_CPU);
-    vTaskDelay(50 / portTICK_PERIOD_MS);
+    // feedDogOfCore(OTHER_TASK_CPU);
+    vTaskDelay(10 / portTICK_PERIOD_MS);
     if(isRunningTask == 0){
       goToSleep();
     }
@@ -122,10 +123,10 @@ void createRTOSTasks() {
   xTaskCreatePinnedToCore(
     checkIfCanGoToSleep,                    /* Task function. */
     "checkIfCanGoToSleep",                  /* name of task. */
-    2048,                                   /* Stack size of task */
+    4096,                                   /* Stack size of task */
     NULL,                                   /* parameter of the task */
     2,                                      /* priority of the task */
-    &tSleepChecker,                        /* task handle */
+    &tSleepChecker,                         /* task handle */
     OTHER_TASK_CPU                          /* CPU core */
   );
 }
@@ -267,7 +268,7 @@ void recordDS18B20(){
 void f_turnOnDs18b20Power(){
   turnOnDs18b20Power();
   t_recordDS18B20.setCallback(&f_getDS18B20Temp);
-  t_recordDS18B20.delay(100);
+  t_recordDS18B20.delay(250);
 }
 void f_getDS18B20Temp(){
   float temperature = getDS18B20Temp();
@@ -352,8 +353,8 @@ void f_GetHowManySecondsHasPassedTodayFromRtc(){
 }
 
 
-#if defined( ARDUINO_ARCH_ESP32 )
-  #define uS_TO_mS_FACTOR 1000ULL
+#define ms_TO_uS_FACTOR 1000ULL
+#if defined( ARDUINO_ARCH_ESP32 )  
   void goToSleep() {
     // have X sec to sleep
     int canSleepMs =  ((nextTaskPreserveTime_min * 60  * 1000) - getPassedMilliSecOfToday()) - 50;
@@ -363,23 +364,37 @@ void f_GetHowManySecondsHasPassedTodayFromRtc(){
       #endif
       writeMsgToPath(systemLogPath, "Go to sleep for : " + String(canSleepMs/1000.0f) + " sec");
 
+      // orignal 
+      // esp_sleep_enable_timer_wakeup(canSleepMs * ms_TO_uS_FACTOR);
+      // esp_light_sleep_start();
+
       int halfMinTimes = canSleepMs / (1000 * 30);
       int remainMs = canSleepMs % (1000 * 30);
       for(int i=0; i<halfMinTimes; i++){
-        esp_sleep_enable_timer_wakeup(500 * uS_TO_mS_FACTOR);
-        esp_light_sleep_start();
+        Serial.println("In loop");
+        // lock if write sd not finished
+        if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
+          esp_sleep_enable_timer_wakeup(30 * 1000 * ms_TO_uS_FACTOR);
+          esp_light_sleep_start();
+        }xSemaphoreGive( xSemaphore_SD );
         // wakeup to feed dog
-        feedDogOfCore(OTHER_TASK_CPU);
+        // feedDogOfCore(OTHER_TASK_CPU);
+        vTaskDelay(1);
+        // getWakeupReason();
         #ifdef GOTOSLEEP_DEBUG
           Serial.println("Have slept for : " + String( (i+1) * 0.5) + " min. Wake up to feed dog.");
         #endif
       }
       #ifdef GOTOSLEEP_DEBUG
-        Serial.println("Sleep for remain " + String(remainMs) + " milliseconds");
+        Serial.println("Sleep for remain " + String(remainMs/1000.0f) + " seconds");
       #endif
-      esp_sleep_enable_timer_wakeup(remainMs * uS_TO_mS_FACTOR);
-      esp_light_sleep_start();
-      feedDogOfCore(OTHER_TASK_CPU);
+      if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
+        esp_sleep_enable_timer_wakeup(remainMs * ms_TO_uS_FACTOR);
+        esp_light_sleep_start();
+      }xSemaphoreGive( xSemaphore_SD );
+      vTaskDelay(1);
+
+      // feedDogOfCore(OTHER_TASK_CPU);
       getWakeupReason();
     }
   }

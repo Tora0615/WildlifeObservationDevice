@@ -67,18 +67,27 @@ void getWakeupReason(){
   writeMsgToPath(systemLogPath, "== " + reason_text + " ==");
 }
 
-#include "soc/timer_group_reg.h"
-#include "soc/timer_group_struct.h"
+// #include "soc/timer_group_reg.h"
+// #include "soc/timer_group_struct.h"
+// // portMUX_TYPE feedDogMutex = portMUX_INITIALIZER_UNLOCKED;
 void feedDogOfCore(byte core){
-  if(core == 0){
-    TIMERG0.wdt_wprotect = TIMG_WDT_WKEY_VALUE; // write enable
-    TIMERG0.wdt_feed = 1;                     // feed dog, any value will trigger this 
-    TIMERG0.wdt_wprotect = 0;                 // write protect
-  }else if(core == 1){
-    TIMERG1.wdt_wprotect = TIMG_WDT_WKEY_VALUE; // write enable
-    TIMERG1.wdt_feed = 1;                     // feed dog, any value will trigger this 
-    TIMERG1.wdt_wprotect = 0;                 // write protect
-  }
+  // taskENTER_CRITICAL(&feedDogMutex);
+  // TIMERG0.wdt_wprotect = TIMG_WDT_WKEY_VALUE; // write enable
+  // TIMERG0.wdt_feed = 1;                     // feed dog, any value will trigger this 
+  // TIMERG0.wdt_wprotect = 0;                 // write protect
+  
+  // vTaskDelay(10);
+  // if(core == 0){
+  //   TIMERG0.wdt_wprotect = TIMG_WDT_WKEY_VALUE; // write enable
+  //   TIMERG0.wdt_feed = 1;                     // feed dog, any value will trigger this 
+  //   TIMERG0.wdt_wprotect = 0;                 // write protect
+  // }
+  // else if(core == 1){
+  //   TIMERG1.wdt_wprotect = TIMG_WDT_WKEY_VALUE; // write enable
+  //   TIMERG1.wdt_feed = 1;                     // feed dog, any value will trigger this 
+  //   TIMERG1.wdt_wprotect = 0;                 // write protect
+  // }
+  // taskEXIT_CRITICAL(&feedDogMutex);
 }
 
 #endif

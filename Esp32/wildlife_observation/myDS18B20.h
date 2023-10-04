@@ -80,6 +80,7 @@ float getDS18B20Temp(){
       #endif 
       // Write log
       writeMsgToPath(systemLogPath, "Error: Could not read temperature data");
+      return 0.0;
     }
   }
   else{  // DHT is using 

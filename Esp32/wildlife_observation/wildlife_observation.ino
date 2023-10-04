@@ -10,7 +10,13 @@
 #include "myScheduler.h"
 
 
+// #include "soc/rtc_wdt.h"
+
+
 void setup() {
+  // rtc_wdt_protect_off();
+  // rtc_wdt_disable();
+
   // To indicate setup status, it will allway on if failed
   turnOnLed();
 
