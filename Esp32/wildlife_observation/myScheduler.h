@@ -33,6 +33,7 @@ void f_DHT_get_temperature();
 void f_DHT_get_Humidity();
 void f_turnOnRtcPower();
 void f_GetHowManySecondsHasPassedTodayFromRtc();
+void f_recordBatteryAfterDelay();
 void goToSleep();
 void checkIfCanGoToSleep();
 
@@ -138,6 +139,7 @@ float gain_ratio;
 String DHT_TimeStamp;
 String DS18B20_TimeStamp;
 String Battery_TimeStamp;
+
 
 
 void checkIsNeedToRunTask(){
@@ -266,11 +268,18 @@ void recordSound(){
 
 
 void recordBattery(){
+  // Use delay to avoid it read and write faster than others. Or the order will be strenge
+  t_recordBattery.setCallback(&f_recordBatteryAfterDelay);
+  t_recordBattery.delay(3000);
+}
+void f_recordBatteryAfterDelay(){
+  // read part 
   #ifdef RECORD_BATTERY_DEBUG
     Serial.println("Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ " %)");
   #endif
   writeMsgToPath(sensorDataPath, "Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ "%)", Battery_TimeStamp);
-  
+  t_recordBattery.setCallback(&recordBattery);
+
   // release sleep lock and delete task
   isRunningTask -= 1;
   runner.deleteTask(t_recordBattery);
