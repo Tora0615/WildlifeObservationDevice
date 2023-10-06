@@ -14,7 +14,6 @@
 #define MYSCHEDULER_H
 
 // scheduler involve
-// #define _TASK_SLEEP_ON_IDLE_RUN
 #include <TaskScheduler.h>
 Scheduler runner;
 
@@ -63,7 +62,6 @@ bool isNeedToRecord = false;
 void checkIfNeedToRecord(void* pvParameters){   // void* pvParameters : don't accept any value
   Serial.println("checkIfNeedToRecord : created");
   while(1){
-    // feedDogOfCore(INMP_CPU);
     vTaskDelay(10 / portTICK_PERIOD_MS);
     if(isNeedToRecord){
       isNeedToRecord = !isNeedToRecord;
@@ -79,7 +77,6 @@ void taskSchedulerThread(void* pvParameters){   // void* pvParameters : don't ac
     runner.allowSleep(false);
   #endif
   while(1){
-    // feedDogOfCore(OTHER_TASK_CPU);
     vTaskDelay(10);
     runner.execute();
   }
@@ -89,7 +86,6 @@ void checkIfCanGoToSleep(void* pvParameters){
   Serial.println("taskCheckIfCanGoToSleep : created");
   // if no task is running 
   while(1){
-    // feedDogOfCore(OTHER_TASK_CPU);
     vTaskDelay(10 / portTICK_PERIOD_MS);
     if(isRunningTask == 0){
       goToSleep();
@@ -147,6 +143,13 @@ String Battery_TimeStamp;
 void checkIsNeedToRunTask(){
   vTaskDelay(500 / portTICK_PERIOD_MS);
 
+  // task index is re-zero, but day haven't change, so don;t do anything.
+  if(isTaskAllLock){
+    // a day 1440 min
+    nextTaskPreserveTime_min = 1439;
+    return;
+  }
+
   #ifdef CHECK_IS_NEED_TO_RUN_TASK
     Serial.println("checkIsNeedToRunTask");
   #endif
@@ -164,6 +167,7 @@ void checkIsNeedToRunTask(){
   // need to run task 
   if( getPassedSecOfToday() > startTimeOfNext * 60 ){  // change to sec and compare
 
+    // add sleep lock, this will be release in every task
     isRunningTask += 1;
 
     char task_code;
@@ -184,10 +188,8 @@ void checkIsNeedToRunTask(){
         recordTime = (taskArray + arrayReadIndex)->taskType.complex.time;
         channel_tag = (taskArray + arrayReadIndex)->taskType.complex.channel;
         gain_ratio = (taskArray + arrayReadIndex)->taskType.complex.multiple;
-        // then active status 
+        // then active status, other core will check this record task
         isNeedToRecord = true;
-        // runner.addTask(t_recordSound);
-        // t_recordSound.enable();
       }
     }else if (task_code == 'B'){
       // DHT
@@ -215,14 +217,24 @@ void checkIsNeedToRunTask(){
       t_recordBattery.enable();
     }
 
-    // plus index or re-zero 
+    // plus index or re-zero after all done
     if(arrayReadIndex == arrayUsedIndex){
+      // prevent out of array 
       arrayReadIndex = 0;
+      // lock all task
+      isTaskAllLock = true;
+      Serial.println("This is lask task of today. Re-zero and lock the task list.");
+      writeMsgToPath(systemLogPath, "This is lask task of today. Re-zero and lock the task list.");
     }else{
       arrayReadIndex += 1;
     }
 
-    isRunningTask -= 1;
+    // a task is finished
+    // isRunningTask -= 1;
+
+    // Have moved to every task's end, before runner delete task
+    // Because current lock only affect with need to run task -> add to scheduler. 
+    // But sometimes sleep will occurred before sensing finished. (AKA lock cnanot protect the reading process)
   }
 }
 
@@ -248,8 +260,9 @@ void recordSound(){
   }
 
   // avoid infinite loop
-  // runner.deleteTask(t_recordSound);
+  // runner.deleteTask(t_recordSound);  --> Now we don't use task scheduler to handle this.
 }
+
 
 
 void recordBattery(){
@@ -257,18 +270,21 @@ void recordBattery(){
     Serial.println("Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ " %)");
   #endif
   writeMsgToPath(sensorDataPath, "Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ "%)", Battery_TimeStamp);
+  
+  // release sleep lock and delete task
+  isRunningTask -= 1;
   runner.deleteTask(t_recordBattery);
 }
 
 
-// for recongnize
+
 void recordDS18B20(){
   t_recordDS18B20.setCallback(&f_turnOnDs18b20Power);
 }
 void f_turnOnDs18b20Power(){
   turnOnDs18b20Power();
   t_recordDS18B20.setCallback(&f_getDS18B20Temp);
-  t_recordDS18B20.delay(250);
+  t_recordDS18B20.delay(150);
 }
 void f_getDS18B20Temp(){
   float temperature = getDS18B20Temp();
@@ -278,6 +294,9 @@ void f_getDS18B20Temp(){
   // write SD 
   writeMsgToPath(sensorDataPath, "DS18B20 : " + String(temperature) + " C", DS18B20_TimeStamp);
   t_recordDS18B20.setCallback(&recordDS18B20);
+
+  // release sleep lock and delete task
+  isRunningTask -= 1;
   runner.deleteTask(t_recordDS18B20);
 }
 
@@ -312,6 +331,9 @@ void f_DHT_get_Humidity(){
   // write SD 
   writeMsgToPath(sensorDataPath, "DHT Humidity : " + String(humidity) + " %", DHT_TimeStamp);
   t_recordDHT.setCallback(&recordDHT);
+
+  // release sleep lock and delete task
+  isRunningTask -= 1;
   runner.deleteTask(t_recordDHT);
 }
 
@@ -349,6 +371,14 @@ void f_GetHowManySecondsHasPassedTodayFromRtc(){
   sensorDataPath = today + "/SENSOR_DATA.txt";
   checkAndCreateFile(sensorDataPath);
 
+  // if lock, release task lock
+  if(isTaskAllLock){
+    isTaskAllLock = false;
+    Serial.println("Unlock the task list.");
+    writeMsgToPath(systemLogPath, "Unlock the task list.");
+  }
+  
+  // reset callback
   t_checkDayChange.setCallback(&checkDayChange);
 }
 
@@ -360,8 +390,11 @@ void f_GetHowManySecondsHasPassedTodayFromRtc(){
     int canSleepMs =  ((nextTaskPreserveTime_min * 60  * 1000) - getPassedMilliSecOfToday()) - 50;
     if(canSleepMs > 100){
       #ifdef GOTOSLEEP_DEBUG
-        Serial.println("Go to sleep for : " + String(canSleepMs/1000.0f) + " sec");
+        #ifdef FEED_DOG_DEBUG
+          Serial.println(String(secMapTo24Hour(getPassedSecOfToday())));
+        #endif
       #endif
+      Serial.println("Go to sleep for : " + String(canSleepMs/1000.0f) + " sec");
       writeMsgToPath(systemLogPath, "Go to sleep for : " + String(canSleepMs/1000.0f) + " sec");
 
       // orignal 
@@ -370,31 +403,44 @@ void f_GetHowManySecondsHasPassedTodayFromRtc(){
 
       int halfMinTimes = canSleepMs / (1000 * 30);
       int remainMs = canSleepMs % (1000 * 30);
+
+      // loop sleep part of long time
       for(int i=0; i<halfMinTimes; i++){
-        Serial.println("In loop");
+
         // lock if write sd not finished
         if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
           esp_sleep_enable_timer_wakeup(30 * 1000 * ms_TO_uS_FACTOR);
           esp_light_sleep_start();
         }xSemaphoreGive( xSemaphore_SD );
+
         // wakeup to feed dog
-        // feedDogOfCore(OTHER_TASK_CPU);
         vTaskDelay(1);
-        // getWakeupReason();
+
+        // debug MSG part
         #ifdef GOTOSLEEP_DEBUG
+          #ifdef FEED_DOG_DEBUG
+            Serial.println(String(secMapTo24Hour(getPassedSecOfToday())));
+          #endif
           Serial.println("Have slept for : " + String( (i+1) * 0.5) + " min. Wake up to feed dog.");
         #endif
       }
+
+      // short sleep part 
       #ifdef GOTOSLEEP_DEBUG
+        #ifdef FEED_DOG_DEBUG
+          Serial.println(String(secMapTo24Hour(getPassedSecOfToday())));
+        #endif
         Serial.println("Sleep for remain " + String(remainMs/1000.0f) + " seconds");
       #endif
+
+      // lock if write sd not finished
       if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
         esp_sleep_enable_timer_wakeup(remainMs * ms_TO_uS_FACTOR);
         esp_light_sleep_start();
       }xSemaphoreGive( xSemaphore_SD );
       vTaskDelay(1);
 
-      // feedDogOfCore(OTHER_TASK_CPU);
+      // every wakeup print a log
       getWakeupReason();
     }
   }

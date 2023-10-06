@@ -31,7 +31,8 @@
 /*--- utils ---*/ 
 // CAN'T set here(?), please see that file
 /*--- myScheduler ---*/
-#define GOTOSLEEP_DEBUG
+// #define GOTOSLEEP_DEBUG
+// #define FEED_DOG_DEBUG
 
 
 // some global variable
@@ -45,6 +46,7 @@ int nextTaskPreserveTime_min;
 bool isRecording = false;
 bool isDHTRecording = false;
 bool isDS18B20Recording = false;
+bool isTaskAllLock = false;
 int isRunningTask = 0;
 
 
