@@ -20,7 +20,7 @@ void RTCInit(){
   #ifdef RTC_DEBUG
     Serial.println("Turn off DS3231_RTC POWER");
   #endif 
-  digitalWrite(RTC_PMOS,HIGH);   // Turn off. GPIO default is low ->  will let mic ON
+  digitalWrite(RTC_PMOS,HIGH);   // Turn off. GPIO default is low ->  will let it ON
 
   // init lib part
   if (! rtc.begin()) {
@@ -94,6 +94,30 @@ uint32_t getPassedSecOfToday(){
 
 uint32_t getPassedMilliSecOfToday(){
   return sys_RTC_time_offset * 1000 + (millis() - sys_millis_time_offset);  // RTC time when boot + (time counter now - time counter before)
+}
+
+
+void setTestTime(){
+  digitalWrite(RTC_PMOS, LOW);   // Turn on.
+  rtc.adjust(DateTime(2023, 10, 07, 23, 56, 00));
+  digitalWrite(RTC_PMOS, HIGH);   // Turn off.
+
+  Serial.println("RTC test mode ON");
+  DateTime now = rtc.now();
+  Serial.print(now.year(), DEC);
+  Serial.print('/');
+  Serial.print(now.month(), DEC);
+  Serial.print('/');
+  Serial.print(now.day(), DEC);
+  Serial.print(" (");
+  Serial.print(daysOfTheWeek[now.dayOfTheWeek()]);
+  Serial.print(") ");
+  Serial.print(now.hour(), DEC);
+  Serial.print(':');
+  Serial.print(now.minute(), DEC);
+  Serial.print(':');
+  Serial.print(now.second(), DEC);
+  Serial.println();
 }
 
 

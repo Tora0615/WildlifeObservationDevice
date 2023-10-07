@@ -26,6 +26,9 @@ void setup() {
   SDInit();
   RTCInit();
 
+  // for test
+  setTestTime();
+
   // get current time as stander time
   sys_RTC_time_offset = GetHowManySecondsHasPassedTodayFromRtc();
   sys_millis_time_offset = millis();

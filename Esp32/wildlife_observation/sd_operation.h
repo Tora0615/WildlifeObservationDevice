@@ -136,7 +136,7 @@ void checkAndCreateFolder(String path){
     }xSemaphoreGive( xSemaphore_SD );
 
     if (isSysLogExist) {
-      writeMsgToPath(systemLogPath, "folder at path : " + path + " create successful");
+      writeMsgToPath(systemLogPath, "===> folder at path : " + path + " create successful", "", false, false);
     }else{
       Serial.println("folder at path : " + path + " create successful");
     }

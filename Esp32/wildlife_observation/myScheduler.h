@@ -9,6 +9,7 @@
 #include "myDHT.h"
 #include "myINMP441.h"
 
+#define ms_TO_uS_FACTOR 1000ULL
 
 #ifndef MYSCHEDULER_H
 #define MYSCHEDULER_H
@@ -88,7 +89,7 @@ void checkIfCanGoToSleep(void* pvParameters){
   // if no task is running 
   while(1){
     vTaskDelay(10 / portTICK_PERIOD_MS);
-    if(isRunningTask == 0){
+    if(isRunningTask == 0 && !isTaskAllLock){
       goToSleep();
     }
   }
@@ -145,10 +146,8 @@ String Battery_TimeStamp;
 void checkIsNeedToRunTask(){
   vTaskDelay(500 / portTICK_PERIOD_MS);
 
-  // task index is re-zero, but day haven't change, so don;t do anything.
+  // task index is re-zero, but day haven't change, so don't do anything.
   if(isTaskAllLock){
-    // a day 1440 min
-    nextTaskPreserveTime_min = 1439;
     return;
   }
 
@@ -219,14 +218,30 @@ void checkIsNeedToRunTask(){
       t_recordBattery.enable();
     }
 
+    #ifdef CHECK_IS_NEED_TO_RUN_TASK
+      Serial.println("arrayReadIndex : " + String(arrayReadIndex));
+      Serial.println("arrayUsedIndex : " + String(arrayUsedIndex));
+    #endif
+
     // plus index or re-zero after all done
-    if(arrayReadIndex == arrayUsedIndex){
-      // prevent out of array 
-      arrayReadIndex = 0;
-      // lock all task
+    if(arrayReadIndex == arrayUsedIndex - 1){    // used always one more than read, because read is start from 0 ... 
+      
+      // lock all task, unlock is at check day change
       isTaskAllLock = true;
       Serial.println("This is lask task of today. Re-zero and lock the task list.");
       writeMsgToPath(systemLogPath, "This is lask task of today. Re-zero and lock the task list.");
+
+      // prevent out of array 
+      arrayReadIndex = 0;
+
+      // rewind sleep time to begin, this will be used at sleep after day changed
+      findFirstTaskStartTime();
+
+      // go to sleep by manual 
+      int canSleepMs =  ((1439 * 60  * 1000) - getPassedMilliSecOfToday()) - 50;
+      Serial.println("Sleep " + String(canSleepMs/1000.0f) + " sec before day changed");
+      esp_sleep_enable_timer_wakeup(canSleepMs * ms_TO_uS_FACTOR);
+      esp_light_sleep_start();
     }else{
       arrayReadIndex += 1;
     }
@@ -370,7 +385,7 @@ void f_GetHowManySecondsHasPassedTodayFromRtc(){
   sys_millis_time_offset = millis();
   Serial.println("day changed");
   // Write log
-  writeMsgToPath(systemLogPath, "Day changed");
+  writeMsgToPath(systemLogPath, "===> Day changed ", "", false, false);
 
   // update value and create new
   today = getDate();
@@ -392,7 +407,6 @@ void f_GetHowManySecondsHasPassedTodayFromRtc(){
 }
 
 
-#define ms_TO_uS_FACTOR 1000ULL
 #if defined( ARDUINO_ARCH_ESP32 )  
   void goToSleep() {
     // have X sec to sleep

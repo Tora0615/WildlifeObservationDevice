@@ -375,4 +375,21 @@ void findTheMatchedArrayReadIndex(){
   writeMsgToPath(systemLogPath, "Now : " + String(secMapTo24Hour(getPassedSecOfToday())) + ", next : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
 }
 
+
+void findFirstTaskStartTime(){
+  int startTime = 0;
+  // get next 
+  if((taskArray + arrayReadIndex)->setType == 0){  // simple task
+    startTime = (taskArray + arrayReadIndex)->taskType.simple.start_min_of_a_day;
+  }else{
+    startTime = (taskArray + arrayReadIndex)->taskType.complex.start_min_of_a_day;
+  }
+  nextTaskPreserveTime_min = startTime;
+
+  Serial.println( "pre-rewind the task time -- Now : " + String(secMapTo24Hour(getPassedSecOfToday())) + ", next day's first task : " + String(startTime) + "(" + String( minConvertTohour24(startTime) ) + ")");
+}
+
+
+
+
 #endif
