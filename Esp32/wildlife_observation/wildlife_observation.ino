@@ -10,12 +10,7 @@
 #include "myScheduler.h"
 
 
-// #include "soc/rtc_wdt.h"
-
-
 void setup() {
-  // rtc_wdt_protect_off();
-  // rtc_wdt_disable();
 
   // To indicate setup status, it will allway on if failed
   turnOnLed();
@@ -27,7 +22,9 @@ void setup() {
   RTCInit();
 
   // for test
-  setTestTime();
+  #ifdef USE_FAKE_TIME
+    setTestTime();
+  #endif
 
   // get current time as stander time
   sys_RTC_time_offset = GetHowManySecondsHasPassedTodayFromRtc();

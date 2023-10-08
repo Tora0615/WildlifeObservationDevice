@@ -99,7 +99,7 @@ uint32_t getPassedMilliSecOfToday(){
 
 void setTestTime(){
   digitalWrite(RTC_PMOS, LOW);   // Turn on.
-  rtc.adjust(DateTime(2023, 10, 07, 23, 56, 00));
+  rtc.adjust(DateTime(2023, 10, 8, 18, 13, 30));
   digitalWrite(RTC_PMOS, HIGH);   // Turn off.
 
   Serial.println("RTC test mode ON");

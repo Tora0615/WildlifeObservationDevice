@@ -60,6 +60,8 @@ SemaphoreHandle_t xSemaphore_SD = xSemaphoreCreateMutex();
 // SD Use setting 
 #define SD_USE_NORMAL
 
+// use fake test time setting 
+// #define USE_FAKE_TIME
 
 
 
