@@ -308,7 +308,10 @@ void addAllTaskFromFile(){
     #endif
 
     // End loop condition 
-    if(String(buffer) == "#---------"){
+    if(String(buffer) == "#---------"){           // 9 x '-'
+      break;
+    }else if(String(buffer) == "#----------"){    // 10 x '-'
+      isEvaluation = false;
       break;
     }
 
@@ -347,6 +350,7 @@ void addAllTaskFromFile(){
 
 
 void findTheMatchedArrayReadIndex(){
+  
   int startTimeOfNext = 0;
 
   while(1){
@@ -375,7 +379,7 @@ void findTheMatchedArrayReadIndex(){
   writeMsgToPath(systemLogPath, "Now : " + String(secMapTo24Hour(getPassedSecOfToday())) + ", next : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
 }
 
-
+// to find everyday's first task start time
 void findFirstTaskStartTime(){
   int startTime = 0;
   // get next 

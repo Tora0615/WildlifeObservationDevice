@@ -47,6 +47,7 @@ bool isRecording = false;
 bool isDHTRecording = false;
 bool isDS18B20Recording = false;
 bool isTaskAllLock = false;
+bool isEvaluation = true;
 int isRunningTask = 0;
 
 

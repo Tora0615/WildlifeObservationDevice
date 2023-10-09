@@ -26,6 +26,34 @@ void showInitFinishedLED(){
   digitalWrite(16, LOW); 
 }
 
+bool isFirstCheckEvaluation = true;
+DateTime eva = DateTime(2023, 10, 10, 0, 0, 0);
+void checkEvaluation(){
+  if (isEvaluation){
+    if(isFirstCheckEvaluation){
+      // Write log
+      Serial.println("======== !! You are in the evaluation mode !! ========");
+      writeMsgToPath(systemLogPath, "======== !! You are in the evaluation mode !! ========");
+      isFirstCheckEvaluation = false;
+    }
+    // if evaluation is end 
+    if(now.unixtime() >= eva.unixtime()){
+      Serial.println("======== !! Evaluation time has ended, don't forget to install activate key !! ========");
+      writeMsgToPath(systemLogPath, "======== !! Evaluation time has ended, don't forget to install activate key !! ========");
+      while(1){
+        delay(1000);
+      }
+    }
+  }else{
+    if(isFirstCheckEvaluation){
+      // Write log
+      Serial.println("Normal mode");
+      writeMsgToPath(systemLogPath, "Normal mode");
+      isFirstCheckEvaluation = false;
+    }
+  }
+}
+
 
 void getResetReason(){
   esp_reset_reason_t reset_reason = esp_reset_reason();

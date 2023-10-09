@@ -96,6 +96,10 @@ void checkIfCanGoToSleep(void* pvParameters){
 }
 
 void createRTOSTasks() {
+
+  // hide evaluation check here
+  checkEvaluation();
+
   Serial.println("RTOS : createCoreTasks");
 
   xTaskCreatePinnedToCore(
@@ -129,12 +133,12 @@ void createRTOSTasks() {
   );
 
   xTaskCreatePinnedToCore(
-    transmitToSD,                    /* Task function. */
-    "transmitToSD",                  /* name of task. */
-    20480,                                   /* Stack size of task */
+    transmitToSD,                           /* Task function. */
+    "transmitToSD",                         /* name of task. */
+    20480,                                  /* Stack size of task */
     NULL,                                   /* parameter of the task */
     2,                                      /* priority of the task */
-    &tTransmitHandle,                         /* task handle */
+    &tTransmitHandle,                       /* task handle */
     OTHER_TASK_CPU                          /* CPU core */
   );
 }
@@ -401,6 +405,12 @@ void f_turnOnRtcPower(){
 }
 void f_GetHowManySecondsHasPassedTodayFromRtc(){
   vTaskDelay(1);
+
+  // not first time check == already have boot check
+  // boot check at findTheMatchedArrayReadIndex()
+  if(!isFirstCheckEvaluation){
+    checkEvaluation();
+  }
 
   // if > a day, calibrate with RTC timer
   sys_RTC_time_offset = GetHowManySecondsHasPassedTodayFromRtc();
