@@ -25,6 +25,8 @@ void transmitToSD(void* pvParameters){
   const TickType_t xMaxBlockTime = pdMS_TO_TICKS(100);
   unsigned long startTime;
   while (true) {
+    // feed dog of each loop 
+    vTaskDelay(10);
     // wait RTOS signal about buffer full for 100 ms
     uint32_t ulNotificationValue = ulTaskNotifyTake(pdTRUE, xMaxBlockTime);
     // if have signal 
