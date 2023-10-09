@@ -224,13 +224,23 @@ void checkScheduleFileExist(){
     
     // write example file
     writeMsgToPath("example_schedule.txt", 
-      "0000,A,30,L,1\n"
-      "0800,A,15,R,2\n"
-      "1200,A,10,B,1\n"
-      "1735,A,20,B,0.5\n"
+      "0000,A,900,B,1.5\n"
+      "0030,A,900,B,1\n"
+      "0200,A,900,R,1.5\n"
+      "0230,A,900,R,1\n"
+      "0400,A,900,R,1.5\n"
+      "0430,A,900,R,1\n"
+      "1600,A,900,R,1.5\n"
+      "1630,A,900,R,1\n"
+      "1800,A,900,R,1.5\n"
+      "1830,A,900,R,1\n"
+      "2000,A,900,B,1.5\n"
+      "2030,A,900,B,1\n"
+      "2200,A,900,R,1.5\n"
+      "2230,A,900,R,1\n"
       "0000,B,0.166\n"
-      "0001,C,0.166\n"
-      "0002,D,0.166\n"
+      "0000,C,0.166\n"
+      "0000,D,0.166\n"
       "#---------\n"
       "任務代碼 : \n"
       "A : Sound (INMP441)\n"
@@ -350,7 +360,6 @@ void addAllTaskFromFile(){
 
 
 void findTheMatchedArrayReadIndex(){
-  
   int startTimeOfNext = 0;
 
   while(1){
