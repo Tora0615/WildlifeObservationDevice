@@ -269,7 +269,7 @@ void checkIsNeedToRunTask(){
 void recordSound(){
   
   // calculate filename
-  String recordPath = "/" + String(today) + "/" + String(secMapTo24Hour(getPassedSecOfToday()) + "_" + String(channel_tag) + ".wav");
+  String recordPath = "/" + String(today) + "/" + String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday()) + "_" + String(channel_tag) + ".wav");
   char filename[40];
   strcpy(filename, recordPath.c_str());
 

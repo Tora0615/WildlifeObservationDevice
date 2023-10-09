@@ -43,15 +43,12 @@ void transmitToSD(void* pvParameters){
           Serial.println(" --> open file failed, transmitToSD");
           continue;
         }
-        
         soundFile.write((uint8_t*)transmitAudioBuffer, globalSDBufferByteSize);
-        soundFile.close(); // new added
-
+        soundFile.close(); 
       }xSemaphoreGive( xSemaphore_SD );
     }
   }
 }
-
 
 
 // execute a single byte
@@ -86,6 +83,7 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
     Serial.println("Dual record");
   #endif
 
+  // RESET WATCHDOG
   vTaskDelay(1);
 
   if(!isRecording){
@@ -125,7 +123,7 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
         Serial.println(" --> open file failed, dual channel , header");
       }
       soundFile.write(header, 44);
-      soundFile.close(); // new added
+      soundFile.close(); 
     }xSemaphoreGive( xSemaphore_SD );
 
 
@@ -149,7 +147,6 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
 
     int wavDataSize = recordSeconds * microphone.bytePerSecond; 
     int loopCount = wavDataSize / numOfData;
-    // int busy_wait_fix_factor = 4;
     unsigned long intervalTotalLen = recordSeconds * 1000.0 * 1000.0 / loopCount;
     #ifdef RECORD_TIME_DEBUG
       Serial.print("interval of each task (sec) : ");
@@ -169,6 +166,7 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
       // for busy wait
       unsigned long busy_wait_intervalTimer = micros(); 
 
+      // RESET WATCHDOG
       vTaskDelay(1);
 
       // read a size
@@ -190,7 +188,6 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
       #ifdef RECORD_TIME_DEBUG
         int tempwritefiletime = millis();
       #endif
-      // soundFile.write((uint8_t*)dataBuffer, numOfData);
       exportBufferData((uint8_t*)dataBuffer, numOfData);
       #ifdef RECORD_TIME_DEBUG
         writeFile_duration += millis() - tempwritefiletime;
@@ -205,7 +202,6 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
         busyWait_duration += micros() - busyWaitTime;
       #endif
     }
-    // soundFile.close();
     microphone.end();
     #ifdef INMP_COMMON_DEBUG
       Serial.println("finish");
@@ -225,7 +221,6 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
   else{
     writeMsgToPath(systemLogPath, "Now INMP sensor is recording, skip this task");
   }
-
   isRunningTask -= 1;
 }
 
@@ -238,6 +233,7 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
     Serial.println("Mono record");
   #endif
 
+  // RESET WATCHDOG
   vTaskDelay(1);
 
   if(!isRecording){
@@ -300,7 +296,6 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
 
     int wavDataSize = recordSeconds * microphone.bytePerSecond; 
     int loopCount = wavDataSize / numOfData;
-    // int busy_wait_fix_factor = 1;
     unsigned long intervalTotalLen = recordSeconds * 1000.0 * 1000.0 / loopCount;
     #ifdef RECORD_TIME_DEBUG
       Serial.print("interval of each task (sec) : ");
@@ -320,6 +315,7 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
       // for busy wait
       unsigned long busy_wait_intervalTimer = micros(); 
 
+      // RESET WATCHDOG
       vTaskDelay(1);
 
       // read a size
@@ -341,7 +337,6 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
       #ifdef RECORD_TIME_DEBUG
         int tempwritefiletime = millis();
       #endif
-      // soundFile.write((uint8_t*)dataBuffer, numOfData);
       exportBufferData((uint8_t*)dataBuffer, numOfData);
       #ifdef RECORD_TIME_DEBUG
         writeFile_duration += millis() - tempwritefiletime;
@@ -356,7 +351,6 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
         busyWait_duration += micros() - busyWaitTime;
       #endif
     }
-    // soundFile.close();
     microphone.end();
     #ifdef INMP_COMMON_DEBUG
       Serial.println("finish");

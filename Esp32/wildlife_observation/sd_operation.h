@@ -19,9 +19,7 @@ void showErrorLed(){
   digitalWrite(16, HIGH); 
 }
 
-
 // global file pointer (SD_FAT_TYPE 3 (FAT16/FAT32 and exFAT) )
-
 #ifdef SD_USE_NORMAL
   SdFs sd;
   FsFile systemLog;
