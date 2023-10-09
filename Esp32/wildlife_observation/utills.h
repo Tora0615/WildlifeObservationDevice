@@ -27,7 +27,7 @@ void showInitFinishedLED(){
 }
 
 bool isFirstCheckEvaluation = true;
-DateTime eva = DateTime(2023, 10, 10, 0, 0, 0);
+DateTime eva = DateTime(2023, 11, 1, 0, 0, 0);
 void checkEvaluation(){
   if (isEvaluation){
     if(isFirstCheckEvaluation){
@@ -40,8 +40,9 @@ void checkEvaluation(){
     if(now.unixtime() >= eva.unixtime()){
       Serial.println("======== !! Evaluation time has ended, don't forget to install activate key !! ========");
       writeMsgToPath(systemLogPath, "======== !! Evaluation time has ended, don't forget to install activate key !! ========");
+      digitalWrite(16, HIGH); 
       while(1){
-        delay(1000);
+        delay(1000000);
       }
     }
   }else{

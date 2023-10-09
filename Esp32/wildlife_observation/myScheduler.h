@@ -406,12 +406,6 @@ void f_turnOnRtcPower(){
 void f_GetHowManySecondsHasPassedTodayFromRtc(){
   vTaskDelay(1);
 
-  // not first time check == already have boot check
-  // boot check at findTheMatchedArrayReadIndex()
-  if(!isFirstCheckEvaluation){
-    checkEvaluation();
-  }
-
   // if > a day, calibrate with RTC timer
   sys_RTC_time_offset = GetHowManySecondsHasPassedTodayFromRtc();
   sys_millis_time_offset = millis();
@@ -436,6 +430,12 @@ void f_GetHowManySecondsHasPassedTodayFromRtc(){
   
   // reset callback
   t_checkDayChange.setCallback(&checkDayChange);
+
+  // not first time check == already have boot check
+  // boot check at findTheMatchedArrayReadIndex()
+  if(!isFirstCheckEvaluation){
+    checkEvaluation();
+  }
 }
 
 
