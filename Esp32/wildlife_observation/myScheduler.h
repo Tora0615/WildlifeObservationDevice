@@ -293,11 +293,13 @@ void recordSound(){
 
 
 void recordBattery(){
+  vTaskDelay(1);
   // Use delay to avoid it read and write faster than others. Or the order will be strenge
   t_recordBattery.setCallback(&f_recordBatteryAfterDelay);
   t_recordBattery.delay(3000);
 }
 void f_recordBatteryAfterDelay(){
+  vTaskDelay(1);
   // read part 
   #ifdef RECORD_BATTERY_DEBUG
     Serial.println("Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ " %)");
@@ -313,14 +315,17 @@ void f_recordBatteryAfterDelay(){
 
 
 void recordDS18B20(){
+  vTaskDelay(1);
   t_recordDS18B20.setCallback(&f_turnOnDs18b20Power);
 }
 void f_turnOnDs18b20Power(){
+  vTaskDelay(1);
   turnOnDs18b20Power();
   t_recordDS18B20.setCallback(&f_getDS18B20Temp);
   t_recordDS18B20.delay(150);
 }
 void f_getDS18B20Temp(){
+  vTaskDelay(1);
   float temperature = getDS18B20Temp();
   #ifdef GET_DS18B20_TEMP_DEBUG
     Serial.println("DS18B20 : " + String(temperature) + " C");
@@ -336,14 +341,17 @@ void f_getDS18B20Temp(){
 
 
 void recordDHT(){
+  vTaskDelay(1);
   t_recordDHT.setCallback(&f_turnOnDhtPower);
 }
 void f_turnOnDhtPower(){
+  vTaskDelay(1);
   turnOnDhtPower();
   t_recordDHT.setCallback(&f_DHT_get_temperature);
   t_recordDHT.delay(500);
 }
 void f_DHT_get_temperature(){
+  vTaskDelay(1);
   float temperature = DHT_get_temperature();
   #ifdef DHT_GET_TEMPERATURE_DEBUG
     Serial.println("DHT temperature : " + String(temperature) + " C");
@@ -353,11 +361,13 @@ void f_DHT_get_temperature(){
   t_recordDHT.setCallback(&f_turnOnDhtPower2);
 }
 void f_turnOnDhtPower2(){
+  vTaskDelay(1);
   turnOnDhtPower();
   t_recordDHT.setCallback(&f_DHT_get_Humidity);
   t_recordDHT.delay(500);
 }
 void f_DHT_get_Humidity(){
+  vTaskDelay(1);
   float humidity = DHT_get_Humidity();
   #ifdef DHT_GET_HUMIDITY_DEBUG
     Serial.println("DHT Humidity : " + String(humidity) + " %");
@@ -384,11 +394,13 @@ void checkDayChange(){
   }
 }
 void f_turnOnRtcPower(){
+  vTaskDelay(1);
   turnOnRtcPower();
   t_checkDayChange.setCallback(&f_GetHowManySecondsHasPassedTodayFromRtc);
   t_checkDayChange.delay(100);
 }
 void f_GetHowManySecondsHasPassedTodayFromRtc(){
+  vTaskDelay(1);
 
   // if > a day, calibrate with RTC timer
   sys_RTC_time_offset = GetHowManySecondsHasPassedTodayFromRtc();
