@@ -54,8 +54,8 @@ uint8_t INMP441::begin(uint16_t sampleRate, uint8_t bit, uint8_t channelSetting)
     .channel_format = CHANNEL_FORMAT,                          
     .communication_format = I2S_COMM_FORMAT_STAND_I2S,
 		.intr_alloc_flags = ESP_INTR_FLAG_LEVEL3,   // highter priority
-    .dma_buf_count = 32,  
-    .dma_buf_len = 1024,  
+    .dma_buf_count = 32,  //32
+    .dma_buf_len = 512,  //1024
     .use_apll = false
     };
   i2s_pin_config_t pin_config = {

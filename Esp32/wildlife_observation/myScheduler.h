@@ -101,7 +101,7 @@ void createRTOSTasks() {
   xTaskCreatePinnedToCore(
     checkIfNeedToRecord,
     "INMPThreadAtCore0",
-    49152,                                  /* Stack size of task */
+    20480,                                  /* Stack size of task */
     NULL,                                   /* parameter of the task */
     2,                                      /* priority of the task */    
     &tINMP,                                 /* task handle */
@@ -125,6 +125,16 @@ void createRTOSTasks() {
     NULL,                                   /* parameter of the task */
     2,                                      /* priority of the task */
     &tSleepChecker,                         /* task handle */
+    OTHER_TASK_CPU                          /* CPU core */
+  );
+
+  xTaskCreatePinnedToCore(
+    transmitToSD,                    /* Task function. */
+    "transmitToSD",                  /* name of task. */
+    20480,                                   /* Stack size of task */
+    NULL,                                   /* parameter of the task */
+    2,                                      /* priority of the task */
+    &tTransmitHandle,                         /* task handle */
     OTHER_TASK_CPU                          /* CPU core */
   );
 }
@@ -260,7 +270,7 @@ void recordSound(){
   
   // calculate filename
   String recordPath = "/" + String(today) + "/" + String(secMapTo24Hour(getPassedSecOfToday()) + "_" + String(channel_tag) + ".wav");
-  char filename[30];
+  char filename[40];
   strcpy(filename, recordPath.c_str());
 
   #ifdef RECORD_SOUND_DEBUG

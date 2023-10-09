@@ -11,9 +11,72 @@
 #include "MEMS_INMP441.h"
 INMP441 microphone(I2S_SCK_IO, I2S_WS_IO, I2S_DI_IO);
 
+// use to save the signal of buffer full & can start to save to SD
+TaskHandle_t tTransmitHandle;
+// a larger buffer befor save to SD (buffer level : DMA --> local function buffer --> 2* global larger buffer --> SD)
+const int globalSDBufferByteSize = 512 * 16;  // 512 uint8_t(byte) * 16 = 1 block of SD
+uint8_t *currentAudioBuffer  = (uint8_t *)malloc(sizeof(uint8_t) * globalSDBufferByteSize);  
+uint8_t *transmitAudioBuffer = (uint8_t *)malloc(sizeof(uint8_t) * globalSDBufferByteSize);
+int bufferIndex = 0;
+char *_filenameWithPath;
+
+// RTOS task
+void transmitToSD(void* pvParameters){
+  const TickType_t xMaxBlockTime = pdMS_TO_TICKS(100);
+  unsigned long startTime;
+  while (true) {
+    // wait RTOS signal about buffer full for 100 ms
+    uint32_t ulNotificationValue = ulTaskNotifyTake(pdTRUE, xMaxBlockTime);
+    // if have signal 
+    if(ulNotificationValue > 0){
+      // lock SD and write
+      if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
+        // SD setting 
+        #ifdef SD_USE_NORMAL
+          FsFile soundFile;
+        #else
+          ExFile soundFile;
+        #endif
+        if (!soundFile.open(_filenameWithPath, O_WRONLY | O_CREAT | O_APPEND )) {     // open need char array, not string. So use c_str to convert
+          Serial.println(" --> open file failed, transmitToSD");
+          continue;
+        }
+        
+        soundFile.write((uint8_t*)transmitAudioBuffer, globalSDBufferByteSize);
+        soundFile.close(); // new added
+
+      }xSemaphoreGive( xSemaphore_SD );
+    }
+  }
+}
+
+
+
+// execute a single byte
+void exportSingleData(uint8_t input){
+  currentAudioBuffer[bufferIndex] = input;
+  bufferIndex += 1;
+  if(bufferIndex == globalSDBufferByteSize){
+    // switch the pointer of memery space
+    std::swap(currentAudioBuffer, transmitAudioBuffer);
+    // re-zero
+    bufferIndex = 0;
+    // send a signal via RTOS to write SD
+    xTaskNotify(tTransmitHandle, 1, eIncrement);
+  }
+}
+
+// execute local buffer 
+void exportBufferData(uint8_t* dataBuffer, int numOfData){
+  // there are n count (numOfData) of uint8_t(byte)
+  for (int i = 0; i < numOfData; i++) {
+    exportSingleData(dataBuffer[i]);
+  }
+}
 
 void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain_ratio){
   // isRunningTask += 1;
+  _filenameWithPath = filenameWithPath;
 
   #ifdef INMP_COMMON_DEBUG
     Serial.println("Dual record");
@@ -22,9 +85,6 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
   feedDogOfCore(INMP_CPU);
 
   if(!isRecording){
-    // lock SD
-    if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
-
     // flag switch
     isRecording = !isRecording; 
 
@@ -45,20 +105,24 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
       ExFile soundFile;
     #endif
 
-    /*--- execute part ---*/
-    while(microphone.begin(SAMPLE_RATE, DATA_BIT, CHANNEL) != 0){
-      Serial.println(" I2S init failed");
-    }
-    #ifdef INMP_COMMON_DEBUG
-      Serial.println("I2S init success");
-    #endif
+    // lock SD
+    if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
+      /*--- execute part ---*/
+      while(microphone.begin(SAMPLE_RATE, DATA_BIT, CHANNEL) != 0){
+        Serial.println(" I2S init failed");
+      }
+      #ifdef INMP_COMMON_DEBUG
+        Serial.println("I2S init success");
+      #endif
 
-    // create header data
-    microphone.createWavHeader(header, recordSeconds, SAMPLE_RATE, DATA_BIT, CHANNEL);
-    if (!soundFile.open(filenameWithPath, O_WRONLY | O_CREAT )) {     // open need char array, not string. So use c_str to convert
-      Serial.println(" --> open file failed");
-    }
-    soundFile.write(header, 44);
+      // create header data
+      microphone.createWavHeader(header, recordSeconds, SAMPLE_RATE, DATA_BIT, CHANNEL);
+      if (!soundFile.open(filenameWithPath, O_WRONLY | O_CREAT )) {     // open need char array, not string. So use c_str to convert
+        Serial.println(" --> open file failed, dual channel , header");
+      }
+      soundFile.write(header, 44);
+      soundFile.close(); // new added
+    }xSemaphoreGive( xSemaphore_SD );
 
 
     // RESET WATCHDOG
@@ -81,7 +145,7 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
 
     int wavDataSize = recordSeconds * microphone.bytePerSecond; 
     int loopCount = wavDataSize / numOfData;
-    int busy_wait_fix_factor = 4;
+    // int busy_wait_fix_factor = 4;
     unsigned long intervalTotalLen = recordSeconds * 1000.0 * 1000.0 / loopCount;
     #ifdef RECORD_TIME_DEBUG
       Serial.print("interval of each task (sec) : ");
@@ -89,7 +153,7 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
       Serial.println("loopCount : " + String(loopCount));
     #endif
     for (int j = 0; j < loopCount; ++j) {
-      feedDogOfCore(INMP_CPU);
+      // feedDogOfCore(INMP_CPU);
 
       // print process percentage 
       #ifdef PERCENTAGE_DEBUG
@@ -101,6 +165,8 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
 
       // for busy wait
       unsigned long busy_wait_intervalTimer = micros(); 
+
+      feedDogOfCore(INMP_CPU);
 
       // read a size
       #ifdef RECORD_TIME_DEBUG
@@ -121,7 +187,8 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
       #ifdef RECORD_TIME_DEBUG
         int tempwritefiletime = millis();
       #endif
-      soundFile.write((uint8_t*)dataBuffer, numOfData);
+      // soundFile.write((uint8_t*)dataBuffer, numOfData);
+      exportBufferData((uint8_t*)dataBuffer, numOfData);
       #ifdef RECORD_TIME_DEBUG
         writeFile_duration += millis() - tempwritefiletime;
       #endif
@@ -130,12 +197,12 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
       #ifdef RECORD_TIME_DEBUG
         int busyWaitTime = micros();
       #endif
-      while (micros() - busy_wait_intervalTimer < intervalTotalLen && j % busy_wait_fix_factor == 0) {}
+      while (micros() - busy_wait_intervalTimer < intervalTotalLen) {}
       #ifdef RECORD_TIME_DEBUG
         busyWait_duration += micros() - busyWaitTime;
       #endif
     }
-    soundFile.close();
+    // soundFile.close();
     microphone.end();
     #ifdef INMP_COMMON_DEBUG
       Serial.println("finish");
@@ -151,7 +218,7 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
     // flag switch
     isRecording = !isRecording; 
 
-    }xSemaphoreGive( xSemaphore_SD );
+    // }xSemaphoreGive( xSemaphore_SD );
   }
   // if INMP was occupied 
   else{
@@ -165,6 +232,8 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
 
 void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain_ratio, uint8_t CHANNEL){
   // isRunningTask += 1;
+
+  _filenameWithPath = filenameWithPath;
   #ifdef INMP_COMMON_DEBUG
     Serial.println("Mono record");
   #endif
@@ -172,9 +241,6 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
   feedDogOfCore(INMP_CPU);
 
   if(!isRecording){
-    // lock SD
-    if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
-
     // flag switch
     isRecording = !isRecording; 
 
@@ -194,20 +260,24 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
       ExFile soundFile;
     #endif
 
-    /*--- execute part ---*/
-    while(microphone.begin(SAMPLE_RATE, DATA_BIT, CHANNEL) != 0){
-      Serial.println(" I2S init failed");
-    }
-    #ifdef INMP_COMMON_DEBUG
-      Serial.println("I2S init success");
-    #endif
+    // lock SD
+    if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
+      /*--- execute part ---*/
+      while(microphone.begin(SAMPLE_RATE, DATA_BIT, CHANNEL) != 0){
+        Serial.println(" I2S init failed");
+      }
+      #ifdef INMP_COMMON_DEBUG
+        Serial.println("I2S init success");
+      #endif
 
-    // create header data
-    microphone.createWavHeader(header, recordSeconds, SAMPLE_RATE, DATA_BIT, CHANNEL);
-    if (!soundFile.open(filenameWithPath, O_WRONLY | O_CREAT )) {     // open need char array, not string. So use c_str to convert
-      Serial.println(" --> open file failed");
-    }
-    soundFile.write(header, 44);
+      // create header dataPsho
+      microphone.createWavHeader(header, recordSeconds, SAMPLE_RATE, DATA_BIT, CHANNEL);
+      if (!soundFile.open(filenameWithPath, O_WRONLY | O_CREAT )) {     // open need char array, not string. So use c_str to convert
+        Serial.println(" --> open file failed, mono channel , header");
+      }
+      soundFile.write(header, 44);
+      soundFile.close();
+    }xSemaphoreGive( xSemaphore_SD );
 
 
     // RESET WATCHDOG
@@ -230,7 +300,7 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
 
     int wavDataSize = recordSeconds * microphone.bytePerSecond; 
     int loopCount = wavDataSize / numOfData;
-    int busy_wait_fix_factor = 1;
+    // int busy_wait_fix_factor = 1;
     unsigned long intervalTotalLen = recordSeconds * 1000.0 * 1000.0 / loopCount;
     #ifdef RECORD_TIME_DEBUG
       Serial.print("interval of each task (sec) : ");
@@ -270,7 +340,8 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
       #ifdef RECORD_TIME_DEBUG
         int tempwritefiletime = millis();
       #endif
-      soundFile.write((uint8_t*)dataBuffer, numOfData);
+      // soundFile.write((uint8_t*)dataBuffer, numOfData);
+      exportBufferData((uint8_t*)dataBuffer, numOfData);
       #ifdef RECORD_TIME_DEBUG
         writeFile_duration += millis() - tempwritefiletime;
       #endif
@@ -279,12 +350,12 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
       #ifdef RECORD_TIME_DEBUG
         int busyWaitTime = micros();
       #endif
-      while (micros() - busy_wait_intervalTimer < intervalTotalLen && j % busy_wait_fix_factor == 0) {}
+      while (micros() - busy_wait_intervalTimer < intervalTotalLen) {}
       #ifdef RECORD_TIME_DEBUG
         busyWait_duration += micros() - busyWaitTime;
       #endif
     }
-    soundFile.close();
+    // soundFile.close();
     microphone.end();
     #ifdef INMP_COMMON_DEBUG
       Serial.println("finish");
@@ -300,7 +371,7 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
     // flag switch
     isRecording = !isRecording; 
 
-    }xSemaphoreGive( xSemaphore_SD );
+    // }xSemaphoreGive( xSemaphore_SD );
   }
   // if INMP was occupied 
   else{
