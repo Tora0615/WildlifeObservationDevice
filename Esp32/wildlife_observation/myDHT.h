@@ -19,28 +19,21 @@ void DHT_init(){
   #endif 
   digitalWrite(DHT22_PMOS,HIGH);   // Turn off. GPIO default is low ->  will let mic ON
 
-  // init library 
-  dht.begin();
-
   // Write log
   writeMsgToPath(systemLogPath, "DHT init successful!");
 }
 
 
 void turnOnDhtPower(){
-  if(!isDHTRecording && !isDS18B20Recording){
-    // power on
-    #ifdef DHT22_DEBUG
-      Serial.println("Turn on DHT POWER");
-      Serial.println(millis());
-    #endif 
-    digitalWrite(DHT22_PMOS, LOW);   // Turn on.
-    // delay(200);
-  }else{
-    #ifdef DHT22_DEBUG
-      Serial.println("DHT22 POWER has already on");
-    #endif 
-  }
+  // power on
+  #ifdef DHT22_DEBUG
+    Serial.println("Turn on DHT POWER");
+  #endif 
+  digitalWrite(DHT22_PMOS, LOW);   // Turn on.
+  // delay(200);
+
+  // init library 
+  dht.begin();
 }
 
 
@@ -64,6 +57,9 @@ float DHT_get_temperature(){
       sum += temp;
       // delay(50);
     }
+
+    // disable pullup
+    gpio_pullup_dis(GPIO_NUM_33);
 
     // power off 
     #ifdef DHT22_DEBUG
@@ -103,6 +99,9 @@ float DHT_get_Humidity(){
       sum += temp; 
       // delay(50);
     }
+
+    // disable pullup
+    gpio_pullup_dis(GPIO_NUM_33);
 
     // power off 
     #ifdef DHT22_DEBUG

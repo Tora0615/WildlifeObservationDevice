@@ -10,9 +10,9 @@
 // #define CHECK_IS_NEED_TO_RUN_TASK
 // #define RECORD_SOUND_DEBUG
 // #define RECORD_BATTERY_DEBUG
-// #define GET_DS18B20_TEMP_DEBUG
-// #define DHT_GET_TEMPERATURE_DEBUG
-// #define DHT_GET_HUMIDITY_DEBUG
+#define GET_DS18B20_TEMP_DEBUG
+#define DHT_GET_TEMPERATURE_DEBUG   // value
+#define DHT_GET_HUMIDITY_DEBUG      // value
 /*--- taskFileReader ---*/
 // #define PARSE_TASK_DEBUG
 // #define ADD_REPEAT_WORKS_DEBUG
@@ -51,8 +51,9 @@ bool isEvaluation = true;
 int isRunningTask = 0;
 
 
-// RTOS for SD
+// RTOS Mutex for some hardware
 SemaphoreHandle_t xSemaphore_SD = xSemaphoreCreateMutex();
+SemaphoreHandle_t xSemaphore_Temp_PMOS = xSemaphoreCreateMutex();
 
 // RTOS Task setting 
 #define INMP_CPU 0

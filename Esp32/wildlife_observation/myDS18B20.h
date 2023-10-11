@@ -34,18 +34,12 @@ void DS18B20Init(){
 
 
 void turnOnDs18b20Power(){
-  if(!isDHTRecording && !isDS18B20Recording){
-    // power on
-    #ifdef DS18B20_DEBUG
-      Serial.println("Turn on DS18B20 POWER");
-    #endif 
-    digitalWrite(DS18B20_PMOS, LOW);   // Turn on.
-    // delay(100);  // by task_scheduler
-  }else{
-    #ifdef DS18B20_DEBUG
-      Serial.println("DS18B20 POWER has already on");
-    #endif 
-  }
+  // power on
+  #ifdef DS18B20_DEBUG
+    Serial.println("Turn on DS18B20 POWER");
+  #endif 
+  digitalWrite(DS18B20_PMOS, LOW);   // Turn on.
+  // delay(100);  // by task_scheduler
 }
 
 
@@ -59,8 +53,16 @@ float getDS18B20Temp(){
     // turnOnDs18b20Power();  // by task_scheduler
 
     // get data 
-    sensor.requestTemperatures(); // Send the command to get temperatures
-    float tempC = sensor.getTempCByIndex(0);
+    int retryCount = 0;
+    float tempC;
+    while(1){
+      sensor.requestTemperatures(); // Send the command to get temperatures
+      tempC = sensor.getTempCByIndex(0);
+      if(tempC != DEVICE_DISCONNECTED_C || retryCount == 10){
+        break;
+      }
+      retryCount += 1;
+    }
 
     // power off 
     #ifdef DS18B20_DEBUG

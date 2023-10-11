@@ -48,6 +48,8 @@ Task t_checkIsNeedToRunTask(0, TASK_FOREVER, &checkIsNeedToRunTask);
 Task t_recordBattery(0, TASK_FOREVER, &recordBattery);
 Task t_recordDS18B20(0, TASK_FOREVER, &recordDS18B20);
 Task t_recordDHT(0, TASK_FOREVER, &recordDHT);
+bool DHT_PowerRetry = false;
+bool DS18B20_PowerRetry = false;
 
 
 /* free RTOS*/
@@ -317,16 +319,23 @@ void f_recordBatteryAfterDelay(){
 }
 
 
-
 void recordDS18B20(){
   vTaskDelay(1);
+  // t_recordDS18B20.delay(150);
   t_recordDS18B20.setCallback(&f_turnOnDs18b20Power);
+  DS18B20_PowerRetry = true;
 }
 void f_turnOnDs18b20Power(){
   vTaskDelay(1);
-  turnOnDs18b20Power();
-  t_recordDS18B20.setCallback(&f_getDS18B20Temp);
-  t_recordDS18B20.delay(150);
+  if(DS18B20_PowerRetry){
+    t_recordDS18B20.delay(100);
+    if( xSemaphoreTake( xSemaphore_Temp_PMOS, pdMS_TO_TICKS(100) ) == pdTRUE){
+      DS18B20_PowerRetry = false;
+      turnOnDs18b20Power();
+      t_recordDS18B20.setCallback(&f_getDS18B20Temp);
+      t_recordDS18B20.delay(150);
+    }
+  }
 }
 void f_getDS18B20Temp(){
   vTaskDelay(1);
@@ -337,6 +346,9 @@ void f_getDS18B20Temp(){
   // write SD 
   writeMsgToPath(sensorDataPath, "DS18B20 : " + String(temperature) + " C", DS18B20_TimeStamp);
   t_recordDS18B20.setCallback(&recordDS18B20);
+  
+  // finished, release power switch 
+  xSemaphoreGive( xSemaphore_Temp_PMOS );
 
   // release sleep lock and delete task
   isRunningTask -= 1;
@@ -346,13 +358,22 @@ void f_getDS18B20Temp(){
 
 void recordDHT(){
   vTaskDelay(1);
+  // t_recordDHT.delay(150);
   t_recordDHT.setCallback(&f_turnOnDhtPower);
+
+  DHT_PowerRetry = true;
 }
 void f_turnOnDhtPower(){
   vTaskDelay(1);
-  turnOnDhtPower();
-  t_recordDHT.setCallback(&f_DHT_get_temperature);
-  t_recordDHT.delay(500);
+  if(DHT_PowerRetry){
+    t_recordDHT.delay(100);
+    if ( xSemaphoreTake( xSemaphore_Temp_PMOS, pdMS_TO_TICKS(100) ) == pdTRUE) {
+      DHT_PowerRetry = false;
+      turnOnDhtPower();
+      t_recordDHT.setCallback(&f_DHT_get_temperature);
+      t_recordDHT.delay(500);
+    }
+  }
 }
 void f_DHT_get_temperature(){
   vTaskDelay(1);
@@ -360,15 +381,27 @@ void f_DHT_get_temperature(){
   #ifdef DHT_GET_TEMPERATURE_DEBUG
     Serial.println("DHT temperature : " + String(temperature) + " C");
   #endif
+
+  // finished, release power switch 
+  xSemaphoreGive( xSemaphore_Temp_PMOS );
+
   // write SD 
   writeMsgToPath(sensorDataPath, "DHT temperature : " + String(temperature) + " C", DHT_TimeStamp);
   t_recordDHT.setCallback(&f_turnOnDhtPower2);
+
+  DHT_PowerRetry = true;
 }
 void f_turnOnDhtPower2(){
   vTaskDelay(1);
-  turnOnDhtPower();
-  t_recordDHT.setCallback(&f_DHT_get_Humidity);
-  t_recordDHT.delay(500);
+  if(DHT_PowerRetry){
+    t_recordDHT.delay(100);
+    if ( xSemaphoreTake( xSemaphore_Temp_PMOS, pdMS_TO_TICKS(100) ) == pdTRUE) {
+      DHT_PowerRetry = false;
+      turnOnDhtPower();
+      t_recordDHT.setCallback(&f_DHT_get_Humidity);
+      t_recordDHT.delay(500);
+    }
+  }
 }
 void f_DHT_get_Humidity(){
   vTaskDelay(1);
@@ -376,6 +409,10 @@ void f_DHT_get_Humidity(){
   #ifdef DHT_GET_HUMIDITY_DEBUG
     Serial.println("DHT Humidity : " + String(humidity) + " %");
   #endif
+
+  // finished, release power switch 
+  xSemaphoreGive( xSemaphore_Temp_PMOS );
+
   // write SD 
   writeMsgToPath(sensorDataPath, "DHT Humidity : " + String(humidity) + " %", DHT_TimeStamp);
   t_recordDHT.setCallback(&recordDHT);
