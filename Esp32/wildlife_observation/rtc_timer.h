@@ -21,12 +21,6 @@ void RTCInit(){
     Serial.println("Turn off DS3231_RTC POWER");
   #endif 
   digitalWrite(RTC_PMOS,HIGH);   // Turn off. GPIO default is low ->  will let it ON
-
-  // init lib part
-  if (! rtc.begin()) {
-    Serial.println("Couldn't find RTC");
-    while (1) delay(1000);
-  }
 }
 
 
@@ -37,8 +31,14 @@ void turnOnRtcPower(){
   #endif 
   digitalWrite(RTC_PMOS, LOW);   // Turn on.
 
+  // init lib part
+  if (! rtc.begin()) {
+    Serial.println("Couldn't find RTC");
+    while (1) delay(1000);
+  }
+
   if(isInit){
-    delay(100);  // by task_scheduler
+    delay(100);  
   }
 }
 
@@ -53,7 +53,11 @@ uint32_t GetHowManySecondsHasPassedTodayFromRtc(){    // since today 0:00
   // a day is 86400 sec
   now = rtc.now(); 
 
-  // power off 
+  // stop i2c pullup
+  gpio_pullup_dis(GPIO_NUM_21);
+  gpio_pullup_dis(GPIO_NUM_22);
+
+  // power off PMOS
   #ifdef RTC_DEBUG
     Serial.println("Turn off DS3231_RTC POWER");
   #endif 
