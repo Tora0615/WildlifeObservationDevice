@@ -1,2 +1,5 @@
 *.bkp
 *.dtmp
+*.bin
+*.elf
+*.map
