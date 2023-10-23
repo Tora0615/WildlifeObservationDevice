@@ -20,7 +20,7 @@ void setup() {
   // system basic part init 
   SDInit();
   RTCInit();
-
+  
   // for test
   #ifdef USE_FAKE_TIME
     setTestTime();

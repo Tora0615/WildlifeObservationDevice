@@ -6,7 +6,7 @@
 #include <SPI.h>
 #include "SdFat.h"
 #include "sdios.h"
-#define SPI_SPEED SD_SCK_MHZ(15)
+#define SPI_SPEED SD_SCK_MHZ(10)
 #define CHIP_SELECT 5
 const int8_t DISABLE_CHIP_SELECT = -1;
 
@@ -20,7 +20,7 @@ void showErrorLed(){
 }
 
 // global file pointer (SD_FAT_TYPE 3 (FAT16/FAT32 and exFAT) )
-#ifdef SD_USE_NORMAL
+#ifdef SD_USE_BASIC
   SdFs sd;
   FsFile systemLog;
   FsFile sensorData;
@@ -31,24 +31,6 @@ void showErrorLed(){
 #endif 
 
 void SDInit(){
-  // byte SPI_SPEED = 20;
-
-  // // auto detect speed
-  // while (1) {
-  //   bool isSDInit = sd.begin(CHIP_SELECT, SPI_SPEED);
-  //   if(isSDInit){
-  //     break;
-  //   }
-  //   if(SPI_SPEED == 0){
-  //     Serial.println("SD card init error : NO SD card");
-  //     while(1){
-  //       delay(1000);
-  //     }
-  //   }else{
-  //     Serial.println("SD card init error, speed : " + String(SPI_SPEED) + ", retry...");
-  //     SPI_SPEED -= 1;
-  //   }
-  // }
 
   if(!sd.begin(CHIP_SELECT, SPI_SPEED)){
     Serial.println("SD card init error : NO SD card");

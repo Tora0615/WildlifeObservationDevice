@@ -33,7 +33,7 @@
 /*--- myScheduler ---*/
 // #define GOTOSLEEP_DEBUG
 // #define FEED_DOG_DEBUG
-
+// #define USE_DEEP_SLEEP
 
 // some global variable
 const String SCHEDULE_FILE = "schedule.txt";
@@ -60,7 +60,7 @@ SemaphoreHandle_t xSemaphore_Temp_PMOS = xSemaphoreCreateMutex();
 #define OTHER_TASK_CPU 1
 
 // SD Use setting 
-#define SD_USE_NORMAL
+// #define SD_USE_BASIC
 
 // use fake test time setting 
 // #define USE_FAKE_TIME

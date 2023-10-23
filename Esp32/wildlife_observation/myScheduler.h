@@ -489,10 +489,6 @@ void f_GetHowManySecondsHasPassedTodayFromRtc(){
       Serial.println("Go to sleep for : " + String(canSleepMs/1000.0f) + " sec");
       writeMsgToPath(systemLogPath, "Go to sleep for : " + String(canSleepMs/1000.0f) + " sec");
 
-      // orignal 
-      // esp_sleep_enable_timer_wakeup(canSleepMs * ms_TO_uS_FACTOR);
-      // esp_light_sleep_start();
-
       int halfMinTimes = canSleepMs / (1000 * 30);
       int remainMs = canSleepMs % (1000 * 30);
 
@@ -502,7 +498,11 @@ void f_GetHowManySecondsHasPassedTodayFromRtc(){
         // lock if write sd not finished
         if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
           esp_sleep_enable_timer_wakeup(30 * 1000 * ms_TO_uS_FACTOR);
-          esp_light_sleep_start();
+          #ifdef USE_DEEP_SLEEP
+            esp_deep_sleep_start();
+          #else
+            esp_light_sleep_start();
+          #endif
         }xSemaphoreGive( xSemaphore_SD );
 
         // wakeup to feed dog
@@ -528,7 +528,11 @@ void f_GetHowManySecondsHasPassedTodayFromRtc(){
       // lock if write sd not finished
       if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
         esp_sleep_enable_timer_wakeup(remainMs * ms_TO_uS_FACTOR);
-        esp_light_sleep_start();
+        #ifdef USE_DEEP_SLEEP
+          esp_deep_sleep_start();
+        #else
+          esp_light_sleep_start();
+        #endif
       }xSemaphoreGive( xSemaphore_SD );
       vTaskDelay(1);
 
