@@ -29,7 +29,7 @@ void showInitFinishedLED(){
 bool isFirstCheckEvaluation = true;
 DateTime eva = DateTime(2023, 11, 1, 0, 0, 0);
 void checkEvaluation(){
-  if (isEvaluation){
+  if (isEvaluation && !skipEvalution){
     if(isFirstCheckEvaluation){
       // Write log
       Serial.println("======== !! You are in the evaluation mode !! ========");

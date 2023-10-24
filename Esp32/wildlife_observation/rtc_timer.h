@@ -77,7 +77,6 @@ String getDate(){
 }
 
 
-
 String secMapTo24Hour(uint32_t sec){
   int min = sec / 60;
   sec = sec % 60;

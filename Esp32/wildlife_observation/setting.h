@@ -65,7 +65,7 @@ SemaphoreHandle_t xSemaphore_Temp_PMOS = xSemaphoreCreateMutex();
 // use fake test time setting 
 // #define USE_FAKE_TIME
 
-
-
+// skip evalution mode
+#define skipEvalution true
 
 #endif
