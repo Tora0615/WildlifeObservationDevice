@@ -123,6 +123,21 @@ void setTestTime(){
   Serial.println();
 }
 
+void setTime(char *timeWords){
+  // parse the string
+  int YEAR    = (timeWords[0] - '0')*1000 + (timeWords[0] - '0')*100 + (timeWords[0] - '0')*10 + (timeWords[0] - '0');
+  int MONTH   = (timeWords[0] - '0')*10 + (timeWords[0] - '0');
+  int DAY     = (timeWords[0] - '0')*10 + (timeWords[0] - '0');
+  int HOUR_24 = (timeWords[0] - '0')*10 + (timeWords[0] - '0');
+  int MINUTE  = (timeWords[0] - '0')*10 + (timeWords[0] - '0');
+  int SECOND  = (timeWords[0] - '0')*10 + (timeWords[0] - '0');
+
+  // execute settime 
+  rtc.adjust(DateTime(YEAR, MONTH, DAY, HOUR_24, MINUTE, SECOND));
+
+  // show light 
+  // skip
+}
 
 
 #endif

@@ -172,4 +172,37 @@ void checkAndCreateFile(String path){
 
 
 
+void checkRtcAdjustFile(){
+  char timeWords[15] = {0};
+  long theTimeNeedToBeSet = -1;
+  #ifdef SD_USE_BASIC
+    FsFile setTimeFile;
+  #else
+    ExFile setTimeFile;
+  #endif 
+
+  // check file exist or not 
+  if (sd.exists("setTime.txt")) {
+    // if exist 
+    if (!setTimeFile.open("setTime.txt", O_RDONLY)) {
+      Serial.println("open RTC set file failed"); 
+    }
+
+    // read a line 
+    int n = setTimeFile.fgets(timeWords, sizeof(timeWords));  // e.q. 20231109203200 -> 14 nums
+    if (timeWords[n - 1] != '\n' && n == (sizeof(timeWords) - 1)) {
+      Serial.println("time format illegal, it is too long");
+    }
+
+    // finished
+    setTimeFile.close();
+    sd.remove("setTime.txt");
+  }
+
+  // if need to set time, then do it
+  if(theTimeNeedToBeSet != -1){
+    setTime(timeWords);
+  }
+}
+
 #endif

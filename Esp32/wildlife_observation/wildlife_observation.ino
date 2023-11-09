@@ -22,9 +22,12 @@ void setup() {
   RTCInit();
   
   // for test
-  #ifdef USE_FAKE_TIME
-    setTestTime();
-  #endif
+  // #ifdef USE_FAKE_TIME
+  //   setTestTime();
+  // #endif
+  
+  // check if need to change time
+  checkRtcAdjustFile();
 
   // get current time as stander time
   sys_RTC_time_offset = GetHowManySecondsHasPassedTodayFromRtc();
