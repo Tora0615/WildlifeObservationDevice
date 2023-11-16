@@ -45,6 +45,9 @@ void SDInit(){
   #endif
 }
 
+
+// Not a full RTOS task, it belong to the corresponding task (e.g : recordDHT, recordBattery ... etc)
+// We only use vTaskDelay to prevent blocking
 void writeMsgToPath(String path, String msg, String customTimeStamp = "", bool replace = false, bool timeStamp = true){
   
   #ifdef SD_WRITE_MSG_DEBUG
@@ -65,35 +68,40 @@ void writeMsgToPath(String path, String msg, String customTimeStamp = "", bool r
     }
   }
   
-  // lock SD opreation 
-  if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
-    #ifdef SD_WRITE_MSG_DEBUG
-      Serial.println("Got Semaphore : " + String(millis()));
-    #endif
-    if(replace){
-      if (!tempfile.open(path.c_str(), O_WRONLY | O_CREAT)) {     // open need char array, not string. So use c_str to convert
-        Serial.println(" --> open " + path + " failed");
-        showErrorLed();
-        while(1){
-          delay(1000);
+  
+  while(true){
+    vTaskDelay(500);
+    // if got the power of control, lock SD opreation 
+    if(xSemaphoreTake( xSemaphore_SD, pdMS_TO_TICKS(100) ) == pdTRUE){
+      #ifdef SD_WRITE_MSG_DEBUG
+        Serial.println("Got Semaphore : " + String(millis()));
+      #endif
+      if(replace){
+        if (!tempfile.open(path.c_str(), O_WRONLY | O_CREAT)) {     // open need char array, not string. So use c_str to convert
+          Serial.println(" --> open " + path + " failed");
+          showErrorLed();
+          while(1){
+            delay(1000);
+          }
+        }else{
+          tempfile.println(msg.c_str());
         }
       }else{
-        tempfile.println(msg.c_str());
-      }
-    }else{
-      if (!tempfile.open(path.c_str(), O_WRONLY | O_CREAT | O_APPEND)) {     // open need char array, not string. So use c_str to convert
-        Serial.println(" --> open " + path + " failed");
-        showErrorLed();
-        while(1){
-          delay(1000);
+        if (!tempfile.open(path.c_str(), O_WRONLY | O_CREAT | O_APPEND)) {     // open need char array, not string. So use c_str to convert
+          Serial.println(" --> open " + path + " failed");
+          showErrorLed();
+          while(1){
+            delay(1000);
+          }
+        }else{
+          tempfile.println(msg.c_str());
         }
-      }else{
-        tempfile.println(msg.c_str());
       }
+      tempfile.close();
+      xSemaphoreGive( xSemaphore_SD );
+      break;
     }
-    tempfile.close();
-
-  }xSemaphoreGive( xSemaphore_SD );
+  }
 }
 
 
