@@ -13,42 +13,10 @@ INMP441 microphone(I2S_SCK_IO, I2S_WS_IO, I2S_DI_IO);
 
 // use to save the signal of buffer full & can start to save to SD
 TaskHandle_t tTransmitHandle;
-// a larger buffer befor save to SD (buffer level : DMA --> local function buffer --> 2* global larger buffer --> SD)
-const int globalSDBufferByteSize = 512 * 16;  // 512 uint8_t(byte) * 16 = 1 block of SD
-uint8_t *currentAudioBuffer  = (uint8_t *)malloc(sizeof(uint8_t) * globalSDBufferByteSize);  
-uint8_t *transmitAudioBuffer = (uint8_t *)malloc(sizeof(uint8_t) * globalSDBufferByteSize);
 int bufferIndex = 0;
 char *_filenameWithPath;
 
-// RTOS task
-void transmitToSD(void* pvParameters){
-  const TickType_t xMaxBlockTime = pdMS_TO_TICKS(100);
-  unsigned long startTime;
-  while (true) {
-    // feed dog of each loop 
-    vTaskDelay(10);
-    // wait RTOS signal about buffer full for 100 ms
-    uint32_t ulNotificationValue = ulTaskNotifyTake(pdTRUE, xMaxBlockTime);
-    // if have signal 
-    if(ulNotificationValue > 0){
-      // lock SD and write
-      if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
-        // SD setting 
-        #ifdef SD_USE_NORMAL
-          FsFile soundFile;
-        #else
-          ExFile soundFile;
-        #endif
-        if (!soundFile.open(_filenameWithPath, O_WRONLY | O_CREAT | O_APPEND )) {     // open need char array, not string. So use c_str to convert
-          Serial.println(" --> open file failed, transmitToSD");
-          continue;
-        }
-        soundFile.write((uint8_t*)transmitAudioBuffer, globalSDBufferByteSize);
-        soundFile.close(); 
-      }xSemaphoreGive( xSemaphore_SD );
-    }
-  }
-}
+
 
 
 // execute a single byte
