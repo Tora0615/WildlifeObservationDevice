@@ -52,7 +52,7 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
   #endif
 
   // RESET WATCHDOG
-  vTaskDelay(1);
+  vTaskDelay(10);
 
   if(!isRecording){
     // flag switch
@@ -96,7 +96,7 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
 
 
     // RESET WATCHDOG
-    vTaskDelay(1);
+    vTaskDelay(10);
 
     #ifdef INMP_COMMON_DEBUG
       Serial.println("start");
@@ -135,7 +135,7 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
       unsigned long busy_wait_intervalTimer = micros(); 
 
       // RESET WATCHDOG
-      vTaskDelay(1);
+      vTaskDelay(10);
 
       // read a size
       #ifdef RECORD_TIME_DEBUG
@@ -165,7 +165,10 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
       #ifdef RECORD_TIME_DEBUG
         int busyWaitTime = micros();
       #endif
-      while (micros() - busy_wait_intervalTimer < intervalTotalLen) {}
+      while (micros() - busy_wait_intervalTimer < intervalTotalLen) {
+        // jump out to other tasks
+        vTaskDelay(10);
+      }
       #ifdef RECORD_TIME_DEBUG
         busyWait_duration += micros() - busyWaitTime;
       #endif
@@ -202,7 +205,7 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
   #endif
 
   // RESET WATCHDOG
-  vTaskDelay(1);
+  vTaskDelay(10);
 
   if(!isRecording){
     // flag switch
@@ -245,7 +248,7 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
 
 
     // RESET WATCHDOG
-    vTaskDelay(1);
+    vTaskDelay(10);
 
     #ifdef INMP_COMMON_DEBUG
       Serial.println("start");
@@ -284,7 +287,7 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
       unsigned long busy_wait_intervalTimer = micros(); 
 
       // RESET WATCHDOG
-      vTaskDelay(1);
+      vTaskDelay(10);
 
       // read a size
       #ifdef RECORD_TIME_DEBUG
@@ -314,7 +317,10 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
       #ifdef RECORD_TIME_DEBUG
         int busyWaitTime = micros();
       #endif
-      while (micros() - busy_wait_intervalTimer < intervalTotalLen) {}
+      while (micros() - busy_wait_intervalTimer < intervalTotalLen) {
+        // jump out to other tasks
+        vTaskDelay(10);
+      }
       #ifdef RECORD_TIME_DEBUG
         busyWait_duration += micros() - busyWaitTime;
       #endif

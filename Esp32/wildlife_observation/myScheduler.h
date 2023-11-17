@@ -20,6 +20,7 @@ float gain_ratio;
 String DHT_TimeStamp;
 String DS18B20_TimeStamp;
 String Battery_TimeStamp;
+bool previousRoundOfSleepFinished;
 #define ms_TO_uS_FACTOR 1000ULL
 void checkGoSleep(void* pvParameters);
 void checkTimeAndTask(void* pvParameters);
@@ -53,7 +54,7 @@ void createRTOSTasks() {
   xTaskCreatePinnedToCore(
     checkGoSleep,                           /* Task function. */
     "checkGoSleep",                         /* name of task. */
-    4096,                                  /* Stack size of task */
+    8192,                                  /* Stack size of task */
     NULL,                                   /* parameter of the task */
     2,                                      /* priority of the task */
     &tCheckGoSleepHandler,                       /* task handle */
@@ -63,7 +64,7 @@ void createRTOSTasks() {
   xTaskCreatePinnedToCore(
     checkTimeAndTask,                           /* Task function. */
     "checkTimeAndTask",                         /* name of task. */
-    4096,                                  /* Stack size of task */
+    8192,                                  /* Stack size of task */
     NULL,                                   /* parameter of the task */
     2,                                      /* priority of the task */
     &tCheckTimeAndTaskHandler,                       /* task handle */
@@ -74,9 +75,9 @@ void createRTOSTasks() {
     xTaskCreatePinnedToCore(
       transmitSoundDataToSD,                           /* Task function. */
       "transmitSoundDataToSD",                         /* name of task. */
-      4096,                                  /* Stack size of task */
+      8192,                                  /* Stack size of task */
       NULL,                                   /* parameter of the task */
-      2,                                      /* priority of the task */
+      3,                                      /* priority of the task */
       &tSdTransmitHandler,                       /* task handle */
       OTHER_TASK_CPU                          /* CPU core */
     );
@@ -84,9 +85,9 @@ void createRTOSTasks() {
     xTaskCreatePinnedToCore(
       recordSound,                           /* Task function. */
       "recordSound",                         /* name of task. */
-      4096,                                  /* Stack size of task */
+      8192,                                  /* Stack size of task */
       NULL,                                   /* parameter of the task */
-      2,                                      /* priority of the task */
+      4,                                      /* priority of the task */
       &tRecordSoundHandler,                       /* task handle */
       OTHER_TASK_CPU                          /* CPU core */
     );
@@ -94,9 +95,9 @@ void createRTOSTasks() {
     xTaskCreatePinnedToCore(
       recordDHT,                           /* Task function. */
       "recordDHT",                         /* name of task. */
-      4096,                                  /* Stack size of task */
+      8192,                                  /* Stack size of task */
       NULL,                                   /* parameter of the task */
-      2,                                      /* priority of the task */
+      3,                                      /* priority of the task */
       &tRecordDHTHandler,                       /* task handle */
       OTHER_TASK_CPU                          /* CPU core */
     );
@@ -104,9 +105,9 @@ void createRTOSTasks() {
     xTaskCreatePinnedToCore(
       recordDS18B20,                           /* Task function. */
       "recordDS18B20",                         /* name of task. */
-      4096,                                  /* Stack size of task */
+      8192,                                  /* Stack size of task */
       NULL,                                   /* parameter of the task */
-      2,                                      /* priority of the task */
+      3,                                      /* priority of the task */
       &tRecordDS18B20Handler,                       /* task handle */
       OTHER_TASK_CPU                          /* CPU core */
     );
@@ -114,9 +115,9 @@ void createRTOSTasks() {
     xTaskCreatePinnedToCore(
       recordBattery,                           /* Task function. */
       "recordBattery",                         /* name of task. */
-      4096,                                  /* Stack size of task */
+      8192,                                  /* Stack size of task */
       NULL,                                   /* parameter of the task */
-      2,                                      /* priority of the task */
+      3,                                      /* priority of the task */
       &tRecordBatteryHandler,                       /* task handle */
       OTHER_TASK_CPU                          /* CPU core */
     );
@@ -126,13 +127,18 @@ void createRTOSTasks() {
 
 
 void checkGoSleep(void* pvParameters){
-  Serial.println("taskCheckIfCanGoToSleep : created");
+  previousRoundOfSleepFinished = true;
+  Serial.println("checkGoSleep : created");
   // if no task is running 
   while(true){
     // block itself first, untill we resume it
+    // Serial.println("checkGoSleep : suspended");
     vTaskSuspend(NULL);
+
     // if called resume, will go to here
-    if(isRunningTask == 0){
+    // Serial.println("checkGoSleep : resumed");
+    if(isRunningTask == 0 && previousRoundOfSleepFinished){
+      previousRoundOfSleepFinished = false;
       goToSleep(nextTaskPreserveTime_sec);
     }
   }
@@ -141,9 +147,10 @@ void checkGoSleep(void* pvParameters){
 
 
 void checkTimeAndTask(void* pvParameters){
+  Serial.println("checkTimeAndTask : created");
   while(true){
     // jump out to other tasks
-    vTaskDelay(500);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
 
     // Debug msg
     #ifdef CHECK_IS_NEED_TO_RUN_TASK
@@ -237,17 +244,18 @@ void checkTimeAndTask(void* pvParameters){
     
 
     // active the suspended task
-    vTaskResume(tCheckGoSleepHandler);
+    // vTaskResume(tCheckGoSleepHandler);
 
   }
 }
 
 // RTOS task of transmit record data
 void transmitSoundDataToSD(void* pvParameters){
+  Serial.println("transmitSoundDataToSD : created");
   const TickType_t xMaxBlockTime = pdMS_TO_TICKS(100);
   while (true) {
     // jump out to other tasks
-    vTaskDelay(500);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
     // wait RTOS signal about buffer full for 100 ms
     uint32_t ulNotificationValue = ulTaskNotifyTake(pdTRUE, xMaxBlockTime);
     // if have signal 
@@ -275,10 +283,14 @@ void transmitSoundDataToSD(void* pvParameters){
 /* Task A*/
 // RTOS task of recordSound
 void recordSound(void* pvParameters){
+  Serial.println("recordSound : created");
   while(true){
     // block itself first, untill we resume it
+    Serial.println("recordSound : suspended");
     vTaskSuspend(NULL);
+
     // calculate filename
+    Serial.println("recordSound : resumed");
     String recordPath = "/" + String(today) + "/" + String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday()) + "_" + String(channel_tag) + ".wav");
     char filename[40];
     strcpy(filename, recordPath.c_str());
@@ -302,14 +314,17 @@ void recordSound(void* pvParameters){
 /* Task B*/
 // RTOS task of recordDHT
 void recordDHT(void* pvParameters){
+  Serial.println("recordDHT : created");
   while(true){
     // block itself first, untill we resume it
+    Serial.println("recordDHT : suspended");
     vTaskSuspend(NULL);
   
     // if it was resumed by someone
     // try to power on the sensor
+    Serial.println("recordDHT : resumed");
     while(true){
-      vTaskDelay(500);
+      vTaskDelay(100 / portTICK_PERIOD_MS);
       // if got the power of control 
       if ( xSemaphoreTake( xSemaphore_Temp_PMOS, pdMS_TO_TICKS(100) ) == pdTRUE) {
         turnOnDhtPower();
@@ -320,14 +335,14 @@ void recordDHT(void* pvParameters){
     }
     
     // get data of temperature
-    vTaskDelay(500);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
     float temperature = DHT_get_temperature();
     #ifdef DHT_GET_TEMPERATURE_DEBUG
       Serial.println("DHT temperature : " + String(temperature) + " C");
     #endif
 
     // get data of humidity
-    vTaskDelay(500);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
     float humidity = DHT_get_Humidity();
     #ifdef DHT_GET_HUMIDITY_DEBUG
       Serial.println("DHT Humidity : " + String(humidity) + " %");
@@ -349,14 +364,17 @@ void recordDHT(void* pvParameters){
 /* Task C*/
 // RTOS task of recordDS18B20
 void recordDS18B20(void* pvParameters){
+  Serial.println("recordDS18B20 : created");
   while(true){
     // block itself first, untill we resume it
+    Serial.println("recordDS18B20 : suspended");
     vTaskSuspend(NULL);
 
     // if it was resumed by someone
     // try to power on the sensor
+    Serial.println("recordDS18B20 : resumed");
     while(true){
-      vTaskDelay(500);
+      vTaskDelay(100 / portTICK_PERIOD_MS);
       if( xSemaphoreTake( xSemaphore_Temp_PMOS, pdMS_TO_TICKS(100) ) == pdTRUE){
         turnOnDs18b20Power();
         // use delay to wait it fully powered 
@@ -366,7 +384,7 @@ void recordDS18B20(void* pvParameters){
     }
 
     // get data of temperature
-    vTaskDelay(500);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
     float temperature = getDS18B20Temp();
     #ifdef GET_DS18B20_TEMP_DEBUG
       Serial.println("DS18B20 : " + String(temperature) + " C");
@@ -388,12 +406,16 @@ void recordDS18B20(void* pvParameters){
 /* Task D*/
 // RTOS task of recordBattery
 void recordBattery(void* pvParameters){
+  Serial.println("recordBattery : created");
   while(true){
     // block itself first, untill we resume it
+    Serial.println("recordBattery : suspended");
     vTaskSuspend(NULL);
 
+    
     // if it was resumed by someone
     // read part 
+    Serial.println("recordBattery : resumed");
     #ifdef RECORD_BATTERY_DEBUG
       Serial.println("Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ " %)");
     #endif
@@ -480,7 +502,7 @@ void checkDayChange(){
         }xSemaphoreGive( xSemaphore_SD );
 
         // wakeup to feed dog
-        vTaskDelay(10);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
 
         // debug MSG part
         #ifdef GOTOSLEEP_DEBUG
@@ -508,11 +530,12 @@ void checkDayChange(){
           esp_light_sleep_start();
         #endif
       }xSemaphoreGive( xSemaphore_SD );
-      vTaskDelay(10);
+      vTaskDelay(100 / portTICK_PERIOD_MS);
 
       // every wakeup print a log
       getWakeupReason();
     }
+    previousRoundOfSleepFinished = true;
   }
 #else
   void SleepMethod( unsigned long aDuration ) {
