@@ -40,7 +40,8 @@ const String SCHEDULE_FILE = "schedule.txt";
 String today;
 String systemLogPath;
 String sensorDataPath;
-int nextTaskPreserveTime_min;
+// int nextTaskPreserveTime_min;
+int nextTaskPreserveTime_sec;
 
 // some status flag
 bool isRecording = false;
@@ -76,6 +77,7 @@ uint8_t *currentAudioBuffer  = (uint8_t *)malloc(sizeof(uint8_t) * globalSDBuffe
 uint8_t *transmitAudioBuffer = (uint8_t *)malloc(sizeof(uint8_t) * globalSDBufferByteSize);
 
 
+#define SECONDS_OF_A_DAY 86400   // a day : 86400 sec
 
 
 #endif

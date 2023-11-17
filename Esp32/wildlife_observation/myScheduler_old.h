@@ -240,7 +240,7 @@ void checkIsNeedToRunTask(){
     #endif
 
     // plus index or re-zero after all done
-    if(arrayReadIndex == arrayUsedIndex - 1){    // used always one more than read, because read is start from 0 ... 
+    if(arrayReadIndex == arrayUsedIndex - 1){    // used always have one more than read, because read is start from 0 ... 
       
       // lock all task, unlock is at check day change
       isTaskAllLock = true;

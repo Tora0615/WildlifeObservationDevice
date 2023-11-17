@@ -9,6 +9,7 @@
 int arrayMaxSize = 2;      // task array max 
 int arrayUsedIndex = 0;    // task array used
 int arrayReadIndex = 0;    // read position, re-zero when day change
+bool isCrossDay = false;
 
 typedef struct complexTask_t{
   int start_min_of_a_day;
@@ -363,25 +364,38 @@ void findTheMatchedArrayReadIndex(){
   int startTimeOfNext = 0;
 
   while(1){
-    // check 
-    if( getPassedSecOfToday() < startTimeOfNext * 60 ){
-      // rewind 1 index
-      arrayReadIndex -= 1;
-      break;
-    }
 
-    // get next 
+    // get next start from index 0
     if((taskArray + arrayReadIndex)->setType == 0){  // simple task
       startTimeOfNext = (taskArray + arrayReadIndex)->taskType.simple.start_min_of_a_day;
     }else{
       startTimeOfNext = (taskArray + arrayReadIndex)->taskType.complex.start_min_of_a_day;
     }
 
-    // index add
-    arrayReadIndex += 1;
+    // index add first 
+    arrayReadIndex += 1;  // it is start at 0
+
+    // check 
+    // if out of range
+    if (arrayReadIndex == arrayUsedIndex){
+      // reset to 0
+      arrayReadIndex = 0;
+      // turn on cross day flag
+      isCrossDay = true;
+      // write flag
+      writeMsgToPath(systemLogPath, "FindTheMatchedArrayReadIndex : Task array out of range, re-zero index");
+      break;
+    }
+    // In the range && match the case 
+    else if( getPassedSecOfToday() < startTimeOfNext * 60 ){
+      // rewind only one index
+      arrayReadIndex -= 1;
+      // write flag
+      writeMsgToPath(systemLogPath, "FindTheMatchedArrayReadIndex : " + String(arrayReadIndex));
+      break;
+    }
   }
 
-  nextTaskPreserveTime_min = startTimeOfNext;
   #ifdef SHOW_NEXT_TASK_WHEN_FIRST_START
     Serial.println( "Now : " + String(secMapTo24Hour(getPassedSecOfToday())) + ", next : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
   #endif
@@ -389,18 +403,18 @@ void findTheMatchedArrayReadIndex(){
 }
 
 // to find everyday's first task start time
-void findFirstTaskStartTime(){
-  int startTime = 0;
-  // get next 
-  if((taskArray + arrayReadIndex)->setType == 0){  // simple task
-    startTime = (taskArray + arrayReadIndex)->taskType.simple.start_min_of_a_day;
-  }else{
-    startTime = (taskArray + arrayReadIndex)->taskType.complex.start_min_of_a_day;
-  }
-  nextTaskPreserveTime_min = startTime;
+// void findFirstTaskStartTime(){
+//   int startTime = 0;
+//   // get next 
+//   if((taskArray + arrayReadIndex)->setType == 0){  // simple task
+//     startTime = (taskArray + arrayReadIndex)->taskType.simple.start_min_of_a_day;
+//   }else{
+//     startTime = (taskArray + arrayReadIndex)->taskType.complex.start_min_of_a_day;
+//   }
+//   nextTaskPreserveTime_min = startTime;
 
-  Serial.println( "pre-rewind the task time -- Now : " + String(secMapTo24Hour(getPassedSecOfToday())) + ", next day's first task : " + String(startTime) + "(" + String( minConvertTohour24(startTime) ) + ")");
-}
+//   Serial.println( "pre-rewind the task time -- Now : " + String(secMapTo24Hour(getPassedSecOfToday())) + ", next day's first task : " + String(startTime) + "(" + String( minConvertTohour24(startTime) ) + ")");
+// }
 
 
 
