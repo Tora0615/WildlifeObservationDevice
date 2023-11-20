@@ -70,7 +70,8 @@ SemaphoreHandle_t xSemaphore_Temp_PMOS = xSemaphoreCreateMutex();
 // skip evalution mode
 #define skipEvalution true
 
-
+// 
+#define KEEP_SET_TIME_FILE
 
 // a larger buffer befor save to SD (buffer level : DMA --> local function buffer --> 2* global larger buffer --> SD)
 const int globalSDBufferByteSize = 512 * 16;  // 512 uint8_t(byte) * 16 = 1 block of SD

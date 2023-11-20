@@ -8,14 +8,19 @@
 #include "RTClib.h"
 RTC_DS3231 rtc;  // default I2C address is : 0x57 (you can choose 0x57 ~ 0x50)
 DateTime now;
-bool isInit = true;
 
 const char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 uint32_t sys_RTC_time_offset;         // RTC clock. It will only change when first boot or date changed. First day equal the boot time, others day it will allways close to 0
 uint32_t sys_millis_time_offset;    // millis clock.
 
 void RTCInit(){
-  // Power part 
+  // init lib part
+  if (! rtc.begin()) {
+    Serial.println("Couldn't find RTC");
+    while (1) delay(1000);
+  }
+  
+  // Power part off
   pinMode(RTC_PMOS, OUTPUT);
   #ifdef RTC_DEBUG
     Serial.println("Turn off DS3231_RTC POWER");
@@ -31,24 +36,15 @@ void turnOnRtcPower(){
   #endif 
   digitalWrite(RTC_PMOS, LOW);   // Turn on.
 
-  // init lib part
-  if (! rtc.begin()) {
-    Serial.println("Couldn't find RTC");
-    while (1) delay(1000);
-  }
-
-  if(isInit){
-    delay(100);  
-  }
+  // wait it powered up
+  vTaskDelay(100 / portTICK_PERIOD_MS);
 }
 
 // use for first boot or day change 
 uint32_t GetHowManySecondsHasPassedTodayFromRtc(){    // since today 0:00
   // power on
-  if(isInit){
-    turnOnRtcPower();  // by task_scheduler
-    isInit = !isInit;
-  }
+  turnOnRtcPower();  
+
   
   // a day is 86400 sec
   now = rtc.now(); 
@@ -100,12 +96,8 @@ uint32_t getPassedMilliSecOfToday(){
 }
 
 
-void setTestTime(){
-  digitalWrite(RTC_PMOS, LOW);   // Turn on.
-  rtc.adjust(DateTime(2023, 10, 10, 0, 43, 0));
-  digitalWrite(RTC_PMOS, HIGH);   // Turn off.
-
-  Serial.println("RTC test mode ON");
+void printNow(){
+  turnOnRtcPower();  
   DateTime now = rtc.now();
   Serial.print(now.year(), DEC);
   Serial.print('/');
@@ -121,23 +113,40 @@ void setTestTime(){
   Serial.print(':');
   Serial.print(now.second(), DEC);
   Serial.println();
+  digitalWrite(RTC_PMOS,HIGH);   // Turn off.
 }
 
-void setTime(char *timeWords){
-  // parse the string
-  int YEAR    = (timeWords[0] - '0')*1000 + (timeWords[0] - '0')*100 + (timeWords[0] - '0')*10 + (timeWords[0] - '0');
-  int MONTH   = (timeWords[0] - '0')*10 + (timeWords[0] - '0');
-  int DAY     = (timeWords[0] - '0')*10 + (timeWords[0] - '0');
-  int HOUR_24 = (timeWords[0] - '0')*10 + (timeWords[0] - '0');
-  int MINUTE  = (timeWords[0] - '0')*10 + (timeWords[0] - '0');
-  int SECOND  = (timeWords[0] - '0')*10 + (timeWords[0] - '0');
+void setTestTime(){
+  turnOnRtcPower();  
+  rtc.adjust(DateTime(2023, 10, 10, 0, 43, 0));
+  digitalWrite(RTC_PMOS, HIGH);   // Turn off.
 
-  // execute settime 
+  Serial.println("RTC test mode ON");
+  printNow();
+}
+
+void setTime(char timeWords[]){
+  // parse the string
+  int YEAR    = (timeWords[0] - '0')*1000 + (timeWords[1] - '0')*100 + (timeWords[2] - '0')*10 + (timeWords[3] - '0');
+  int MONTH   = (timeWords[4] - '0')*10 + (timeWords[5] - '0');
+  int DAY     = (timeWords[6] - '0')*10 + (timeWords[7] - '0');
+  int HOUR_24 = (timeWords[8] - '0')*10 + (timeWords[9] - '0');
+  int MINUTE  = (timeWords[10] - '0')*10 + (timeWords[11] - '0');
+  int SECOND  = (timeWords[12] - '0')*10 + (timeWords[13] - '0');
+
+  // execute set time 
+  turnOnRtcPower();  
   rtc.adjust(DateTime(YEAR, MONTH, DAY, HOUR_24, MINUTE, SECOND));
+  digitalWrite(RTC_PMOS,HIGH);   // Turn off.
+  Serial.println(String(YEAR) + "/" + String(MONTH) + "/" + String(DAY) + "/" + String(HOUR_24) + "/" + String(MINUTE) + "/" + String(SECOND));
 
   // show light 
   // skip
+
+  Serial.print("Set time from file successful, now : ");
+  printNow();
 }
+
 
 
 #endif

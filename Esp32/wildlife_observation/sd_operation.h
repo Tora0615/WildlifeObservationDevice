@@ -178,11 +178,8 @@ void checkAndCreateFile(String path){
 }
 
 
-
-
 void checkRtcAdjustFile(){
   char timeWords[15] = {0};
-  long theTimeNeedToBeSet = -1;
   #ifdef SD_USE_BASIC
     FsFile setTimeFile;
   #else
@@ -196,21 +193,22 @@ void checkRtcAdjustFile(){
       Serial.println("open RTC set file failed"); 
     }
 
-    // read a line 
-    int n = setTimeFile.fgets(timeWords, sizeof(timeWords));  // e.q. 20231109203200 -> 14 nums
-    if (timeWords[n - 1] != '\n' && n == (sizeof(timeWords) - 1)) {
-      Serial.println("time format illegal, it is too long");
+    // read all 14 char
+    for (int i=0; i<14; i++){
+      timeWords[i] = setTimeFile.read();
     }
+    timeWords[14] = '\0';
 
     // finished
     setTimeFile.close();
-    sd.remove("setTime.txt");
+    #ifdef KEEP_SET_TIME_FILE
+      Serial.println("!! Don't forgot to adjust the setting of change time by file !!");
+    #else
+      sd.remove("setTime.txt");
+    #endif
   }
 
-  // if need to set time, then do it
-  if(theTimeNeedToBeSet != -1){
-    setTime(timeWords);
-  }
+  setTime(timeWords);
 }
 
 #endif

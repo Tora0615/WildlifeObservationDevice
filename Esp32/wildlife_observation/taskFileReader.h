@@ -259,9 +259,9 @@ void checkScheduleFileExist(){
       "請將 example_schedule.txt 重新命名成 schedule.txt，程式才能正確執行\n"
       "\n"
       "常用換算 : \n"
-      "01 min = 0.016 hr = 60 sec\n"
-      "05 min = 0.083 hr = 300 sec\n"
-      "10 min = 0.166 hr = 600 sec\n"
+      "01 min = 0.0166 hr = 60 sec\n"
+      "05 min = 0.0833 hr = 300 sec\n"
+      "10 min = 0.1666 hr = 600 sec\n"
       "15 min = 0.25  hr = 900 sec\n"
       "30 min = 0.5   hr = 1800 sec\n"
       "45 min = 0.75  hr = 2700 sec\n"
@@ -362,14 +362,17 @@ void addAllTaskFromFile(){
 
 void findTheMatchedArrayReadIndex(){
   int startTimeOfNext = 0;
+  char task_code;
 
   while(1){
 
-    // get next start from index 0
+    // get next start from index 0 (arrayReadIndex start from 0)
     if((taskArray + arrayReadIndex)->setType == 0){  // simple task
       startTimeOfNext = (taskArray + arrayReadIndex)->taskType.simple.start_min_of_a_day;
+      task_code = (taskArray + arrayReadIndex)->taskType.simple.task;
     }else{
       startTimeOfNext = (taskArray + arrayReadIndex)->taskType.complex.start_min_of_a_day;
+      task_code = (taskArray + arrayReadIndex)->taskType.complex.task;
     }
 
     // index add first 
@@ -384,6 +387,17 @@ void findTheMatchedArrayReadIndex(){
       isCrossDay = true;
       // write flag
       writeMsgToPath(systemLogPath, "FindTheMatchedArrayReadIndex : Task array out of range, re-zero index");
+      Serial.println("FindTheMatchedArrayReadIndex : Task array out of range, re-zero index");
+      
+      // read again from index 0
+      if((taskArray + arrayReadIndex)->setType == 0){  // simple task
+        startTimeOfNext = (taskArray + arrayReadIndex)->taskType.simple.start_min_of_a_day;
+        task_code = (taskArray + arrayReadIndex)->taskType.simple.task;
+      }else{
+        startTimeOfNext = (taskArray + arrayReadIndex)->taskType.complex.start_min_of_a_day;
+        task_code = (taskArray + arrayReadIndex)->taskType.complex.task;
+      }
+
       break;
     }
     // In the range && match the case 
@@ -392,29 +406,16 @@ void findTheMatchedArrayReadIndex(){
       arrayReadIndex -= 1;
       // write flag
       writeMsgToPath(systemLogPath, "FindTheMatchedArrayReadIndex : " + String(arrayReadIndex));
+      Serial.println("FindTheMatchedArrayReadIndex : " + String(arrayReadIndex));
       break;
     }
   }
 
   #ifdef SHOW_NEXT_TASK_WHEN_FIRST_START
-    Serial.println( "Now : " + String(secMapTo24Hour(getPassedSecOfToday())) + ", next : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+    Serial.println("Now : " + String(secMapTo24Hour(getPassedSecOfToday())) + ", next : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + "), code : " + String(task_code));
   #endif
-  writeMsgToPath(systemLogPath, "Now : " + String(secMapTo24Hour(getPassedSecOfToday())) + ", next : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+  writeMsgToPath(systemLogPath, "Now : " + String(secMapTo24Hour(getPassedSecOfToday())) + ", next : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + "), code : " + String(task_code));
 }
-
-// to find everyday's first task start time
-// void findFirstTaskStartTime(){
-//   int startTime = 0;
-//   // get next 
-//   if((taskArray + arrayReadIndex)->setType == 0){  // simple task
-//     startTime = (taskArray + arrayReadIndex)->taskType.simple.start_min_of_a_day;
-//   }else{
-//     startTime = (taskArray + arrayReadIndex)->taskType.complex.start_min_of_a_day;
-//   }
-//   nextTaskPreserveTime_min = startTime;
-
-//   Serial.println( "pre-rewind the task time -- Now : " + String(secMapTo24Hour(getPassedSecOfToday())) + ", next day's first task : " + String(startTime) + "(" + String( minConvertTohour24(startTime) ) + ")");
-// }
 
 
 
