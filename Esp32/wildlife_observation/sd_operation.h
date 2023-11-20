@@ -70,9 +70,9 @@ void writeMsgToPath(String path, String msg, String customTimeStamp = "", bool r
   
   
   while(true){
-    vTaskDelay(500);
+    vTaskDelay(50);
     // if got the power of control, lock SD opreation 
-    if(xSemaphoreTake( xSemaphore_SD, pdMS_TO_TICKS(100) ) == pdTRUE){
+    if(xSemaphoreTake( xSemaphore_SD, pdMS_TO_TICKS(50) ) == pdTRUE){
       #ifdef SD_WRITE_MSG_DEBUG
         Serial.println("Got Semaphore : " + String(millis()));
       #endif

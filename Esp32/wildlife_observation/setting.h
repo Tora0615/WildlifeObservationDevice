@@ -13,6 +13,7 @@
 #define GET_DS18B20_TEMP_DEBUG
 #define DHT_GET_TEMPERATURE_DEBUG   // value
 #define DHT_GET_HUMIDITY_DEBUG      // value
+// #define RTOS_DETIAL
 /*--- taskFileReader ---*/
 // #define PARSE_TASK_DEBUG
 // #define ADD_REPEAT_WORKS_DEBUG
@@ -31,7 +32,7 @@
 /*--- utils ---*/ 
 // CAN'T set here(?), please see that file
 /*--- myScheduler ---*/
-// #define GOTOSLEEP_DEBUG
+#define GOTOSLEEP_DEBUG
 // #define FEED_DOG_DEBUG
 // #define USE_DEEP_SLEEP
 

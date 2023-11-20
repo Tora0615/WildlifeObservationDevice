@@ -40,6 +40,7 @@ void setup() {
   checkAndCreateFile(systemLogPath);
   sensorDataPath = today + "/SENSOR_DATA.txt";
   checkAndCreateFile(sensorDataPath);
+
   
 
   // print reboot msg if not first boot (sd is new)
@@ -47,20 +48,20 @@ void setup() {
   if (notfirstBoot) getResetReason();
 
   // check schedule and setting doc
-  checkScheduleFileExist();
-  addAllTaskFromFile();
-  findTheMatchedArrayReadIndex();
+  checkScheduleFileExist(); 
+  addAllTaskFromFile(); 
+  findTheMatchedArrayReadIndex(); 
 
   // system advance part inint
-  batteryMonitorInit();
-  DS18B20Init();
-  DHT_init();
+  batteryMonitorInit(); 
+  DS18B20Init(); 
+  DHT_init(); 
 
   // shine and close
-  showInitFinishedLED();
+  showInitFinishedLED(); 
 
   // use dual core by RTOS 
-  createRTOSTasks();
+  createRTOSTasks(); 
 }
 
 

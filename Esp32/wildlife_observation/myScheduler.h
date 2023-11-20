@@ -77,7 +77,7 @@ void createRTOSTasks() {
       "transmitSoundDataToSD",                         /* name of task. */
       8192,                                  /* Stack size of task */
       NULL,                                   /* parameter of the task */
-      3,                                      /* priority of the task */
+      4,                                      /* priority of the task */
       &tSdTransmitHandler,                       /* task handle */
       OTHER_TASK_CPU                          /* CPU core */
     );
@@ -87,7 +87,7 @@ void createRTOSTasks() {
       "recordSound",                         /* name of task. */
       8192,                                  /* Stack size of task */
       NULL,                                   /* parameter of the task */
-      4,                                      /* priority of the task */
+      5,                                      /* priority of the task */
       &tRecordSoundHandler,                       /* task handle */
       OTHER_TASK_CPU                          /* CPU core */
     );
@@ -132,11 +132,16 @@ void checkGoSleep(void* pvParameters){
   // if no task is running 
   while(true){
     // block itself first, untill we resume it
-    // Serial.println("checkGoSleep : suspended");
+    #ifdef RTOS_DETIAL
+      Serial.println("checkGoSleep : suspended");
+    #endif
     vTaskSuspend(NULL);
 
     // if called resume, will go to here
-    // Serial.println("checkGoSleep : resumed");
+    #ifdef RTOS_DETIAL
+      Serial.println("checkGoSleep : resumed");
+    #endif
+    Serial.print("isRunningTask : " + String(isRunningTask)); Serial.println(", previousRoundOfSleepFinished : " + String(previousRoundOfSleepFinished));
     if(isRunningTask == 0 && previousRoundOfSleepFinished){
       previousRoundOfSleepFinished = false;
       goToSleep(nextTaskPreserveTime_sec);
@@ -241,10 +246,17 @@ void checkTimeAndTask(void* pvParameters){
       // normal 
       nextTaskPreserveTime_sec = startTimeOfNext * 60 - getPassedSecOfToday();
     }
-    
+    Serial.println("checkTimeAndTask -- nextTaskPreserveTime_sec : " + String(nextTaskPreserveTime_sec));
+    char task_code;
+    if((taskArray + arrayReadIndex)->setType == 0){  // simple task
+      task_code = (taskArray + arrayReadIndex)->taskType.simple.task;
+    }else{
+      task_code = (taskArray + arrayReadIndex)->taskType.complex.task;
+    }
+    Serial.println("checkTimeAndTask -- nextTask : " + String(task_code));
 
-    // active the suspended task
-    // vTaskResume(tCheckGoSleepHandler);
+    // active the suspended sleep task
+    vTaskResume(tCheckGoSleepHandler);
 
   }
 }
@@ -286,11 +298,15 @@ void recordSound(void* pvParameters){
   Serial.println("recordSound : created");
   while(true){
     // block itself first, untill we resume it
-    Serial.println("recordSound : suspended");
+    #ifdef RTOS_DETIAL
+      Serial.println("recordSound : suspended");
+    #endif
     vTaskSuspend(NULL);
 
     // calculate filename
-    Serial.println("recordSound : resumed");
+    #ifdef RTOS_DETIAL
+      Serial.println("recordSound : resumed");
+    #endif
     String recordPath = "/" + String(today) + "/" + String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday()) + "_" + String(channel_tag) + ".wav");
     char filename[40];
     strcpy(filename, recordPath.c_str());
@@ -317,12 +333,16 @@ void recordDHT(void* pvParameters){
   Serial.println("recordDHT : created");
   while(true){
     // block itself first, untill we resume it
-    Serial.println("recordDHT : suspended");
+    #ifdef RTOS_DETIAL
+      Serial.println("recordDHT : suspended");
+    #endif
     vTaskSuspend(NULL);
   
     // if it was resumed by someone
     // try to power on the sensor
-    Serial.println("recordDHT : resumed");
+    #ifdef RTOS_DETIAL
+      Serial.println("recordDHT : resumed");
+    #endif
     while(true){
       vTaskDelay(100 / portTICK_PERIOD_MS);
       // if got the power of control 
@@ -367,12 +387,16 @@ void recordDS18B20(void* pvParameters){
   Serial.println("recordDS18B20 : created");
   while(true){
     // block itself first, untill we resume it
-    Serial.println("recordDS18B20 : suspended");
+    #ifdef RTOS_DETIAL
+      Serial.println("recordDS18B20 : suspended");
+    #endif
     vTaskSuspend(NULL);
 
     // if it was resumed by someone
     // try to power on the sensor
-    Serial.println("recordDS18B20 : resumed");
+    #ifdef RTOS_DETIAL
+      Serial.println("recordDS18B20 : resumed");
+    #endif
     while(true){
       vTaskDelay(100 / portTICK_PERIOD_MS);
       if( xSemaphoreTake( xSemaphore_Temp_PMOS, pdMS_TO_TICKS(100) ) == pdTRUE){
@@ -396,9 +420,8 @@ void recordDS18B20(void* pvParameters){
     // write SD 
     writeMsgToPath(sensorDataPath, "DS18B20 : " + String(temperature) + " C", DS18B20_TimeStamp);
     
-    // release sleep lock and delete task
+    // release sleep lock 
     isRunningTask -= 1;
-    vTaskDelete(NULL);
   }
 }
 
@@ -409,13 +432,17 @@ void recordBattery(void* pvParameters){
   Serial.println("recordBattery : created");
   while(true){
     // block itself first, untill we resume it
-    Serial.println("recordBattery : suspended");
+    #ifdef RTOS_DETIAL
+      Serial.println("recordBattery : suspended");
+    #endif
     vTaskSuspend(NULL);
 
     
     // if it was resumed by someone
     // read part 
-    Serial.println("recordBattery : resumed");
+    #ifdef RTOS_DETIAL
+      Serial.println("recordBattery : resumed");
+    #endif
     #ifdef RECORD_BATTERY_DEBUG
       Serial.println("Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ " %)");
     #endif
@@ -475,7 +502,7 @@ void checkDayChange(){
 #if defined( ARDUINO_ARCH_ESP32 )  
   void goToSleep(int sleepTime_sec) {
     // have X sec to sleep
-    int canSleepMs =  ((sleepTime_sec  * 1000) - getPassedMilliSecOfToday()) - 10;
+    int canSleepMs =  sleepTime_sec  * 1000;  // Serial.println("canSleepMs : " + String(canSleepMs));
     if(canSleepMs > 100){
       #ifdef GOTOSLEEP_DEBUG
         #ifdef FEED_DOG_DEBUG
@@ -486,14 +513,14 @@ void checkDayChange(){
       writeMsgToPath(systemLogPath, "Go to sleep for : " + String(canSleepMs/1000.0f) + " sec");
 
       int oneMinTimes = canSleepMs / (1000 * 60);
-      int remainMs = canSleepMs % (1000 * 30);
+      int remainMs = canSleepMs % (1000 * 60);
 
       // loop sleep part of long time
       for(int i=0; i<oneMinTimes; i++){
 
         // lock if write sd not finished
         if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
-          esp_sleep_enable_timer_wakeup(30 * 1000 * ms_TO_uS_FACTOR);
+          esp_sleep_enable_timer_wakeup(60 * 1000 * ms_TO_uS_FACTOR);
           #ifdef USE_DEEP_SLEEP
             esp_deep_sleep_start();
           #else
@@ -502,14 +529,14 @@ void checkDayChange(){
         }xSemaphoreGive( xSemaphore_SD );
 
         // wakeup to feed dog
-        vTaskDelay(100 / portTICK_PERIOD_MS);
+        vTaskDelay(40 / portTICK_PERIOD_MS);
 
         // debug MSG part
         #ifdef GOTOSLEEP_DEBUG
           #ifdef FEED_DOG_DEBUG
             Serial.println(String(secMapTo24Hour(getPassedSecOfToday())));
           #endif
-          Serial.println("Have slept for : " + String( (i+1) * 0.5) + " min. Wake up to feed dog.");
+          Serial.println("Have slept for : " + String( (i+1) ) + " min. Wake up to feed dog.");
         #endif
       }
 
@@ -530,11 +557,14 @@ void checkDayChange(){
           esp_light_sleep_start();
         #endif
       }xSemaphoreGive( xSemaphore_SD );
-      vTaskDelay(100 / portTICK_PERIOD_MS);
+      vTaskDelay(40 / portTICK_PERIOD_MS);
 
       // every wakeup print a log
       getWakeupReason();
     }
+    // After sleep finished, wait long enough to check task
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+    // then release sleep lock
     previousRoundOfSleepFinished = true;
   }
 #else
