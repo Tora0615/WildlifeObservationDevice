@@ -2,7 +2,7 @@
 #define UTILLS_H
 
 #define PRINT_RESET_REASON
-// #define PRINT_WAKEUP_REASON
+#define PRINT_WAKEUP_REASON
 
 void turnOnLed(){
   pinMode(16, OUTPUT);

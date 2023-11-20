@@ -39,7 +39,7 @@ void goToSleep(int sleepTime_sec);
 /* RTOS handler */
 TaskHandle_t tCheckGoSleepHandler;
 TaskHandle_t tCheckTimeAndTaskHandler;
-  TaskHandle_t tSdTransmitHandler;
+  // TaskHandle_t tSdTransmitHandler;  --> at myINMP file
   TaskHandle_t tRecordSoundHandler;
   TaskHandle_t tRecordDHTHandler;
   TaskHandle_t tRecordDS18B20Handler;
@@ -85,7 +85,7 @@ void createRTOSTasks() {
     xTaskCreatePinnedToCore(
       recordSound,                           /* Task function. */
       "recordSound",                         /* name of task. */
-      8192,                                  /* Stack size of task */
+      20480,                                  /* Stack size of task */
       NULL,                                   /* parameter of the task */
       5,                                      /* priority of the task */
       &tRecordSoundHandler,                       /* task handle */
@@ -231,8 +231,10 @@ void checkTimeAndTask(void* pvParameters){
       // swift to next task and check it is cross day or not
       arrayReadIndex +=1;
       if (arrayReadIndex == arrayUsedIndex){
+        Serial.println("checkTimeAndTask : Task array out of range, it is cross-day task! Re-zero index now.");
         writeMsgToPath(systemLogPath, "checkTimeAndTask : Task array out of range, it is cross-day task! Re-zero index now.");
         arrayReadIndex = 0;
+        // lock the task
         isCrossDay = true;
       }
     }
@@ -241,6 +243,7 @@ void checkTimeAndTask(void* pvParameters){
     // save sleep time to global variable
     if(isCrossDay){
       // change day
+      Serial.println("checkTimeAndTask -- This sleep will cross day");
       nextTaskPreserveTime_sec = SECONDS_OF_A_DAY - getPassedSecOfToday() + startTimeOfNext * 60;
     }else{
       // normal 
@@ -461,6 +464,7 @@ void checkDayChange(){
     Serial.println("check day change");
   #endif
 
+  // confirmed that the day is changed
   if( getPassedSecOfToday() > SECONDS_OF_A_DAY){  
     turnOnRtcPower();
     // use delay to wait it fully powered 
@@ -493,6 +497,9 @@ void checkDayChange(){
     if(!isFirstCheckEvaluation){
       checkEvaluation();
     }
+
+    // release the task lock
+    isCrossDay = false;
   }
 }
 

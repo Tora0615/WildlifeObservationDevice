@@ -383,7 +383,7 @@ void findTheMatchedArrayReadIndex(){
     if (arrayReadIndex == arrayUsedIndex){
       // reset to 0
       arrayReadIndex = 0;
-      // turn on cross day flag
+      // turn on cross day flag (lock the task)
       isCrossDay = true;
       // write flag
       writeMsgToPath(systemLogPath, "FindTheMatchedArrayReadIndex : Task array out of range, re-zero index");

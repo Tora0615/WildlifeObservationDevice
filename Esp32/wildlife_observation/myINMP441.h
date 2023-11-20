@@ -10,13 +10,11 @@
 
 #include "MEMS_INMP441.h"
 INMP441 microphone(I2S_SCK_IO, I2S_WS_IO, I2S_DI_IO);
+TaskHandle_t tSdTransmitHandler;
 
 // use to save the signal of buffer full & can start to save to SD
-TaskHandle_t tTransmitHandle;
 int bufferIndex = 0;
 char *_filenameWithPath;
-
-
 
 
 // execute a single byte
@@ -29,7 +27,7 @@ void exportSingleData(uint8_t input){
     // re-zero
     bufferIndex = 0;
     // send a signal via RTOS to write SD
-    xTaskNotify(tTransmitHandle, 1, eIncrement);
+    xTaskNotify(tSdTransmitHandler, 1, eIncrement);
   }
 }
 
