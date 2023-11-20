@@ -14,7 +14,7 @@ bool isCrossDay = false;
 typedef struct complexTask_t{
   int start_min_of_a_day;
   char task;
-  float time;
+  int time;
   char channel;
   float multiple;
 }complexTask;
@@ -145,13 +145,13 @@ myTask parseTasks(String input){
   if(lenCount == 3){
     tempTask.taskType.complex.start_min_of_a_day = hour24ConvetToMin(atoi(temp[0]));
     tempTask.taskType.complex.task = temp[1][0];
-    tempTask.taskType.complex.time = atof(temp[2]);
+    tempTask.taskType.complex.time = atoi(temp[2]);
     tempTask.taskType.complex.channel = ' ';
     tempTask.taskType.complex.multiple = 0.0;
   }else{
     tempTask.taskType.complex.start_min_of_a_day = hour24ConvetToMin(atoi(temp[0]));
     tempTask.taskType.complex.task = temp[1][0];
-    tempTask.taskType.complex.time = atof(temp[2]);
+    tempTask.taskType.complex.time = atoi(temp[2]);
     tempTask.taskType.complex.channel = temp[3][0];
     tempTask.taskType.complex.multiple = atof(temp[4]);
   }
@@ -180,7 +180,7 @@ void addRepeatWorks(myTask *inputTaskArray){
       #endif
     }else{
       // count repeat time
-      int repeatTime = 24.0 / ((inputTaskArray+i)->taskType.complex.time);
+      int repeatTime = 24.0 * 60 / ((inputTaskArray+i)->taskType.complex.time);
       #ifdef ADD_REPEAT_WORKS_DEBUG
         Serial.println("repeatTime : " + String(repeatTime));
       #endif
@@ -190,7 +190,7 @@ void addRepeatWorks(myTask *inputTaskArray){
         myTask tempTask;        // !!same address, if malloc will be different!!
         tempTask.setType = 0;
         tempTask.taskType.simple.task = ( (inputTaskArray+i)->taskType.complex.task );
-        tempTask.taskType.simple.start_min_of_a_day = ( (inputTaskArray+i)->taskType.complex.start_min_of_a_day) + j * ((inputTaskArray+i)->taskType.complex.time) * 60;
+        tempTask.taskType.simple.start_min_of_a_day = ( (inputTaskArray+i)->taskType.complex.start_min_of_a_day) + j * ((inputTaskArray+i)->taskType.complex.time);
         addTask(&temptaskArray, &tempTask, &tempArrayMaxSize, &tempArrayUsedIndex);
 
         #ifdef ADD_REPEAT_WORKS_DEBUG
@@ -239,9 +239,9 @@ void checkScheduleFileExist(){
       "2030,A,900,B,1\n"
       "2200,A,900,R,1.5\n"
       "2230,A,900,R,1\n"
-      "0000,B,0.166\n"
-      "0000,C,0.166\n"
-      "0000,D,0.166\n"
+      "0000,B,10\n"
+      "0000,C,10\n"
+      "0000,D,10\n"
       "#---------\n"
       "任務代碼 : \n"
       "A : Sound (INMP441)\n"
@@ -251,21 +251,21 @@ void checkScheduleFileExist(){
       "\n"
       "參數說明 : \n"
       "任務 A\n"
-      "初始時間 (24小時制,無標點), 任務代碼, 執行時間(sec), L/R/B (聲道左/右/兩者), 音量幾倍 (基準為1，建議範圍 : 0.5 ~ 2倍)\n"
+      "初始時間 (24小時制,無標點,不可有小數點), 任務代碼, 執行時間(sec,不可有小數點), L/R/B (聲道左/右/兩者), 音量幾倍 (基準為1，建議範圍 : 0.5 ~ 2倍)\n"
       "任務 BCD\n"
-      "初始時間 (24小時制,無標點), 任務代碼, 執行間隔(hr)\n"
+      "初始時間 (24小時制,無標點,不可有小數點), 任務代碼, 執行間隔(min,不可有小數點)\n"
       "\n"
       "其他 : \n"
       "請將 example_schedule.txt 重新命名成 schedule.txt，程式才能正確執行\n"
       "\n"
       "常用換算 : \n"
-      "01 min = 0.0166 hr = 60 sec\n"
-      "05 min = 0.0833 hr = 300 sec\n"
-      "10 min = 0.1666 hr = 600 sec\n"
-      "15 min = 0.25  hr = 900 sec\n"
-      "30 min = 0.5   hr = 1800 sec\n"
-      "45 min = 0.75  hr = 2700 sec\n"
-      "60 min = 1     hr = 3600 sec\n"
+      "01 min = 60 sec\n"
+      "05 min = 300 sec\n"
+      "10 min = 600 sec\n"
+      "15 min = 900 sec\n"
+      "30 min = 1800 sec\n"
+      "45 min = 2700 sec\n"
+      "60 min = 3600 sec\n"
     ,"", true, false);   // custem timestamp msg, append, timestamp
 
     // delay and show light
