@@ -322,11 +322,11 @@ void recordSound(void* pvParameters){
 
     // recognize channel tag
     if(channel_tag == 'B'){
-      recordWithDualChannel(recordTime, filename, gain_ratio);
+      startTheRecord(recordTime, filename, gain_ratio, CHANNEL_STEREO);
     }else if(channel_tag == 'L'){
-      recordWithMonoChannel(recordTime, filename, gain_ratio, CHANNEL_LEFT);
+      startTheRecord(recordTime, filename, gain_ratio, CHANNEL_LEFT);
     }else if(channel_tag == 'R'){
-      recordWithMonoChannel(recordTime, filename, gain_ratio, CHANNEL_RIGHT);
+      startTheRecord(recordTime, filename, gain_ratio, CHANNEL_RIGHT);
     }
   }
 }
