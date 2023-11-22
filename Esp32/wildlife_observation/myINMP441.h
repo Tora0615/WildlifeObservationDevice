@@ -132,9 +132,6 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
       // for busy wait
       unsigned long busy_wait_intervalTimer = micros(); 
 
-      // RESET WATCHDOG
-      vTaskDelay(10);
-
       // read a size
       #ifdef RECORD_TIME_DEBUG
         int tempreadtime = millis();
@@ -163,9 +160,10 @@ void recordWithDualChannel(int recordSeconds, char *filenameWithPath, float gain
       #ifdef RECORD_TIME_DEBUG
         int busyWaitTime = micros();
       #endif
-      while (micros() - busy_wait_intervalTimer < intervalTotalLen) {
-        // jump out to other tasks
-        vTaskDelay(10);
+      // jump out to other tasks with interger delay ms time first 
+      vTaskDelay(intervalTotalLen / 1000 / portTICK_PERIOD_MS);           // us to ms. e.g. : 5805 uS -> 5 mS
+      while (micros() - busy_wait_intervalTimer < intervalTotalLen) {     // e.g. remain 805 uS
+        // Do nothing, just busy wait the remaining time. 
       }
       #ifdef RECORD_TIME_DEBUG
         busyWait_duration += micros() - busyWaitTime;
@@ -284,9 +282,6 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
       // for busy wait
       unsigned long busy_wait_intervalTimer = micros(); 
 
-      // RESET WATCHDOG
-      vTaskDelay(10);
-
       // read a size
       #ifdef RECORD_TIME_DEBUG
         int tempreadtime = millis();
@@ -315,9 +310,10 @@ void recordWithMonoChannel(int recordSeconds, char *filenameWithPath, float gain
       #ifdef RECORD_TIME_DEBUG
         int busyWaitTime = micros();
       #endif
+      // jump out to other tasks with interger delay ms time first 
+      vTaskDelay(intervalTotalLen / 1000 / portTICK_PERIOD_MS);  // us to ms. e.g. : 5805 us -> 5 ms
       while (micros() - busy_wait_intervalTimer < intervalTotalLen) {
-        // jump out to other tasks
-        vTaskDelay(10);
+        // Do nothing, just busy wait the remaining time. 
       }
       #ifdef RECORD_TIME_DEBUG
         busyWait_duration += micros() - busyWaitTime;

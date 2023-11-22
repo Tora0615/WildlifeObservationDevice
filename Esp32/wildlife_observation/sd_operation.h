@@ -6,7 +6,7 @@
 #include <SPI.h>
 #include "SdFat.h"
 #include "sdios.h"
-#define SPI_SPEED SD_SCK_MHZ(10)
+#define SPI_SPEED SD_SCK_MHZ(15)
 #define CHIP_SELECT 5
 const int8_t DISABLE_CHIP_SELECT = -1;
 

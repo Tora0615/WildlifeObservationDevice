@@ -45,7 +45,6 @@ TaskHandle_t tCheckTimeAndTaskHandler;
   TaskHandle_t tRecordDS18B20Handler;
   TaskHandle_t tRecordBatteryHandler;
 
-
 void createRTOSTasks() {
   // hide evaluation check here
   checkEvaluation();
@@ -121,8 +120,10 @@ void createRTOSTasks() {
       &tRecordBatteryHandler,                       /* task handle */
       OTHER_TASK_CPU                          /* CPU core */
     );
-
+  // OTHER_TASK_CPU
+  // INMP_CPU
 }
+
 
 
 
@@ -268,6 +269,13 @@ void checkTimeAndTask(void* pvParameters){
 void transmitSoundDataToSD(void* pvParameters){
   Serial.println("transmitSoundDataToSD : created");
   const TickType_t xMaxBlockTime = pdMS_TO_TICKS(100);
+  // SD setting 
+  #ifdef SD_USE_NORMAL
+    FsFile soundFile;
+  #else
+    ExFile soundFile;
+  #endif
+  // task part 
   while (true) {
     // jump out to other tasks
     vTaskDelay(500 / portTICK_PERIOD_MS);
@@ -277,12 +285,6 @@ void transmitSoundDataToSD(void* pvParameters){
     if(ulNotificationValue > 0){
       // lock SD and write
       if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
-        // SD setting 
-        #ifdef SD_USE_NORMAL
-          FsFile soundFile;
-        #else
-          ExFile soundFile;
-        #endif
         if (!soundFile.open(_filenameWithPath, O_WRONLY | O_CREAT | O_APPEND )) {     // open need char array, not string. So use c_str to convert
           Serial.println(" --> open file failed, transmitToSD");
           continue;
