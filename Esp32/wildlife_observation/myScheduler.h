@@ -278,7 +278,7 @@ void transmitSoundDataToSD(void* pvParameters){
   // task part 
   while (true) {
     // jump out to other tasks
-    vTaskDelay(500 / portTICK_PERIOD_MS);
+    // vTaskDelay(500 / portTICK_PERIOD_MS);
     // wait RTOS signal about buffer full for 100 ms
     uint32_t ulNotificationValue = ulTaskNotifyTake(pdTRUE, xMaxBlockTime);
     // if have signal 
