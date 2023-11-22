@@ -206,9 +206,9 @@ void checkRtcAdjustFile(){
     #else
       sd.remove("setTime.txt");
     #endif
-  }
 
-  setTime(timeWords);
+    setTime(timeWords);
+  }
 }
 
 #endif

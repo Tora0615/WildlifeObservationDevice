@@ -138,10 +138,6 @@ void setTime(char timeWords[]){
   turnOnRtcPower();  
   rtc.adjust(DateTime(YEAR, MONTH, DAY, HOUR_24, MINUTE, SECOND));
   digitalWrite(RTC_PMOS,HIGH);   // Turn off.
-  Serial.println(String(YEAR) + "/" + String(MONTH) + "/" + String(DAY) + "/" + String(HOUR_24) + "/" + String(MINUTE) + "/" + String(SECOND));
-
-  // show light 
-  // skip
 
   Serial.print("Set time from file successful, now : ");
   printNow();
