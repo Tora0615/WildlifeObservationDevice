@@ -74,7 +74,7 @@ SemaphoreHandle_t xSemaphore_Temp_PMOS = xSemaphoreCreateMutex();
 #define KEEP_SET_TIME_FILE
 
 // a larger buffer befor save to SD (buffer level : DMA --> local function buffer --> 2* global larger buffer --> SD)
-const int globalSDBufferByteSize = 512 * 16;  // 512 uint8_t(byte) * 16 = 1 block of SD
+const int globalSDBufferByteSize = 512 * 16;  // 1 x uint8_t(byte) * 512  * 16 = 1 block of SD
 uint8_t *currentAudioBuffer  = (uint8_t *)malloc(sizeof(uint8_t) * globalSDBufferByteSize);  
 uint8_t *transmitAudioBuffer = (uint8_t *)malloc(sizeof(uint8_t) * globalSDBufferByteSize);
 

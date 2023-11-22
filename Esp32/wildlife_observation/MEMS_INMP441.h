@@ -21,6 +21,10 @@
 class INMP441{
   public:
 
+    /*
+    * @brief How many byte per second. 
+    * @Formula：SAMPLE_RATE * CHANNEL * DATA_BIT / 8 
+    */
     int bytePerSecond;
     int totalDataLen;
     uint8_t blockAlign;
