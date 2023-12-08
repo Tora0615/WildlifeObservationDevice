@@ -474,41 +474,52 @@ void checkDayChange(){
   #endif
 
   // confirmed that the day is changed
+  // local time crossed day 
   if( getPassedSecOfToday() > SECONDS_OF_A_DAY){  
     turnOnRtcPower();
     // use delay to wait it fully powered 
     vTaskDelay(500 / portTICK_PERIOD_MS);
 
-    // if > a day, calibrate with RTC timer
-    sys_RTC_time_offset = GetHowManySecondsHasPassedTodayFromRtc();
-    sys_millis_time_offset = millis();   // notice : millis only can count 49 days
-    Serial.println("day changed");
-    // Write log
-    writeMsgToPath(systemLogPath, "===> Day changed ", "", false, false);
+    /* calibrate local time with RTC timer */
+    uint32_t tempRtcTime = GetHowManySecondsHasPassedTodayFromRtc();
+    
+    // if local time && RTC time both cross day (normal situation) or RTC cross day but local not
+    // 1hr tolerance range 
+    if(tempRtcTime < 3600){
+      sys_RTC_time_offset = tempRtcTime;
+      sys_millis_time_offset = millis();   // notice : millis only can count 49 days
+      Serial.println("day changed");
+      // Write log
+      writeMsgToPath(systemLogPath, "===> Day changed ", "", false, false);
 
-    // update value and create new
-    today = getDate();
-    checkAndCreateFolder(today);
-    systemLogPath = today + "/SYSLOG.txt";
-    checkAndCreateFile(systemLogPath);
-    sensorDataPath = today + "/SENSOR_DATA.txt";
-    checkAndCreateFile(sensorDataPath);
+      // update value and create new
+      today = getDate();
+      checkAndCreateFolder(today);
+      systemLogPath = today + "/SYSLOG.txt";
+      checkAndCreateFile(systemLogPath);
+      sensorDataPath = today + "/SENSOR_DATA.txt";
+      checkAndCreateFile(sensorDataPath);
 
-    // if task list lock, release task lock
-    if(isTaskAllLock){
-      isTaskAllLock = false;
-      Serial.println("Unlock the task list.");
-      writeMsgToPath(systemLogPath, "Unlock the task list.");
+      // if task list lock, release task lock
+      if(isTaskAllLock){
+        isTaskAllLock = false;
+        Serial.println("Unlock the task list.");
+        writeMsgToPath(systemLogPath, "Unlock the task list.");
+      }
+
+      // not first time check == already have boot check
+      // boot check at findTheMatchedArrayReadIndex()
+      if(!isFirstCheckEvaluation){
+        checkEvaluation();
+      }
+
+      // release the task lock
+      isCrossDay = false;
     }
-
-    // not first time check == already have boot check
-    // boot check at findTheMatchedArrayReadIndex()
-    if(!isFirstCheckEvaluation){
-      checkEvaluation();
+    // if local time cross day but RTC time not 
+    else{
+      // do nothing, system will go to sleep again automatically 
     }
-
-    // release the task lock
-    isCrossDay = false;
   }
 }
 
@@ -518,7 +529,7 @@ void checkDayChange(){
 #if defined( ARDUINO_ARCH_ESP32 )  
   void goToSleep(int sleepTime_sec) {
     // have X sec to sleep
-    int canSleepMs =  sleepTime_sec  * 1000;  // Serial.println("canSleepMs : " + String(canSleepMs));
+    int canSleepMs =  (sleepTime_sec + 10)  * 1000;  // Serial.println("canSleepMs : " + String(canSleepMs));
     if(canSleepMs > 100){
       #ifdef GOTOSLEEP_DEBUG
         #ifdef FEED_DOG_DEBUG

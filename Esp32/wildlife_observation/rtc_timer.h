@@ -45,7 +45,6 @@ uint32_t GetHowManySecondsHasPassedTodayFromRtc(){    // since today 0:00
   // power on
   turnOnRtcPower();  
 
-  
   // a day is 86400 sec
   now = rtc.now(); 
 
@@ -87,6 +86,12 @@ String secMapTo24Hour(uint32_t sec){
   return time;
 }
 
+/*
+    <- wakeup delay
+|--------|------------------|--------------------|
+0      RTC_off          now(millis)             86400
+    = millis_off
+*/
 uint32_t getPassedSecOfToday(){
   return sys_RTC_time_offset + (millis() - sys_millis_time_offset)/1000;  // RTC time when boot + (time counter now - time counter before)
 }
