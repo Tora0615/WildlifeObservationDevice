@@ -529,7 +529,7 @@ void checkDayChange(){
 #if defined( ARDUINO_ARCH_ESP32 )  
   void goToSleep(int sleepTime_sec) {
     // have X sec to sleep
-    int canSleepMs =  (sleepTime_sec + 10)  * 1000;  // Serial.println("canSleepMs : " + String(canSleepMs));
+    int canSleepMs =  sleepTime_sec * 1000;  // Serial.println("canSleepMs : " + String(canSleepMs));
     if(canSleepMs > 100){
       #ifdef GOTOSLEEP_DEBUG
         #ifdef FEED_DOG_DEBUG
