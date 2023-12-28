@@ -1,3 +1,5 @@
+#include <stdint.h>
+#include <sys/types.h>
 // others involve 
 #include "setting.h"
 #include "sd_operation.h"
@@ -31,6 +33,7 @@ void recordDS18B20(void* pvParameters);
 void recordBattery(void* pvParameters);
 void checkDayChange();
 void goToSleep(int sleepTime_sec);
+void aliveLedShow();
 
 // RTOS setting
 #define configUSE_TIME_SLICING 1
@@ -156,9 +159,16 @@ void checkGoSleep(void* pvParameters){
 void checkTimeAndTask(void* pvParameters){
   Serial.println("checkTimeAndTask : created");
   writeMsgToPath(systemLogPath, "checkTimeAndTask : created");
+  uint8_t aliveCounter = 0;
   while(true){
     // jump out to other tasks
     vTaskDelay(500 / portTICK_PERIOD_MS);
+
+    // every 50 sec show led when running    
+    if(aliveCounter >= 100){
+      aliveLedShow();
+      aliveCounter = 0;
+    }
 
     // Debug msg
     #ifdef CHECK_IS_NEED_TO_RUN_TASK
@@ -264,6 +274,7 @@ void checkTimeAndTask(void* pvParameters){
     // active the suspended sleep task
     vTaskResume(tCheckGoSleepHandler);
 
+    aliveCounter += 1;
   }
 }
 
@@ -557,6 +568,7 @@ void checkDayChange(){
 
         // wakeup to feed dog
         vTaskDelay(40 / portTICK_PERIOD_MS);
+        aliveLedShow();
 
         // debug MSG part
         #ifdef GOTOSLEEP_DEBUG
@@ -600,7 +612,11 @@ void checkDayChange(){
 #endif
 
 
-
+void aliveLedShow(){
+  digitalWrite(16, HIGH);  
+  vTaskDelay(5 / portTICK_PERIOD_MS);                   
+  digitalWrite(16, LOW);   
+}
 
 #endif
 

@@ -17,6 +17,8 @@ const int8_t DISABLE_CHIP_SELECT = -1;
 
 void showErrorLed(){
   digitalWrite(16, HIGH); 
+  // reboot
+  ESP.restart();
 }
 
 // global file pointer (SD_FAT_TYPE 3 (FAT16/FAT32 and exFAT) )
@@ -36,6 +38,8 @@ void SDInit(){
     Serial.println("SD card init error : NO SD card");
     while(1){
       delay(1000);
+      // reboot
+      ESP.restart();
     }
   }
 
