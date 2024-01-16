@@ -526,6 +526,10 @@ void checkDayChange(){
 
       // release the task lock
       isCrossDay = false;
+
+      // reboot
+      ESP.restart();
+      writeMsgToPath(systemLogPath, "restart successfully after day change execute ");
     }
     // if local time cross day but RTC time not 
     else{
