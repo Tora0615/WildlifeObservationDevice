@@ -34,7 +34,7 @@
 /*--- myScheduler ---*/
 #define GOTOSLEEP_DEBUG
 // #define FEED_DOG_DEBUG
-// #define USE_DEEP_SLEEP
+#define USE_DEEP_SLEEP
 
 // some global variable
 const String SCHEDULE_FILE = "schedule.txt";

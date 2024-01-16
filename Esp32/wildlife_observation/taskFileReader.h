@@ -122,7 +122,7 @@ void printAllTask(myTask *taskArray, int inputArrayUsedIndex){
 
 myTask parseTasks(String input){
   // write log
-  writeMsgToPath(systemLogPath, "|-- Start to parse task command : " + input);
+  // writeMsgToPath(systemLogPath, "|-- Start to parse task command : " + input);
 
   int lenCount = 0;
   char *temp[5];  // a pointer point to a value which can storage 5 char array pointer
@@ -155,7 +155,7 @@ myTask parseTasks(String input){
     tempTask.taskType.complex.channel = temp[3][0];
     tempTask.taskType.complex.multiple = atof(temp[4]);
   }
-  writeMsgToPath(systemLogPath, "   |-- Parse task command successful!");
+  // writeMsgToPath(systemLogPath, "   |-- Parse task command successful!");
   return tempTask;
 }
 
