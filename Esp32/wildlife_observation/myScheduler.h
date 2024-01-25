@@ -586,6 +586,7 @@ void checkDayChange(){
         #endif
         Serial.println("Sleep for remain " + String(remainMs/1000.0f) + " seconds");
       #endif
+      vTaskDelay(40 / portTICK_PERIOD_MS);
 
       // lock if write sd not finished
       if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
@@ -596,6 +597,8 @@ void checkDayChange(){
           esp_light_sleep_start();
         #endif
       }xSemaphoreGive( xSemaphore_SD );
+
+      // wake feed dog
       vTaskDelay(40 / portTICK_PERIOD_MS);
 
       // every wakeup print a log
