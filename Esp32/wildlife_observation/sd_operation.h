@@ -16,6 +16,7 @@ const int8_t DISABLE_CHIP_SELECT = -1;
 
 
 void showErrorLed(){
+  Serial.println("!!!! showErrorLed : triggered !!!!");
   digitalWrite(16, HIGH); 
   // reboot
   ESP.restart();
@@ -37,7 +38,7 @@ void SDInit(){
   if(!sd.begin(CHIP_SELECT, SPI_SPEED)){
     Serial.println("SD card init error : NO SD card");
     while(1){
-      delay(1000);
+      delay(10000);
       // reboot
       ESP.restart();
     }
@@ -84,9 +85,9 @@ void writeMsgToPath(String path, String msg, String customTimeStamp = "", bool r
         if (!tempfile.open(path.c_str(), O_WRONLY | O_CREAT)) {     // open need char array, not string. So use c_str to convert
           Serial.println(" --> open " + path + " failed");
           showErrorLed();
-          while(1){
-            delay(1000);
-          }
+          // while(1){
+          //   delay(1000);
+          // }
         }else{
           tempfile.println(msg.c_str());
         }
@@ -94,9 +95,9 @@ void writeMsgToPath(String path, String msg, String customTimeStamp = "", bool r
         if (!tempfile.open(path.c_str(), O_WRONLY | O_CREAT | O_APPEND)) {     // open need char array, not string. So use c_str to convert
           Serial.println(" --> open " + path + " failed");
           showErrorLed();
-          while(1){
-            delay(1000);
-          }
+          // while(1){
+          //   delay(1000);
+          // }
         }else{
           tempfile.println(msg.c_str());
         }
