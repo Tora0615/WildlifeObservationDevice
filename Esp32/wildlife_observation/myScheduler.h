@@ -147,10 +147,28 @@ void checkGoSleep(void* pvParameters){
       Serial.println("checkGoSleep : resumed");
     #endif
     Serial.print("isRunningTask : " + String(isRunningTask)); Serial.println(", previousRoundOfSleepFinished : " + String(previousRoundOfSleepFinished));
-    if(isRunningTask == 0 && previousRoundOfSleepFinished){
-      previousRoundOfSleepFinished = false;
-      goToSleep(nextTaskPreserveTime_sec);
-    }
+    
+    #ifdef USE_DEEP_SLEEP
+      int startTimeOfNext = 0;
+      if((taskArray + arrayReadIndex)->setType == 0){  // simple task
+        startTimeOfNext = (taskArray + arrayReadIndex)->taskType.simple.start_min_of_a_day;
+      }else{
+        startTimeOfNext = (taskArray + arrayReadIndex)->taskType.complex.start_min_of_a_day;
+      }
+
+      // only sleep in deep mode when still have at least 10 sec
+      if(isRunningTask == 0 && previousRoundOfSleepFinished && (startTimeOfNext * 60 - getPassedSecOfToday()) > 10){
+        previousRoundOfSleepFinished = false;
+        if(nextTaskPreserveTime_sec - 5 > 0){
+          goToSleep(nextTaskPreserveTime_sec - 5);
+        }
+      }
+    #else
+      if(isRunningTask == 0 && previousRoundOfSleepFinished){
+        previousRoundOfSleepFinished = false;
+        goToSleep(nextTaskPreserveTime_sec);
+      }
+    #endif
   }
 }
 
