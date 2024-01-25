@@ -12,8 +12,13 @@
 const float voltage_division_factor = 0.2272;  // 150k : 510k -->  150 / (150 + 510) = 0.2272
 
 #include "sd_operation.h"
-#include <SimpleKalmanFilter.h>
-SimpleKalmanFilter simpleKalmanFilter(2, 2, 0.01);
+// #define USE_K_FILTER 
+
+#ifdef USE_K_FILTER
+  #include <SimpleKalmanFilter.h>
+  SimpleKalmanFilter simpleKalmanFilter(2, 2, 0.01);
+#endif
+
 
 
 void batteryMonitorInit(){
@@ -31,16 +36,23 @@ void batteryMonitorInit(){
   */
 
   // put data into the filter
-  for (int i =0; i<10; i++){
-    simpleKalmanFilter.updateEstimate(analogReadMilliVolts(BATTERY_MONITOR_PIN));
-  }
+  #ifdef USE_K_FILTER
+    for (int i =0; i<10; i++){
+      simpleKalmanFilter.updateEstimate(analogReadMilliVolts(BATTERY_MONITOR_PIN));
+    }
+  #endif
 
   // Write log
   writeMsgToPath(systemLogPath, "Battery monitor init successful!");
 }
 
 float getBatteryVoltage(){
-  float estimated_value = simpleKalmanFilter.updateEstimate(analogReadMilliVolts(BATTERY_MONITOR_PIN));
+  float estimated_value;
+  #ifdef USE_K_FILTER
+    estimated_value = simpleKalmanFilter.updateEstimate(analogReadMilliVolts(BATTERY_MONITOR_PIN));
+  #else
+    estimated_value = analogReadMilliVolts(BATTERY_MONITOR_PIN);
+  #endif
   return estimated_value / 1000.0 / voltage_division_factor;
 }
 
@@ -49,7 +61,13 @@ float getBatteryPercentage(){
   const float calculated_full_batter_voltage = FULL_BATTERY_VOLTAGE * voltage_division_factor;
   const float calculated_empty_batter_voltage = EMPTY_BATTERY_VOLTAGE * voltage_division_factor;
 
-  float estimated_value = simpleKalmanFilter.updateEstimate(analogReadMilliVolts(BATTERY_MONITOR_PIN));
+  float estimated_value;
+  #ifdef USE_K_FILTER
+    estimated_value = simpleKalmanFilter.updateEstimate(analogReadMilliVolts(BATTERY_MONITOR_PIN));
+  #else
+    estimated_value = analogReadMilliVolts(BATTERY_MONITOR_PIN);
+  #endif
+
   float percentage = (estimated_value / 1000.0 - calculated_empty_batter_voltage) / (calculated_full_batter_voltage - calculated_empty_batter_voltage);
   percentage = percentage < 0 ? 0 : percentage;
   return percentage * 100;  
