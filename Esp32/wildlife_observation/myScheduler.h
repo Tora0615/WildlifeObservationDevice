@@ -566,10 +566,6 @@ void checkDayChange(){
           #endif
         }xSemaphoreGive( xSemaphore_SD );
 
-        // wakeup to feed dog
-        vTaskDelay(40 / portTICK_PERIOD_MS);
-        aliveLedShow();
-
         // debug MSG part
         #ifdef GOTOSLEEP_DEBUG
           #ifdef FEED_DOG_DEBUG
@@ -577,6 +573,10 @@ void checkDayChange(){
           #endif
           Serial.println("Have slept for : " + String( (i+1) ) + " min. Wake up to feed dog.");
         #endif
+
+        // feed dog
+        vTaskDelay(40 / portTICK_PERIOD_MS);
+        aliveLedShow();
       }
 
       // short sleep part 
