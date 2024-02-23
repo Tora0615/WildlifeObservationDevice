@@ -60,6 +60,13 @@ void setup() {
   // shine and close
   showInitFinishedLED(); 
 
+  if(isFirstBoot){
+    readIndexBeforeSleep = arrayReadIndex;
+    isFirstBoot = false;
+  }else{
+    arrayReadIndex = readIndexBeforeSleep;
+  }
+
   // use dual core by RTOS 
   createRTOSTasks(); 
 }

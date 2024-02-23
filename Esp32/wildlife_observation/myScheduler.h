@@ -159,8 +159,8 @@ void checkGoSleep(void* pvParameters){
       // only sleep in deep mode when still have at least 10 sec
       if(isRunningTask == 0 && previousRoundOfSleepFinished && (startTimeOfNext * 60 - getPassedSecOfToday()) > 10){
         previousRoundOfSleepFinished = false;
-        if(nextTaskPreserveTime_sec - 5 > 0){
-          goToSleep(nextTaskPreserveTime_sec - 5);
+        if(nextTaskPreserveTime_sec> 0){
+          goToSleep(nextTaskPreserveTime_sec);
         }
       }
     #else

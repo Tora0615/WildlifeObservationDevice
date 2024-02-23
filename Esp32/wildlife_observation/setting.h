@@ -34,7 +34,7 @@
 /*--- myScheduler ---*/
 #define GOTOSLEEP_DEBUG
 // #define FEED_DOG_DEBUG
-// #define USE_DEEP_SLEEP
+#define USE_DEEP_SLEEP
 
 // some global variable
 const String SCHEDULE_FILE = "schedule.txt";
@@ -78,6 +78,8 @@ const int globalSDBufferByteSize = 512 * 16;  // 1 x uint8_t(byte) * 512  * 16 =
 uint8_t *currentAudioBuffer  = (uint8_t *)malloc(sizeof(uint8_t) * globalSDBufferByteSize);  
 uint8_t *transmitAudioBuffer = (uint8_t *)malloc(sizeof(uint8_t) * globalSDBufferByteSize);
 
+RTC_DATA_ATTR bool isFirstBoot = true;
+RTC_DATA_ATTR int readIndexBeforeSleep = 0;
 
 #define SECONDS_OF_A_DAY 86400   // a day : 86400 sec
 
