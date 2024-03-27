@@ -8,7 +8,6 @@
 /* process task command */
 int arrayMaxSize = 2;      // task array max 
 int arrayUsedIndex = 0;    // task array used
-int arrayReadIndex = 0;    // read position, re-zero when day change
 bool isCrossDay = false;
 
 typedef struct complexTask_t{

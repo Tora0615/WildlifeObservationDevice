@@ -79,7 +79,8 @@ uint8_t *currentAudioBuffer  = (uint8_t *)malloc(sizeof(uint8_t) * globalSDBuffe
 uint8_t *transmitAudioBuffer = (uint8_t *)malloc(sizeof(uint8_t) * globalSDBufferByteSize);
 
 RTC_DATA_ATTR bool isFirstBoot = true;
-RTC_DATA_ATTR int readIndexBeforeSleep = 0;
+// RTC_DATA_ATTR int readIndexBeforeSleep = 0;
+RTC_DATA_ATTR int arrayReadIndex = 0;    // read position, re-zero when day change
 
 #define SECONDS_OF_A_DAY 86400   // a day : 86400 sec
 

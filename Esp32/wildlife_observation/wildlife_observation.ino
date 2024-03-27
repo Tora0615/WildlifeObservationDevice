@@ -50,8 +50,16 @@ void setup() {
   // check schedule and setting doc
   checkScheduleFileExist(); 
   addAllTaskFromFile(); 
-  findTheMatchedArrayReadIndex(); 
-
+  if(isFirstBoot){
+    Serial.println("!! First boot : start to find the matched arrayReadIndex !!");
+    writeMsgToPath(systemLogPath, "First boot : start to find the matched arrayReadIndex");
+    findTheMatchedArrayReadIndex(); 
+    isFirstBoot = false;
+  }else {
+    Serial.println("!! Still alive : skip to read task index from file !!");
+    writeMsgToPath(systemLogPath, "Still alive : skip to read task index from file");
+  }
+  
   // system advance part inint
   batteryMonitorInit(); 
   DS18B20Init(); 
@@ -59,13 +67,6 @@ void setup() {
 
   // shine and close
   showInitFinishedLED(); 
-
-  if(isFirstBoot){
-    readIndexBeforeSleep = arrayReadIndex;
-    isFirstBoot = false;
-  }else{
-    arrayReadIndex = readIndexBeforeSleep;
-  }
 
   // use dual core by RTOS 
   createRTOSTasks(); 
