@@ -3,9 +3,6 @@
 #define MYDHT_H
 
 /*---- macro or define ----*/
-#define DHTPIN 33
-#define DHTTYPE DHT22
-#define DHT22_PMOS 32
 
 /*---- official lib ----*/ 
 #include <DHT.h>

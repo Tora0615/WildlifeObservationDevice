@@ -3,7 +3,6 @@
 #define RTC_TIMER_H
 
 /*---- macro or define ----*/
-#define RTC_PMOS 17
 
 /*---- official lib ----*/ 
 #include <RTClib.h>

@@ -3,9 +3,6 @@
 #define MYDS18B20_H
 
 /*---- macro or define ----*/
-// Data wire pin
-#define ONE_WIRE_BUS 25
-#define DS18B20_PMOS 32
 
 /*---- official lib ----*/ 
 #include <OneWire.h>

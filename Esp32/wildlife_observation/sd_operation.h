@@ -6,8 +6,7 @@ This file should only have basic SD oprate functions
 */
 
 /*---- macro or define ----*/
-#define SPI_SPEED SD_SCK_MHZ(15)
-#define CHIP_SELECT 5
+
 // #define SD_WRITE_MSG_DEBUG
 
 /*---- official lib ----*/ 

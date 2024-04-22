@@ -3,11 +3,45 @@
 #define SETTING_H
 
 /*=================== macro ==================*/
-//== define ==
+//== value define ==
 #define SECONDS_OF_A_DAY 86400    // a day : 86400 sec
 #define skipEvalution true        // skip evalution mode
 #define INMP_CPU 0                // RTOS Task setting
 #define OTHER_TASK_CPU 1
+#define SPI_SPEED SD_SCK_MHZ(10)
+#define ADC_BIT_12 12
+#define FULL_BATTERY_VOLTAGE 4.2    //battery : 4.2
+#define EMPTY_BATTERY_VOLTAGE 3.0  // protect board : 2.54 +- 0.1 / battery : 2.5, DC_DC module : 3V 
+//== pin define ==
+// LED
+#define LED_BLUE
+#define LED_GREEN
+#define LED_RED
+// RTC
+#define RTC_PMOS 17
+//--- RTC is on i2c, no pin to set 
+// SD (And SPI)
+#define SD_PMOS 
+#define CHIP_SELECT 5
+// DS18B20 (And one wire)
+#define DS18B20_PMOS 32
+#define ONE_WIRE_BUS 25  // DS18B20
+// DHT
+#define DHT22_PMOS 32
+#define DHTPIN 33
+#define DHTTYPE DHT22
+// Battery (ADC)
+#define BATTERY_MONITOR_PIN A0  // GPIO 36 / VP 
+// I2S
+#define I2S_NUM       (i2s_port_t)(0)
+#define I2S_SCK_IO    (27)    // SCK, clock
+#define I2S_WS_IO     (26)    // WS, choose LR
+#define I2S_DI_IO     (14)    // SD, I2S data output 
+#define MODE_R_PIN    (15)    // 15 pin weak pull-up / Set LR of that micorphone / High - R
+#define MODE_L_PIN    (2)     // 2 pin weak pull-down / Set LR of that micorphone / Low - L
+#define SOUND_PMOS    (4)
+
+
 //== conpile setting ==
 // #define KEEP_SET_TIME_FILE     // for test change RTC time by file
 // #define SD_USE_BASIC           // SD Use setting 

@@ -3,10 +3,6 @@
 #define BATTERY_H
 
 /*---- macro or define ----*/
-#define ADC_BIT_12 12
-#define BATTERY_MONITOR_PIN A0  // GPIO 36 / VP 
-#define FULL_BATTERY_VOLTAGE 4.2    //battery : 4.2
-#define EMPTY_BATTERY_VOLTAGE 3.0  // protect board : 2.54 +- 0.1 / battery : 2.5, DC_DC module : 3V 
 // #define USE_K_FILTER 
 
 /*---- official lib ----*/ 

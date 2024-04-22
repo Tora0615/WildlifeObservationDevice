@@ -11,8 +11,8 @@
 /*---- official lib ----*/ 
 
 /*---- other involve lib  ----*/
-#include "utills.h"   // include sd_operation / rtc_timer / setting
 #include "MEMS_INMP441.h"
+#include "utills.h"   // include sd_operation / rtc_timer / setting
 
 /*---- classes, variables or function define  ----*/
 int bufferIndex = 0;  // use to save the signal of buffer full & can start to save to SD
