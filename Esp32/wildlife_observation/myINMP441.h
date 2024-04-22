@@ -1,22 +1,27 @@
-#include "setting.h"
-
+/*---- include guard ----*/
 #ifndef MYINMP441_H
 #define MYINMP441_H
 
+/*---- macro or define ----*/
 // Left : 0 / Right : 1 / stereo : 2
 #define CHANNEL_LEFT     (0)
 #define CHANNEL_RIGHT    (1)
 #define CHANNEL_STEREO   (2)
 
+/*---- official lib ----*/ 
+
+/*---- other involve lib  ----*/
+#include "utills.h"   // include sd_operation / rtc_timer / setting
 #include "MEMS_INMP441.h"
-INMP441 microphone(I2S_SCK_IO, I2S_WS_IO, I2S_DI_IO);
-TaskHandle_t tSdTransmitHandler;
 
-// use to save the signal of buffer full & can start to save to SD
-int bufferIndex = 0;
+/*---- classes, variables or function define  ----*/
+int bufferIndex = 0;  // use to save the signal of buffer full & can start to save to SD
 char *_filenameWithPath;
+TaskHandle_t tSdTransmitHandler;
+INMP441 microphone(I2S_SCK_IO, I2S_WS_IO, I2S_DI_IO);
 
 
+/*-------- function implement --------*/
 // execute a single byte
 void exportSingleData(uint8_t input){
   currentAudioBuffer[bufferIndex] = input;

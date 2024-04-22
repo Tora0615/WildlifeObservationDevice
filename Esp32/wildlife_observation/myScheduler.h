@@ -1,21 +1,26 @@
-#include <stdint.h>
-#include <sys/types.h>
-// others involve 
-#include "setting.h"
-#include "sd_operation.h"
-#include "battery.h"
-#include "rtc_timer.h"
-#include "sd_operation.h"
-#include "myDS18B20.h"
-#include "utills.h"
-#include "myDHT.h"
-#include "myINMP441.h"
-
-// include guard
+/*---- include guard ----*/
 #ifndef MYSCHEDULER_H
 #define MYSCHEDULER_H
 
-// variables 
+/*---- macro or define ----*/
+#define ms_TO_uS_FACTOR 1000ULL
+// RTOS setting
+#define configUSE_TIME_SLICING 1
+#define configUSE_PREEMPTION 1
+
+/*---- official lib ----*/ 
+#include <stdint.h>
+#include <sys/types.h>
+
+/*---- other involve lib  ----*/
+#include "myDHT.h"
+#include "utills.h"   // include sd_operation / rtc_timer / setting
+#include "battery.h"
+#include "myINMP441.h"
+#include "myDS18B20.h"
+#include "taskFileReader.h"
+
+/*---- variables or function define  ----*/
 float recordTime;
 char channel_tag;
 float gain_ratio;
@@ -23,7 +28,6 @@ String DHT_TimeStamp;
 String DS18B20_TimeStamp;
 String Battery_TimeStamp;
 bool previousRoundOfSleepFinished;
-#define ms_TO_uS_FACTOR 1000ULL
 void checkGoSleep(void* pvParameters);
 void checkTimeAndTask(void* pvParameters);
 void transmitSoundDataToSD(void* pvParameters);
@@ -35,10 +39,6 @@ void checkDayChange();
 void goToSleep(int sleepTime_sec);
 void aliveLedShow();
 
-// RTOS setting
-#define configUSE_TIME_SLICING 1
-#define configUSE_PREEMPTION 1
-
 /* RTOS handler */
 TaskHandle_t tCheckGoSleepHandler;
 TaskHandle_t tCheckTimeAndTaskHandler;
@@ -48,6 +48,8 @@ TaskHandle_t tCheckTimeAndTaskHandler;
   TaskHandle_t tRecordDS18B20Handler;
   TaskHandle_t tRecordBatteryHandler;
 
+
+/*-------- function implement --------*/
 void createRTOSTasks() {
   // hide evaluation check here
   checkEvaluation();

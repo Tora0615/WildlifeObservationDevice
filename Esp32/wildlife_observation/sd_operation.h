@@ -1,20 +1,30 @@
-#include "rtc_timer.h"
-
+/*---- include guard ----*/
 #ifndef SD_OPERATION_H
 #define SD_OPERATION_H
+/*
+This file should only have basic SD oprate functions
+*/
 
-#include <SPI.h>
-#include "SdFat.h"
-#include "sdios.h"
+/*---- macro or define ----*/
 #define SPI_SPEED SD_SCK_MHZ(15)
 #define CHIP_SELECT 5
+// #define SD_WRITE_MSG_DEBUG
+
+/*---- official lib ----*/ 
+#include <Update.h>
+#include <SPI.h>
+#include <SdFat.h>
+#include <sdios.h>
+
+/*---- other involve lib  ----*/
+#include "rtc_timer.h"  // include setting 
+
+/*---- classes, variables or function define  ----*/
 const int8_t DISABLE_CHIP_SELECT = -1;
 
 
-// debug switch
-// #define SD_WRITE_MSG_DEBUG
-
-
+/*-------- function implement --------*/
+// Only LED function put here
 void showErrorLed(){
   Serial.println("!!!! showErrorLed : triggered !!!!");
   digitalWrite(16, HIGH); 
@@ -183,44 +193,46 @@ void checkAndCreateFile(String path){
 }
 
 
-void checkRtcAdjustFile(){
-  char timeWords[15] = {0};
-  #ifdef SD_USE_BASIC
-    FsFile setTimeFile;
-  #else
-    ExFile setTimeFile;
-  #endif 
 
-  // check file exist or not 
-  if (sd.exists("setTime.txt")) {
-    Serial.println("|-- RTC adjust file exist");
 
-    // if exist 
-    if (!setTimeFile.open("setTime.txt", O_RDONLY)) {
-      Serial.println("open RTC adjust file failed"); 
-    }
 
-    // read all 14 char
-    for (int i=0; i<14; i++){
-      timeWords[i] = setTimeFile.read();
-    }
-    timeWords[14] = '\0';
-    Serial.println("|-- The time read from file : " + String(timeWords));
 
-    // Do file operation 
-    setTimeFile.close();
-    #ifdef KEEP_SET_TIME_FILE
-      Serial.println("!! Don't forgot to adjust the setting of change time by file !!");
-    #else
-      sd.remove("setTime.txt");
-    #endif
-    Serial.println("|-- setTime.txt deleted");
+// void progressCallBack(size_t currSize, size_t totalSize) {
+//       Serial.printf("CALLBACK:  Update process at %d of %d bytes...\n", currSize, totalSize);
+// }
+// void checkUpdate(){
+//   Serial.print(F("\nSearch for firmware.."));
+//   File firmware =  sd.open("/firmware.bin");
+//   if (firmware) {
+//       Serial.println(F("found!"));
+//       Serial.println(F("Try to update!"));
+ 
+//       Update.onProgress(progressCallBack);
+ 
+//       Update.begin(firmware.size(), U_FLASH);
+//       Update.writeStream(firmware);
+//       if (Update.end()){
+//           Serial.println(F("Update finished!"));
+//       }else{
+//           Serial.println(F("Update error!"));
+//           Serial.println(Update.getError());
+//       }
+ 
+//       firmware.close();
+ 
+//       if (sd.rename("/firmware.bin", "/firmware.bak")){
+//           Serial.println(F("Firmware rename succesfully!"));
+//       }else{
+//           Serial.println(F("Firmware rename error!"));
+//       }
+//       delay(2000);
+ 
+//       ESP.restart();
+//   }else{
+//       Serial.println(F("not found!"));
+//   }
+// }
 
-    // set time
-    setTime(timeWords);
-  }else{
-    Serial.println("|-- No need to adjust RTC time, skip");
-  }
-}
+
 
 #endif

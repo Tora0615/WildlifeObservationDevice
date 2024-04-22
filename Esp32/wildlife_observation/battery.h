@@ -1,26 +1,30 @@
-// #include "driver/adc.h"   -->  for cpp dev only; 
-// For arduino, don't need to include anything.
-// The ref code is in esp32-hal-adc.c
+/*---- include guard ----*/
 #ifndef BATTERY_H
 #define BATTERY_H
 
-
-#define BATTERY_MONITOR_PIN A0  // GPIO 36 / VP 
+/*---- macro or define ----*/
 #define ADC_BIT_12 12
+#define BATTERY_MONITOR_PIN A0  // GPIO 36 / VP 
 #define FULL_BATTERY_VOLTAGE 4.2    //battery : 4.2
 #define EMPTY_BATTERY_VOLTAGE 3.0  // protect board : 2.54 +- 0.1 / battery : 2.5, DC_DC module : 3V 
-const float voltage_division_factor = 0.2272;  // 150k : 510k -->  150 / (150 + 510) = 0.2272
-
-#include "sd_operation.h"
 // #define USE_K_FILTER 
 
+/*---- official lib ----*/ 
+// #include "driver/adc.h"   -->  for cpp dev only; 
+// For arduino, don't need to include anything.
+// The ref code is in esp32-hal-adc.c
 #ifdef USE_K_FILTER
   #include <SimpleKalmanFilter.h>
   SimpleKalmanFilter simpleKalmanFilter(2, 2, 0.01);
 #endif
 
+/*---- other involve lib  ----*/
+#include "utills.h"   // include sd_operation / rtc_timer / setting
 
+/*---- classes, variables or function define  ----*/
+const float voltage_division_factor = 0.2272;  // 150k : 510k -->  150 / (150 + 510) = 0.2272
 
+/*-------- function implement --------*/
 void batteryMonitorInit(){
   pinMode(BATTERY_MONITOR_PIN, INPUT);        // GPIO36 (A0) (read only)
   analogSetAttenuation(ADC_2_5db);            // max 1.5V

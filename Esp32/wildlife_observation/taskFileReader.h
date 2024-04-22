@@ -1,10 +1,17 @@
+/*---- include guard ----*/
 #ifndef TASKFILEREADER_H
 #define TASKFILEREADER_H
 
-#include "sd_operation.h"
-#include "rtc_timer.h"
-#include "setting.h"
+/*---- macro or define ----*/
 
+/*---- official lib ----*/ 
+
+/*---- other involve lib  ----*/
+#include "utills.h"   // include sd_operation / rtc_timer / setting
+
+
+
+/*---- classes, variables or function define  ----*/
 /* process task command */
 int arrayMaxSize = 2;      // task array max 
 int arrayUsedIndex = 0;    // task array used
@@ -33,6 +40,8 @@ typedef struct myTask_t {
 
 myTask *taskArray = (myTask*)malloc( sizeof(myTask) * arrayMaxSize );
 
+
+/*-------- function implement --------*/
 void addTask(myTask **pointerToTaskArray, myTask *pointerToTask, int *pointerToArrayMaxSize, int *pointerToArrayUsedIndex){  
   // if array size is not enough
   if(*pointerToArrayUsedIndex == *pointerToArrayMaxSize){

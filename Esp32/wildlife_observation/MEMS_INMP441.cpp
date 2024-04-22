@@ -1,3 +1,4 @@
+/* This is the implement of INMP441.h*/
 #include "MEMS_INMP441.h"
 
 INMP441::INMP441(uint8_t bckIoNum, uint8_t wsIoNum, uint8_t dInNum){

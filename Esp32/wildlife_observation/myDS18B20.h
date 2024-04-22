@@ -1,23 +1,25 @@
-#include "setting.h"
-
+/*---- include guard ----*/
 #ifndef MYDS18B20_H
 #define MYDS18B20_H
 
-// Include the libraries we need
-#include <OneWire.h>
-#include <DallasTemperature.h>
-#include "sd_operation.h"
-
+/*---- macro or define ----*/
 // Data wire pin
 #define ONE_WIRE_BUS 25
 #define DS18B20_PMOS 32
 
-// Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
-OneWire oneWire(ONE_WIRE_BUS);
+/*---- official lib ----*/ 
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
-// Pass our oneWire reference to Dallas Temperature. 
-DallasTemperature sensor(&oneWire);
+/*---- other involve lib  ----*/
+#include "utills.h"
 
+/*---- classes, variables or function define  ----*/
+OneWire oneWire(ONE_WIRE_BUS);        // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
+DallasTemperature sensor(&oneWire);   // Pass our oneWire reference to Dallas Temperature. 
+
+
+/*-------- function implement --------*/
 void DS18B20Init(){
   // Power part (32 Pin)
   pinMode(DS18B20_PMOS, OUTPUT);

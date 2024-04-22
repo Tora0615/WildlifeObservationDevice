@@ -1,16 +1,23 @@
-#include "setting.h"
-
+/*---- include guard ----*/
 #ifndef MYDHT_H
 #define MYDHT_H
 
-#include <DHT.h>
+/*---- macro or define ----*/
 #define DHTPIN 33
 #define DHTTYPE DHT22
-
 #define DHT22_PMOS 32
 
+/*---- official lib ----*/ 
+#include <DHT.h>
+
+/*---- other involve lib  ----*/
+#include "utills.h"
+
+/*---- classes, variables or function define  ----*/
 DHT dht(DHTPIN, DHTTYPE);
 
+
+/*-------- function implement --------*/
 void DHT_init(){
   // Power part (32 Pin)
   pinMode(DHT22_PMOS, OUTPUT);

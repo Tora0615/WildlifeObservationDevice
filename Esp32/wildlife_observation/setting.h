@@ -1,7 +1,21 @@
+/*---- include guard ----*/
 #ifndef SETTING_H
 #define SETTING_H
 
-/*----- debug part setting -----*/ 
+/*=================== macro ==================*/
+//== define ==
+#define SECONDS_OF_A_DAY 86400    // a day : 86400 sec
+#define skipEvalution true        // skip evalution mode
+#define INMP_CPU 0                // RTOS Task setting
+#define OTHER_TASK_CPU 1
+//== conpile setting ==
+// #define KEEP_SET_TIME_FILE     // for test change RTC time by file
+// #define SD_USE_BASIC           // SD Use setting 
+// #define USE_FAKE_TIME          // use fake test time setting 
+
+
+
+//== debug setting ==
 // #define DS18B20_DEBUG
 // #define DHT22_DEBUG
 // #define RTC_DEBUG
@@ -36,12 +50,12 @@
 // #define FEED_DOG_DEBUG
 #define USE_DEEP_SLEEP
 
-// some global variable
+/*=================== global variable ==================*/
 const String SCHEDULE_FILE = "schedule.txt";
 String today;
 String systemLogPath;
 String sensorDataPath;
-// int nextTaskPreserveTime_min;
+
 int nextTaskPreserveTime_sec;
 
 // some status flag
@@ -52,26 +66,9 @@ bool isTaskAllLock = false;
 bool isEvaluation = true;
 int isRunningTask = 0;
 
-
 // RTOS Mutex for some hardware
 SemaphoreHandle_t xSemaphore_SD = xSemaphoreCreateMutex();
 SemaphoreHandle_t xSemaphore_Temp_PMOS = xSemaphoreCreateMutex();
-
-// RTOS Task setting 
-#define INMP_CPU 0
-#define OTHER_TASK_CPU 1
-
-// SD Use setting 
-// #define SD_USE_BASIC
-
-// use fake test time setting 
-// #define USE_FAKE_TIME
-
-// skip evalution mode
-#define skipEvalution true
-
-// for test change RTC time by file
-// #define KEEP_SET_TIME_FILE
 
 // a larger buffer befor save to SD (buffer level : DMA --> local function buffer --> 2* global larger buffer --> SD)
 const int globalSDBufferByteSize = 512 * 16;  // 1 x uint8_t(byte) * 512  * 16 = 1 block of SD
@@ -81,8 +78,6 @@ uint8_t *transmitAudioBuffer = (uint8_t *)malloc(sizeof(uint8_t) * globalSDBuffe
 RTC_DATA_ATTR bool isFirstBoot = true;
 // RTC_DATA_ATTR int readIndexBeforeSleep = 0;
 RTC_DATA_ATTR int arrayReadIndex = 0;    // read position, re-zero when day change
-
-#define SECONDS_OF_A_DAY 86400   // a day : 86400 sec
 
 
 #endif

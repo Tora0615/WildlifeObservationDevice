@@ -1,18 +1,25 @@
-#include "setting.h"
-
+/*---- include guard ----*/
 #ifndef RTC_TIMER_H
 #define RTC_TIMER_H
 
+/*---- macro or define ----*/
 #define RTC_PMOS 17
 
-#include "RTClib.h"
-RTC_DS3231 rtc;  // default I2C address is : 0x57 (you can choose 0x57 ~ 0x50)
-DateTime now;
+/*---- official lib ----*/ 
+#include <RTClib.h>
 
-const char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+/*---- other involve lib  ----*/
+#include "setting.h"
+
+/*---- variables or function define  ----*/
+DateTime now;
+RTC_DS3231 rtc;  // default I2C address is : 0x57 (you can choose 0x57 ~ 0x50)
 uint32_t sys_RTC_time_offset;         // RTC clock. It will only change when first boot or date changed. First day equal the boot time, others day it will allways close to 0
 uint32_t sys_millis_time_offset;    // millis clock.
+const char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
+
+/*-------- function implement --------*/
 void RTCInit(){
   // init lib part
   if (! rtc.begin()) {

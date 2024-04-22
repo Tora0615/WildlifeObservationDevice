@@ -1,14 +1,4 @@
-#include "setting.h"   // put at the first line
-#include "taskFileReader.h"
-#include "battery.h"
-#include "rtc_timer.h"
-#include "sd_operation.h"
-#include "myDS18B20.h"
-#include "utills.h"
-#include "myDHT.h"
-#include "myINMP441.h"
 #include "myScheduler.h"
-
 
 void setup() {
 

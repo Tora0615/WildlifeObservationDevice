@@ -1,10 +1,8 @@
+/*---- include guard ----*/
 #ifndef MEMS_INMP441_H
 #define MEMS_INMP441_H
 
-#include "stdio.h"
-#include "Arduino.h"
-#include <driver/i2s.h>
-
+/*---- macro or define ----*/
 #define I2S_NUM       (i2s_port_t)(0)
 #define I2S_SCK_IO    (27)    // SCK, clock
 #define I2S_WS_IO     (26)    // WS, choose LR
@@ -13,10 +11,18 @@
 #define MODE_L_PIN    (2)     // 2 pin weak pull-down / Set LR of that micorphone / Low - L
 #define SOUND_PMOS    (4)
 
+/*---- official lib ----*/ 
+#include "stdio.h"
+#include "Arduino.h"
+#include <driver/i2s.h>
+
+/*---- other involve lib  ----*/
+// N/A
 
 /*--- MEMS_INMP441  ---*/
 // #define INMP_DEBUG 
 
+/*---- classes, variables or function define  ----*/
 
 class INMP441{
   public:
