@@ -12,6 +12,20 @@
 #define ADC_BIT_12 12
 #define FULL_BATTERY_VOLTAGE 4.2    //battery : 4.2
 #define EMPTY_BATTERY_VOLTAGE 3.0  // protect board : 2.54 +- 0.1 / battery : 2.5, DC_DC module : 3V 
+#define DOUBLE_PMOS_SWITCH
+#ifdef DOUBLE_PMOS_SWITCH
+  #define POWER_ON  HIGH
+  #define POWER_OFF LOW
+#else
+  #define POWER_ON  LOW
+  #define POWER_OFF HIGH
+#endif
+#define JUST_START 0
+#define SD_STARTED 1
+#define RTC_STARTED 2
+#define SCHEDULE_FILE_EXIST 3
+#define TASK_ADDED 4
+#define ALL_INIT_FINISHED 5
 //== pin define ==
 // LED
 #define LED_BLUE 34

@@ -16,27 +16,7 @@
 
 
 /*-------- function implement --------*/
-void turnOnLed(){
-  pinMode(16, OUTPUT);
-  digitalWrite(16, HIGH); 
-  delay(100);
-}
 
-void showInitFinishedLED(){
-  digitalWrite(16, LOW); 
-  delay(100);
-  digitalWrite(16, HIGH); 
-  delay(100);
-  digitalWrite(16, LOW); 
-  delay(100);
-  digitalWrite(16, HIGH); 
-  delay(100);
-  digitalWrite(16, LOW); 
-  delay(100);
-  digitalWrite(16, HIGH); 
-  delay(100);
-  digitalWrite(16, LOW); 
-}
 
 bool isFirstCheckEvaluation = true;
 DateTime eva = DateTime(2023, 11, 1, 0, 0, 0);

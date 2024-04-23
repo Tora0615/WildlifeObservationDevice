@@ -23,14 +23,6 @@ const int8_t DISABLE_CHIP_SELECT = -1;
 
 
 /*-------- function implement --------*/
-// Only LED function put here
-void showErrorLed(){
-  Serial.println("!!!! showErrorLed : triggered !!!!");
-  digitalWrite(16, HIGH); 
-  // reboot
-  ESP.restart();
-}
-
 // global file pointer (SD_FAT_TYPE 3 (FAT16/FAT32 and exFAT) )
 #ifdef SD_USE_BASIC
   SdFs sd;

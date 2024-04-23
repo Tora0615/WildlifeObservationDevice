@@ -1,15 +1,14 @@
 #include "myScheduler.h"
 
 void setup() {
-
-  // To indicate setup status, it will allway on if failed
-  turnOnLed();
-
   Serial.begin(115200);  
-
+  // To indicate setup status, it will allway on if failed
+  showInitStatusLED(JUST_START);
   // system basic part init 
   SDInit();
+  showInitStatusLED(SD_STARTED);
   RTCInit();
+  showInitStatusLED(RTC_STARTED);
   
   // for test
   // #ifdef USE_FAKE_TIME
@@ -18,11 +17,9 @@ void setup() {
   
   // check if need to change time
   checkRtcAdjustFile();
-
   // get current time as stander time
   sys_RTC_time_offset = GetHowManySecondsHasPassedTodayFromRtc();
   sys_millis_time_offset = millis();
-
   // create first folder and file in the 
   today = getDate();
   checkAndCreateFolder(today);
@@ -31,15 +28,15 @@ void setup() {
   sensorDataPath = today + "/SENSOR_DATA.txt";
   checkAndCreateFile(sensorDataPath);
 
-  
-
   // print reboot msg if not first boot (sd is new)
   bool notfirstBoot = sd.exists(systemLogPath);
   if (notfirstBoot) getResetReason();
 
   // check schedule and setting doc
   checkScheduleFileExist(); 
+  showInitStatusLED(SCHEDULE_FILE_EXIST);
   addAllTaskFromFile(); 
+  showInitStatusLED(TASK_ADDED);
   if(isFirstBoot){
     Serial.println("!! First boot : start to find the matched arrayReadIndex !!");
     writeMsgToPath(systemLogPath, "First boot : start to find the matched arrayReadIndex");
@@ -56,7 +53,7 @@ void setup() {
   DHT_init(); 
 
   // shine and close
-  showInitFinishedLED(); 
+  showInitStatusLED(ALL_INIT_FINISHED); 
 
   // use dual core by RTOS 
   createRTOSTasks(); 

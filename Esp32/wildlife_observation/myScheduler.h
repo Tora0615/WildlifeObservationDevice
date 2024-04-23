@@ -635,11 +635,7 @@ void checkDayChange(){
 #endif
 
 
-void aliveLedShow(){
-  digitalWrite(16, HIGH);  
-  vTaskDelay(5 / portTICK_PERIOD_MS);                   
-  digitalWrite(16, LOW);   
-}
+
 
 #endif
 

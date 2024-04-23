@@ -8,7 +8,7 @@
 #include <RTClib.h>
 
 /*---- other involve lib  ----*/
-#include "setting.h"
+#include "led.h"
 
 /*---- variables or function define  ----*/
 DateTime now;
@@ -31,7 +31,7 @@ void RTCInit(){
   #ifdef RTC_DEBUG
     Serial.println("Turn off DS3231_RTC POWER");
   #endif 
-  digitalWrite(RTC_PMOS,HIGH);   // Turn off. GPIO default is low ->  will let it ON
+  digitalWrite(RTC_PMOS, POWER_OFF);   // Turn off. 
 }
 
 
@@ -40,7 +40,7 @@ void turnOnRtcPower(){
   #ifdef RTC_DEBUG
     Serial.println("Turn on DS3231_RTC POWER");
   #endif 
-  digitalWrite(RTC_PMOS, LOW);   // Turn on.
+  digitalWrite(RTC_PMOS, POWER_ON);   // Turn on.
 
   // wait it powered up
   vTaskDelay(100 / portTICK_PERIOD_MS);
@@ -62,7 +62,7 @@ uint32_t GetHowManySecondsHasPassedTodayFromRtc(){    // since today 0:00
   #ifdef RTC_DEBUG
     Serial.println("Turn off DS3231_RTC POWER");
   #endif 
-  digitalWrite(RTC_PMOS, HIGH);   // Turn off. GPIO default is low ->  will let mic ON
+  digitalWrite(RTC_PMOS, POWER_OFF);   // Turn off. GPIO default is low ->  will let mic ON
 
   // return part 
   return now.hour() * 60 * 60 + now.minute() * 60 + now.second();
@@ -130,7 +130,7 @@ void printNow(){
 void setTestTime(){
   turnOnRtcPower();  
   rtc.adjust(DateTime(2023, 10, 10, 0, 43, 0));
-  digitalWrite(RTC_PMOS, HIGH);   // Turn off.
+  digitalWrite(RTC_PMOS, POWER_OFF);   // Turn off.
 
   Serial.println("RTC test mode ON");
   printNow();
@@ -148,7 +148,7 @@ void setTime(char timeWords[]){
   // execute set time 
   turnOnRtcPower();  
   rtc.adjust(DateTime(YEAR, MONTH, DAY, HOUR_24, MINUTE, SECOND));
-  digitalWrite(RTC_PMOS,HIGH);   // Turn off.
+  digitalWrite(RTC_PMOS, POWER_OFF);   // Turn off.
 
   Serial.print("Set time from file successful, now : ");
   printNow();
