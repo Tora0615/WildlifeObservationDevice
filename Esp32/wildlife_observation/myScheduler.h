@@ -37,9 +37,13 @@ void recordDS18B20(void* pvParameters);
 void recordBattery(void* pvParameters);
 void checkDayChange();
 void goToSleep(int sleepTime_sec);
-void aliveLedShow();
+void showLowBattery(void* pvParameters);
+void showTaskRunningLED(void* pvParameters);
+// void aliveLedShow();  // from led.h
 
 /* RTOS handler */
+TaskHandle_t tShowTaskRunningLEDHandler;
+TaskHandle_t tShowLowBatteryHandler;
 TaskHandle_t tCheckGoSleepHandler;
 TaskHandle_t tCheckTimeAndTaskHandler;
   // TaskHandle_t tSdTransmitHandler;  --> at myINMP file
@@ -55,6 +59,26 @@ void createRTOSTasks() {
   checkEvaluation();
   Serial.println("RTOS : createCoreTasks");
   writeMsgToPath(systemLogPath, "RTOS : createCoreTasks");
+
+  xTaskCreatePinnedToCore(
+    showTaskRunningLED,                           /* Task function. */
+    "showTaskRunningLED",                         /* name of task. */
+    4096,                                  /* Stack size of task */
+    NULL,                                   /* parameter of the task */
+    2,                                      /* priority of the task */
+    &tShowTaskRunningLEDHandler,                       /* task handle */
+    OTHER_TASK_CPU                          /* CPU core */
+  );
+
+  xTaskCreatePinnedToCore(
+    showLowBattery,                           /* Task function. */
+    "showLowBattery",                         /* name of task. */
+    4096,                                  /* Stack size of task */
+    NULL,                                   /* parameter of the task */
+    2,                                      /* priority of the task */
+    &tShowLowBatteryHandler,                       /* task handle */
+    OTHER_TASK_CPU                          /* CPU core */
+  );
 
   xTaskCreatePinnedToCore(
     checkGoSleep,                           /* Task function. */
@@ -131,6 +155,38 @@ void createRTOSTasks() {
 // TODO : RTOS Error flag
 // When have any error, set flag to true, then use highest task to block all tasks.
 
+void showTaskRunningLED(void* pvParameters){
+  Serial.println("showLowBattery : created");
+  writeMsgToPath(systemLogPath, "showLowBattery : created");
+  while(true){
+    if(isRunningTask > 0){
+      runningTaskLedShow();
+    }
+    vTaskDelay(30000 / portTICK_PERIOD_MS);
+  }
+}
+
+void showLowBattery(void* pvParameters){
+  Serial.println("showLowBattery : created");
+  writeMsgToPath(systemLogPath, "showLowBattery : created");
+  while(true){
+    // check state
+    if(!isLowBattery){
+      if (getBatteryVoltage() < LOW_BATTERY_VOLTAGE){
+        isLowBattery = true;
+      }
+    }
+    // do the action
+    // low battery : blink every 30 sec   
+    if(isLowBattery) {
+      lowBatteryLedShow();
+      vTaskDelay(30000 / portTICK_PERIOD_MS);
+    // normal : check every 5 min (== 300 sec == 300000 ms)
+    }else{
+      vTaskDelay(300000 / portTICK_PERIOD_MS);
+    }
+  }
+}
 
 void checkGoSleep(void* pvParameters){
   previousRoundOfSleepFinished = true;

@@ -10,7 +10,7 @@
 /*---- other involve lib  ----*/
 #include "setting.h"
 
-
+// reg LED to system
 void initLEDs(){
   pinMode(LED_BLUE, OUTPUT);
   pinMode(LED_GREEN, OUTPUT);
@@ -21,12 +21,13 @@ void initLEDs(){
 // Only LED function put here
 void showErrorLed(){
   Serial.println("!!!! showErrorLed : triggered !!!!");
-  digitalWrite(16, HIGH); 
-  // reboot
+  digitalWrite(LED_RED, HIGH); 
+  delay(10000);
   ESP.restart();
 }
 
 // 
+// init state visible
 void showInitStatusLED(int stage){
   if (stage == JUST_START){
     // all on 
@@ -63,19 +64,23 @@ void showInitStatusLED(int stage){
 }
 
 
+// running state visible
 void aliveLedShow(){
+  // show 5 ms we called
   digitalWrite(LED_BLUE, HIGH);  
   vTaskDelay(5 / portTICK_PERIOD_MS);                   
   digitalWrite(LED_BLUE, LOW);   
 }
 
 void runningTaskLedShow(){
+  // show 5 ms we called
   digitalWrite(LED_GREEN, HIGH);  
   vTaskDelay(5 / portTICK_PERIOD_MS);                   
   digitalWrite(LED_GREEN, LOW);   
 }
 
 void lowBatteryLedShow(){
+  // show 5 ms we called
   digitalWrite(LED_RED, HIGH);  
   vTaskDelay(5 / portTICK_PERIOD_MS);                   
   digitalWrite(LED_RED, LOW);   

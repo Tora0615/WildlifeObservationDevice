@@ -10,8 +10,9 @@
 #define OTHER_TASK_CPU 1
 #define SPI_SPEED SD_SCK_MHZ(10)
 #define ADC_BIT_12 12
-#define FULL_BATTERY_VOLTAGE 4.2    //battery : 4.2
-#define EMPTY_BATTERY_VOLTAGE 3.0  // protect board : 2.54 +- 0.1 / battery : 2.5, DC_DC module : 3V 
+#define FULL_BATTERY_VOLTAGE 4.2    // battery : 4.2
+#define LOW_BATTERY_VOLTAGE 3.5     // ?
+#define EMPTY_BATTERY_VOLTAGE 3.2   // protect board : 2.54 +- 0.1 / battery : 2.5, DC_DC module : 3V  / rt5707wsc need at least ?v to step down to 3v 
 #define DOUBLE_PMOS_SWITCH
 #ifdef DOUBLE_PMOS_SWITCH
   #define POWER_ON  HIGH
@@ -112,6 +113,7 @@ bool isDS18B20Recording = false;
 bool isTaskAllLock = false;
 bool isEvaluation = true;
 int isRunningTask = 0;
+bool isLowBattery = false;
 
 // RTOS Mutex for some hardware
 SemaphoreHandle_t xSemaphore_SD = xSemaphoreCreateMutex();
