@@ -14,21 +14,21 @@
 #define EMPTY_BATTERY_VOLTAGE 3.0  // protect board : 2.54 +- 0.1 / battery : 2.5, DC_DC module : 3V 
 //== pin define ==
 // LED
-#define LED_BLUE
-#define LED_GREEN
-#define LED_RED
+#define LED_BLUE 34
+#define LED_GREEN 35
+#define LED_RED 17
 // RTC
-#define RTC_PMOS 17
+#define RTC_PMOS 4        // 3V_RTC_I2C_SWITCH
 //--- RTC is on i2c, no pin to set 
 // SD (And SPI)
-#define SD_PMOS 
+#define SD_PMOS 16
 #define CHIP_SELECT 5
 // DS18B20 (And one wire)
-#define DS18B20_PMOS 32
-#define ONE_WIRE_BUS 25  // DS18B20
+#define DS18B20_PMOS 32   // 3V_sensor_switch (DS18 & DHT)
+#define ONE_WIRE_BUS 25   // DS18_DATA (DS18B20)
 // DHT
-#define DHT22_PMOS 32
-#define DHTPIN 33
+#define DHT22_PMOS 32     // 3V_sensor_switch (DS18 & DHT)
+#define DHTPIN 33         // DHT_DATA
 #define DHTTYPE DHT22
 // Battery (ADC)
 #define BATTERY_MONITOR_PIN A0  // GPIO 36 / VP 
@@ -39,14 +39,13 @@
 #define I2S_DI_IO     (14)    // SD, I2S data output 
 #define MODE_R_PIN    (15)    // 15 pin weak pull-up / Set LR of that micorphone / High - R
 #define MODE_L_PIN    (2)     // 2 pin weak pull-down / Set LR of that micorphone / Low - L
-#define SOUND_PMOS    (4)
+#define SOUND_PMOS    (13)    // 3V_I2S_SWITCH
 
 
-//== conpile setting ==
+//== compile setting ==
 // #define KEEP_SET_TIME_FILE     // for test change RTC time by file
 // #define SD_USE_BASIC           // SD Use setting 
 // #define USE_FAKE_TIME          // use fake test time setting 
-
 
 
 //== debug setting ==
