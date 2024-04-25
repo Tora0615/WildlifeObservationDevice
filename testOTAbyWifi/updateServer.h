@@ -1,3 +1,5 @@
+#include "setting.h"
+
 const char* serverIndex = 
 /*--- css  ---*/
 "<style>"
@@ -80,6 +82,7 @@ void startUpdateServer(){
   server.on("/update", HTTP_POST, []() {
     server.sendHeader("Connection", "close");
     server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+    isFirstBoot = false;
     ESP.restart();
   }, []() {
     HTTPUpload& upload = server.upload();
@@ -107,5 +110,8 @@ void startUpdateServer(){
   while(1){
     server.handleClient();
     delay(1);
+    // This loop will be break when 
+    //    1. firmware is uploaded then triggered the restart
+    //    2. reset been pressed or power off
   }
 }
