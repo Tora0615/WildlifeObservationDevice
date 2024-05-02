@@ -23,6 +23,7 @@ void scanConnectedForMS(int countDownTime){
       Serial.print("Number of devices found: ");
       Serial.println(numDevices);
       Serial.println("remain sec of AP : " + String( (countDownTime - (millis() - startTime))/1000.f ) );
+      quickShine();
       printTimer = millis();
     }
     // check the num of connected

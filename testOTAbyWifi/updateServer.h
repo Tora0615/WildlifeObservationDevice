@@ -47,8 +47,8 @@ const char* serverIndex =
         // progress bar
         "document.getElementById('progress_bar').value = Math.round(percentComplete * 100);"
         "if (percentComplete == 1) {"
-          "document.getElementById('progress').textContent = 'Upload finished! Device will auto restart.';"
-          "document.getElementById('msg').textContent = 'You can close the window now.';"
+          "document.getElementById('progress').textContent = 'Upload finished! Device will auto restart. You can close the window now.';"
+          "document.getElementById('msg').textContent = 'Dont forget to press reset button after you disconnect from wifi named ESP32!';"
         "}"
       "}"
     "});"
