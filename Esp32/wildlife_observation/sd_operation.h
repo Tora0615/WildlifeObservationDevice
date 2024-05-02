@@ -40,8 +40,21 @@ void SDInit(){
     Serial.println("SD card init error : NO SD card");
     while(1){
       delay(10000);
-      // reboot
-      ESP.restart();
+
+      if (noSdRetry < NO_SD_RETRY_LIMIT){
+        // reboot, 
+      // by using deep sleep and wake
+      // this can remember something in RTC memory
+      Serial.println("Trigger sleep (Fake no SD reboot), retry : " + String(noSdRetry));
+      noSdRetry +=1;
+      delay(2); // for print fully
+      esp_sleep_enable_timer_wakeup(1 * 1000 * ms_TO_uS_FACTOR);  // 1 sec
+      esp_deep_sleep_start();
+      }else{
+        // sleep forever
+        Serial.println("sleep forever");
+        esp_deep_sleep_start();
+      }
     }
   }
 

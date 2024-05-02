@@ -29,9 +29,9 @@
 #define ALL_INIT_FINISHED 5
 //== pin define ==
 // LED
-#define LED_BLUE 34
-#define LED_GREEN 35
-#define LED_RED 17
+#define LED_BLUE 17   // 34, input only ....
+#define LED_GREEN 17  // 35, input only ....
+#define LED_RED 17 
 // RTC
 #define RTC_PMOS 4        // 3V_RTC_I2C_SWITCH
 //--- RTC is on i2c, no pin to set 
@@ -127,6 +127,9 @@ uint8_t *transmitAudioBuffer = (uint8_t *)malloc(sizeof(uint8_t) * globalSDBuffe
 RTC_DATA_ATTR bool isFirstBoot = true;
 // RTC_DATA_ATTR int readIndexBeforeSleep = 0;
 RTC_DATA_ATTR int arrayReadIndex = 0;    // read position, re-zero when day change
+
+#define NO_SD_RETRY_LIMIT 5
+RTC_DATA_ATTR int noSdRetry = 0;
 
 /* OTA relative */
 #define AP_TIMEOUT_MS 30000  // 30 sec

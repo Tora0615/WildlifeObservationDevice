@@ -135,6 +135,7 @@ void checkRtcAdjustFile(){
 }
 
 void checkFirmwareUpdate(){
+  Serial.println("== Start to check for firmware update ==");
   if(isFirstCheckOTA){
     Serial.println("Fisrt boot -- check firmware updates");
     startSoftAp();
