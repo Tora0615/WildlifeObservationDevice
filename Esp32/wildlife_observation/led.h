@@ -63,6 +63,28 @@ void showInitStatusLED(int stage){
   }
 }
 
+void quickShine(unsigned long remainTimeMs){
+  int LED;
+  if ( remainTimeMs > (2.0f * AP_TIMEOUT_MS / 3.0f) ){    // remain > 2/3, blue
+    LED = LED_BLUE;
+    Serial.println("Shine blue");
+  }else if( remainTimeMs > (AP_TIMEOUT_MS / 3.0f) && remainTimeMs < (2.0f * AP_TIMEOUT_MS / 3.0f)){   // 2/3 > remain > 1/3, green
+    LED = LED_GREEN;
+    Serial.println("Shine green");
+  }else{    // remain < 1/3, red
+    LED = LED_RED;
+    Serial.println("Shine red");
+  }
+  digitalWrite(LED, LOW);  // turn the LED on (HIGH is the voltage level)
+  delay(100);                      // wait for a second
+  digitalWrite(LED, HIGH);   // turn the LED off by making the voltage LOW
+  delay(100); 
+  digitalWrite(LED, LOW);  // turn the LED on (HIGH is the voltage level)
+  delay(100);                      // wait for a second
+  digitalWrite(LED, HIGH);   // turn the LED off by making the voltage LOW
+  delay(100); 
+}
+
 
 // running state visible
 void aliveLedShow(){

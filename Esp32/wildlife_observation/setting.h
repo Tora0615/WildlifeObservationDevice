@@ -128,5 +128,11 @@ RTC_DATA_ATTR bool isFirstBoot = true;
 // RTC_DATA_ATTR int readIndexBeforeSleep = 0;
 RTC_DATA_ATTR int arrayReadIndex = 0;    // read position, re-zero when day change
 
+/* OTA relative */
+#define AP_TIMEOUT_MS 30000  // 30 sec
+// This status will only keep when light/deep sleep (reset will clean the status)
+RTC_DATA_ATTR bool isFirstCheckOTA = true;
+bool isNeedToUpdate = false;
+
 
 #endif

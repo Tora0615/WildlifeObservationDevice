@@ -4,6 +4,7 @@ void setup() {
   Serial.begin(115200);  
   // To indicate setup status, it will allway on if failed
   showInitStatusLED(JUST_START);
+  checkFirmwareUpdate();
   // system basic part init 
   SDInit();
   showInitStatusLED(SD_STARTED);

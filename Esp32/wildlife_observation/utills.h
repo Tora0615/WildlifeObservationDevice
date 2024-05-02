@@ -7,10 +7,16 @@
 #define PRINT_WAKEUP_REASON
 
 /*---- official lib ----*/ 
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <WebServer.h>
+#include <Update.h>
+#include <WiFiAP.h>
 
 /*---- other involve lib  ----*/
 #include "sd_operation.h"  // include rtc_timer / setting 
-
+#include "softAp.h"
+#include "updateServer.h"
 
 /*---- classes, variables or function define  ----*/
 
@@ -125,6 +131,18 @@ void checkRtcAdjustFile(){
     setTime(timeWords);
   }else{
     Serial.println("|-- No need to adjust RTC time, skip");
+  }
+}
+
+void checkFirmwareUpdate(){
+  if(isFirstCheckOTA){
+    Serial.println("Fisrt boot -- check firmware updates");
+    startSoftAp();
+    if (isNeedToUpdate) startUpdateServer();
+    closeSoftAP();
+    isFirstCheckOTA = false;
+  }else{
+    Serial.println("Not fisrt boot -- skip firmware updates check");
   }
 }
 
