@@ -35,6 +35,13 @@ const int8_t DISABLE_CHIP_SELECT = -1;
 #endif 
 
 void SDInit(){
+  // Power part (16 Pin)
+  pinMode(SD_PMOS, OUTPUT);
+  #ifdef SD_WRITE_MSG_DEBUG
+    Serial.println("Direct turn on SD POWER");
+  #endif 
+  digitalWrite(SD_PMOS, POWER_ON);   // Turn off. GPIO default is low ->  will let mic ON
+  // TODO : turn off when sleep
 
   if(!sd.begin(CHIP_SELECT, SPI_SPEED)){
     Serial.println("SD card init error : NO SD card");

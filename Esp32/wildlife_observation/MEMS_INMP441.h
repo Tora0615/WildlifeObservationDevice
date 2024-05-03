@@ -113,7 +113,7 @@ INMP441::INMP441(uint8_t bckIoNum, uint8_t wsIoNum, uint8_t dInNum){
   #ifdef INMP_DEBUG
     Serial.println("Turn off mic power");
   #endif
-  digitalWrite(SOUND_PMOS,HIGH);   // Turn off. gpio default is low -> this will let mic ON
+  digitalWrite(SOUND_PMOS,POWER_OFF);   // Turn off. gpio default is low -> this will let mic ON
   digitalWrite(I2S_DI_IO,LOW);
 }
 
@@ -123,7 +123,7 @@ uint8_t INMP441::begin(uint16_t sampleRate, uint8_t bit, uint8_t channelSetting)
   #ifdef INMP_DEBUG
     Serial.println("Turn on mic power");
   #endif
-  digitalWrite(SOUND_PMOS,LOW);    // Turn on 
+  digitalWrite(SOUND_PMOS,POWER_ON);    // Turn on 
 
   // set INMP left and right
   #ifdef INMP_DEBUG
@@ -207,7 +207,7 @@ void INMP441::end(){
   #ifdef INMP_DEBUG
     Serial.println("Turn off mic power");
   #endif
-  digitalWrite(SOUND_PMOS,HIGH);   // Turn off, gpio default is low -> this will let mic ON
+  digitalWrite(SOUND_PMOS,POWER_OFF);   // Turn off, gpio default is low -> this will let mic ON
   digitalWrite(MODE_R_PIN,LOW);    // Turn off LR setpin to save power.
   digitalWrite(I2S_DI_IO,LOW);
   i2s_driver_uninstall(I2S_NUM);  

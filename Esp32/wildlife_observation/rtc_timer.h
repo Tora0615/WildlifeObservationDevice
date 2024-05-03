@@ -21,8 +21,8 @@ const char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "
 /*-------- function implement --------*/
 void RTCInit(){
   // init lib part
-  if (! rtc.begin()) {
-    Serial.println("Couldn't find RTC");
+  if (!rtc.begin()) {
+    Serial.println("Could not find RTC");
     while (1) delay(1000);
   }
   

@@ -23,7 +23,7 @@ void DS18B20Init(){
   #ifdef DS18B20_DEBUG
     Serial.println("Turn off DS18B20 POWER");
   #endif 
-  digitalWrite(DS18B20_PMOS,HIGH);   // Turn off. GPIO default is low ->  will let mic ON
+  digitalWrite(DS18B20_PMOS, POWER_OFF);   // Turn off. GPIO default is low ->  will let mic ON
 
   // Start up the library
   sensor.begin();
@@ -37,7 +37,7 @@ void turnOnDs18b20Power(){
   #ifdef DS18B20_DEBUG
     Serial.println("Turn on DS18B20 POWER");
   #endif 
-  digitalWrite(DS18B20_PMOS, LOW);   // Turn on.
+  digitalWrite(DS18B20_PMOS, POWER_ON);   // Turn on.
   // delay(100);  // by task_scheduler
 }
 
@@ -67,7 +67,7 @@ float getDS18B20Temp(){
     #ifdef DS18B20_DEBUG
       Serial.println("Turn off DS18B20 POWER");
     #endif 
-    digitalWrite(DS18B20_PMOS, HIGH);   // Turn off. GPIO default is low ->  will let mic ON
+    digitalWrite(DS18B20_PMOS, POWER_OFF);   // Turn off. GPIO default is low ->  will let mic ON
 
     // release DS18B20
     isDS18B20Recording = !isDS18B20Recording;

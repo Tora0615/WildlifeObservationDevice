@@ -13,8 +13,8 @@ void setup(void) {
   Serial.begin(115200);
 
   // initialize digital pin LED_BUILTIN as an output.
-  pinMode(4, OUTPUT);
-  digitalWrite(4, HIGH);
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, HIGH);
   
   if(isFirstBoot){
     Serial.println("Fisrt boot -- check firmware updates");
@@ -31,10 +31,10 @@ void setup(void) {
 
 
 void loop(void) {
-  digitalWrite(4, LOW);  // turn the LED on (HIGH is the voltage level)
-  delay(1000);                      // wait for a second
-  digitalWrite(4, HIGH);   // turn the LED off by making the voltage LOW
-  delay(1000);      
+  digitalWrite(LED_PIN, LOW);  // turn the LED on (HIGH is the voltage level)
+  delay(100);                      // wait for a second
+  digitalWrite(LED_PIN, HIGH);   // turn the LED off by making the voltage LOW
+  delay(100);      
 
   if ((millis() - loopStartTime) >= 5000){
     Serial.println("Trigger sleep");

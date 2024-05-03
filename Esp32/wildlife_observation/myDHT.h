@@ -21,7 +21,7 @@ void DHT_init(){
   #ifdef DHT22_DEBUG
     Serial.println("Turn off DHT POWER");
   #endif 
-  digitalWrite(DHT22_PMOS,HIGH);   // Turn off. GPIO default is low ->  will let mic ON
+  digitalWrite(DHT22_PMOS,POWER_OFF);   // Turn off. GPIO default is low ->  will let mic ON
 
   // Write log
   writeMsgToPath(systemLogPath, "DHT init successful!");
@@ -33,7 +33,7 @@ void turnOnDhtPower(){
   #ifdef DHT22_DEBUG
     Serial.println("Turn on DHT POWER");
   #endif 
-  digitalWrite(DHT22_PMOS, LOW);   // Turn on.
+  digitalWrite(DHT22_PMOS, POWER_ON);   // Turn on.
   // delay(200);
 
   // init library 
@@ -69,7 +69,7 @@ float DHT_get_temperature(){
     #ifdef DHT22_DEBUG
       Serial.println("Turn off DHT POWER");
     #endif 
-    digitalWrite(DHT22_PMOS, HIGH);   // Turn off. GPIO default is low ->  will let mic ON
+    digitalWrite(DHT22_PMOS, POWER_OFF);   // Turn off. GPIO default is low ->  will let mic ON
 
     // release DHT
     isDHTRecording = !isDHTRecording;
@@ -111,7 +111,7 @@ float DHT_get_Humidity(){
     #ifdef DHT22_DEBUG
       Serial.println("Turn off DHT POWER");
     #endif 
-    digitalWrite(DHT22_PMOS, HIGH);   // Turn off. GPIO default is low ->  will let mic ON
+    digitalWrite(DHT22_PMOS, POWER_OFF);   // Turn off. GPIO default is low ->  will let mic ON
 
     // release DHT
     isDHTRecording = !isDHTRecording;
