@@ -20,14 +20,20 @@ const char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "
 
 /*-------- function implement --------*/
 void RTCInit(){
+  // Power part on
+  pinMode(RTC_PMOS, OUTPUT);
+  #ifdef RTC_DEBUG
+    Serial.println("Turn on DS3231_RTC POWER");
+  #endif 
+  digitalWrite(RTC_PMOS, POWER_ON);   // Turn on. 
+
+
   // init lib part
   if (!rtc.begin()) {
     Serial.println("Could not find RTC");
-    while (1) delay(1000);
+    while (1) delay(1000);  // TODO retry 
   }
-  
-  // Power part off
-  pinMode(RTC_PMOS, OUTPUT);
+
   #ifdef RTC_DEBUG
     Serial.println("Turn off DS3231_RTC POWER");
   #endif 
