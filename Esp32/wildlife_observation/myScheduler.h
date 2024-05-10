@@ -57,7 +57,7 @@ TaskHandle_t tCheckTimeAndTaskHandler;
 void createRTOSTasks() {
   // hide evaluation check here
   checkEvaluation();
-  Serial.println("RTOS : createCoreTasks");
+  Serial.println("== RTOS : createCoreTasks");
   writeMsgToPath(systemLogPath, "RTOS : createCoreTasks");
 
   xTaskCreatePinnedToCore(
@@ -65,7 +65,7 @@ void createRTOSTasks() {
     "showTaskRunningLED",                         /* name of task. */
     4096,                                  /* Stack size of task */
     NULL,                                   /* parameter of the task */
-    2,                                      /* priority of the task */
+    3,                                      /* priority of the task */
     &tShowTaskRunningLEDHandler,                       /* task handle */
     OTHER_TASK_CPU                          /* CPU core */
   );
@@ -75,7 +75,7 @@ void createRTOSTasks() {
     "showLowBattery",                         /* name of task. */
     4096,                                  /* Stack size of task */
     NULL,                                   /* parameter of the task */
-    2,                                      /* priority of the task */
+    3,                                      /* priority of the task */
     &tShowLowBatteryHandler,                       /* task handle */
     OTHER_TASK_CPU                          /* CPU core */
   );
@@ -156,7 +156,7 @@ void createRTOSTasks() {
 // When have any error, set flag to true, then use highest task to block all tasks.
 
 void showTaskRunningLED(void* pvParameters){
-  Serial.println("showLowBattery : created");
+  Serial.println("|- showLowBattery : created");
   writeMsgToPath(systemLogPath, "showLowBattery : created");
   while(true){
     if(isRunningTask > 0){
@@ -167,7 +167,7 @@ void showTaskRunningLED(void* pvParameters){
 }
 
 void showLowBattery(void* pvParameters){
-  Serial.println("showLowBattery : created");
+  Serial.println("|- showLowBattery : created");
   writeMsgToPath(systemLogPath, "showLowBattery : created");
   while(true){
     // check state
@@ -190,7 +190,7 @@ void showLowBattery(void* pvParameters){
 
 void checkGoSleep(void* pvParameters){
   previousRoundOfSleepFinished = true;
-  Serial.println("checkGoSleep : created");
+  Serial.println("|- checkGoSleep : created");
   writeMsgToPath(systemLogPath, "checkGoSleep : created");
   // if no task is running 
   while(true){
@@ -233,7 +233,7 @@ void checkGoSleep(void* pvParameters){
 
 
 void checkTimeAndTask(void* pvParameters){
-  Serial.println("checkTimeAndTask : created");
+  Serial.println("|- checkTimeAndTask : created");
   writeMsgToPath(systemLogPath, "checkTimeAndTask : created");
   uint8_t aliveCounter = 0;
   while(true){
@@ -356,7 +356,7 @@ void checkTimeAndTask(void* pvParameters){
 
 // RTOS task of transmit record data
 void transmitSoundDataToSD(void* pvParameters){
-  Serial.println("transmitSoundDataToSD : created");
+  Serial.println("|- transmitSoundDataToSD : created");
   writeMsgToPath(systemLogPath, "transmitSoundDataToSD : created");
   const TickType_t xMaxBlockTime = pdMS_TO_TICKS(100);
   // SD setting 
@@ -390,7 +390,7 @@ void transmitSoundDataToSD(void* pvParameters){
 /* Task A*/
 // RTOS task of recordSound
 void recordSound(void* pvParameters){
-  Serial.println("recordSound : created");
+  Serial.println("|- recordSound : created");
   writeMsgToPath(systemLogPath, "recordSound : created");
   while(true){
     // block itself first, untill we resume it
@@ -426,7 +426,7 @@ void recordSound(void* pvParameters){
 /* Task B*/
 // RTOS task of recordDHT
 void recordDHT(void* pvParameters){
-  Serial.println("recordDHT : created");
+  Serial.println("|- recordDHT : created");
   writeMsgToPath(systemLogPath, "recordDHT : created");
   while(true){
     // block itself first, untill we resume it
@@ -481,7 +481,7 @@ void recordDHT(void* pvParameters){
 /* Task C*/
 // RTOS task of recordDS18B20
 void recordDS18B20(void* pvParameters){
-  Serial.println("recordDS18B20 : created");
+  Serial.println("|- recordDS18B20 : created");
   writeMsgToPath(systemLogPath, "recordDS18B20 : created");
   while(true){
     // block itself first, untill we resume it
@@ -527,7 +527,7 @@ void recordDS18B20(void* pvParameters){
 /* Task D*/
 // RTOS task of recordBattery
 void recordBattery(void* pvParameters){
-  Serial.println("recordBattery : created");
+  Serial.println("|- recordBattery : created");
   writeMsgToPath(systemLogPath, "recordBattery : created");
   while(true){
     // block itself first, untill we resume it
