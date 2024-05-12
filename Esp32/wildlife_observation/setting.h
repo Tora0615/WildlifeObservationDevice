@@ -127,10 +127,8 @@ const int globalSDBufferByteSize = 512 * 16;  // 1 x uint8_t(byte) * 512  * 16 =
 uint8_t *currentAudioBuffer  = (uint8_t *)malloc(sizeof(uint8_t) * globalSDBufferByteSize);  
 uint8_t *transmitAudioBuffer = (uint8_t *)malloc(sizeof(uint8_t) * globalSDBufferByteSize);
 
+// init relative
 RTC_DATA_ATTR bool isFirstBoot = true;
-// RTC_DATA_ATTR int readIndexBeforeSleep = 0;
-RTC_DATA_ATTR int arrayReadIndex = 0;    // read position, re-zero when day change
-
 #define NO_SD_RETRY_LIMIT 5
 RTC_DATA_ATTR int noSdRetry = 0;
 
@@ -140,5 +138,11 @@ RTC_DATA_ATTR int noSdRetry = 0;
 RTC_DATA_ATTR bool isFirstCheckOTA = true;
 bool isNeedToUpdate = false;
 
+
+/* new task struct */
+#define MIN_A_DAY 1440
+RTC_DATA_ATTR char taskScheduleList[MIN_A_DAY] = {'Z'};
+RTC_DATA_ATTR int readTask = 0;    // read position, re-zero when day change
+RTC_DATA_ATTR int readSetting = 0;    // read position, re-zero when day change
 
 #endif

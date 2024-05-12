@@ -85,6 +85,14 @@ void quickShine(unsigned long remainTimeMs){
   delay(100); 
 }
 
+void showNoScheduleFileLED(){
+    while(1) {
+    digitalWrite(LED_RED, LOW); 
+    delay(500);
+    digitalWrite(LED_RED, HIGH); 
+    delay(500);
+  }
+}
 
 // running state visible
 void aliveLedShow(){

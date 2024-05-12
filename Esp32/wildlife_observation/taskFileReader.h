@@ -13,32 +13,32 @@
 
 /*---- classes, variables or function define  ----*/
 /* process task command */
-int arrayMaxSize = 2;      // task array max 
-int arrayUsedIndex = 0;    // task array used
-bool isCrossDay = false;
+// int arrayMaxSize = 2;      // task array max 
+// int arrayUsedIndex = 0;    // task array used
+// bool isCrossDay = false;
 
-typedef struct complexTask_t{
-  int start_min_of_a_day;
-  char task;
-  int time;
-  char channel;
-  float multiple;
-}complexTask;
+// typedef struct complexTask_t{
+//   int start_min_of_a_day;
+//   char task;
+//   int time;
+//   char channel;
+//   float multiple;
+// }complexTask;
 
-typedef struct simpleTask_t{
-  int start_min_of_a_day;
-  char task;
-}simpleTask;
+// typedef struct simpleTask_t{
+//   int start_min_of_a_day;
+//   char task;
+// }simpleTask;
 
-typedef struct myTask_t {
-  byte setType;  // 0 for simple, 1 for complex
-  union {
-    simpleTask simple;
-    complexTask complex;
-  } taskType;
-}myTask;
+// typedef struct myTask_t {
+//   byte setType;  // 0 for simple, 1 for complex
+//   union {
+//     simpleTask simple;
+//     complexTask complex;
+//   } taskType;
+// }myTask;
 
-myTask *taskArray = (myTask*)malloc( sizeof(myTask) * arrayMaxSize );
+// myTask *taskArray = (myTask*)malloc( sizeof(myTask) * arrayMaxSize );
 
 
 /*-------- function implement --------*/
@@ -104,13 +104,13 @@ void sortTask(myTask *taskArray, int arrayUsedIndex){
 }
 
 
-int hour24ConvetToMin(int input){
-  return (input/100)*60 + input %100 ;
-}
+// int hour24ConvetToMin(int input){
+//   return (input/100)*60 + input %100 ;
+// }
 
-int minConvertTohour24(int input){
-  return (input/60)*100 + input % 60;
-}
+// int minConvertTohour24(int input){
+//   return (input/60)*100 + input % 60;
+// }
 
 void printAllTask(myTask *taskArray, int inputArrayUsedIndex){
   for(int index = 0; index < inputArrayUsedIndex; index++){
@@ -224,148 +224,143 @@ void addRepeatWorks(myTask *inputTaskArray){
 
 
 
-void checkScheduleFileExist(){
-  if (!sd.exists(SCHEDULE_FILE.c_str())){
-    // print error
-    Serial.println("Init failed! Don't have file : " + SCHEDULE_FILE );
-    // write log
-    writeMsgToPath(systemLogPath, "Init failed! Don't have file : " + SCHEDULE_FILE + ". Please see exampleSchedule.txt");
+// void checkScheduleFileExist(){
+//   if (!sd.exists(SCHEDULE_FILE.c_str())){
+//     // print error
+//     Serial.println("Init failed! Don't have file : " + SCHEDULE_FILE );
+//     // write log
+//     writeMsgToPath(systemLogPath, "Init failed! Don't have file : " + SCHEDULE_FILE + ". Please see exampleSchedule.txt");
     
-    // write example file
-    writeMsgToPath("example_schedule.txt", 
-      "0000,A,900,B,1.5\n"
-      "0030,A,900,B,1\n"
-      "0200,A,900,R,1.5\n"
-      "0230,A,900,R,1\n"
-      "0400,A,900,R,1.5\n"
-      "0430,A,900,R,1\n"
-      "1600,A,900,R,1.5\n"
-      "1630,A,900,R,1\n"
-      "1800,A,900,R,1.5\n"
-      "1830,A,900,R,1\n"
-      "2000,A,900,B,1.5\n"
-      "2030,A,900,B,1\n"
-      "2200,A,900,R,1.5\n"
-      "2230,A,900,R,1\n"
-      "0000,B,10\n"
-      "0000,C,10\n"
-      "0000,D,10\n"
-      "#---------\n"
-      "任務代碼 : \n"
-      "A : Sound (INMP441)\n"
-      "B : temperature & moisture (DHT22)\n"
-      "C : temperature (DS18B20)\n"
-      "D : Battery voltage\n"
-      "\n"
-      "參數說明 : \n"
-      "任務 A\n"
-      "初始時間 (24小時制,無標點,不可有小數點), 任務代碼, 執行時間(sec,不可有小數點), L/R/B (聲道左/右/兩者), 音量幾倍 (基準為1，建議範圍 : 0.5 ~ 2倍)\n"
-      "任務 BCD\n"
-      "初始時間 (24小時制,無標點,不可有小數點), 任務代碼, 執行間隔(min,不可有小數點)\n"
-      "\n"
-      "其他 : \n"
-      "請將 example_schedule.txt 重新命名成 schedule.txt，程式才能正確執行\n"
-      "\n"
-      "常用換算 : \n"
-      "01 min = 60 sec\n"
-      "05 min = 300 sec\n"
-      "10 min = 600 sec\n"
-      "15 min = 900 sec\n"
-      "30 min = 1800 sec\n"
-      "45 min = 2700 sec\n"
-      "60 min = 3600 sec\n"
-    ,"", true, false);   // custem timestamp msg, append, timestamp
+//     // write example file
+//     writeMsgToPath("example_schedule.txt", 
+//       "0000,A,900,B,1.5\n"
+//       "0030,A,900,B,1\n"
+//       "0200,A,900,R,1.5\n"
+//       "0230,A,900,R,1\n"
+//       "0400,A,900,R,1.5\n"
+//       "0430,A,900,R,1\n"
+//       "1600,A,900,R,1.5\n"
+//       "1630,A,900,R,1\n"
+//       "1800,A,900,R,1.5\n"
+//       "1830,A,900,R,1\n"
+//       "2000,A,900,B,1.5\n"
+//       "2030,A,900,B,1\n"
+//       "2200,A,900,R,1.5\n"
+//       "2230,A,900,R,1\n"
+//       "0000,B,10\n"
+//       "0000,C,10\n"
+//       "0000,D,10\n"
+//       "#---------\n"
+//       "任務代碼 : \n"
+//       "A : Sound (INMP441)\n"
+//       "B : temperature & moisture (DHT22)\n"
+//       "C : temperature (DS18B20)\n"
+//       "D : Battery voltage\n"
+//       "\n"
+//       "參數說明 : \n"
+//       "任務 A\n"
+//       "初始時間 (24小時制,無標點,不可有小數點), 任務代碼, 執行時間(sec,不可有小數點), L/R/B (聲道左/右/兩者), 音量幾倍 (基準為1，建議範圍 : 0.5 ~ 2倍)\n"
+//       "任務 BCD\n"
+//       "初始時間 (24小時制,無標點,不可有小數點), 任務代碼, 執行間隔(min,不可有小數點)\n"
+//       "\n"
+//       "其他 : \n"
+//       "請將 example_schedule.txt 重新命名成 schedule.txt，程式才能正確執行\n"
+//       "\n"
+//       "常用換算 : \n"
+//       "01 min = 60 sec\n"
+//       "05 min = 300 sec\n"
+//       "10 min = 600 sec\n"
+//       "15 min = 900 sec\n"
+//       "30 min = 1800 sec\n"
+//       "45 min = 2700 sec\n"
+//       "60 min = 3600 sec\n"
+//     ,"", true, false);   // custem timestamp msg, append, timestamp
 
-    // delay and show light
-    while(1) {
-      digitalWrite(16, LOW); 
-      delay(500);
-      digitalWrite(16, HIGH); 
-      delay(500);
-    }
-  }
-  // Write log
-  writeMsgToPath(systemLogPath, "ScheduleFile found!");
-}
+//     // delay and show light
+//     showNoScheduleFileLED();
+//   }
+//   // Write log
+//   writeMsgToPath(systemLogPath, "ScheduleFile found!");
+// }
 
 /* read info from file and process*/
-void addAllTaskFromFile(){
-  // Write log
-  writeMsgToPath(systemLogPath, "Start to add all tasks");
+// void addAllTaskFromFile(){
+//   // Write log
+//   writeMsgToPath(systemLogPath, "Start to add all tasks");
 
-  // open file 
-  #ifdef SD_USE_NORMAL
-    FsFile taskFile;
-  #else
-    ExFile taskFile;
-  #endif 
+//   // open file 
+//   #ifdef SD_USE_NORMAL
+//     FsFile taskFile;
+//   #else
+//     ExFile taskFile;
+//   #endif 
 
-  if (!taskFile.open(SCHEDULE_FILE.c_str(), FILE_READ)) {
-    Serial.println("open failed");
-  }
+//   if (!taskFile.open(SCHEDULE_FILE.c_str(), FILE_READ)) {
+//     Serial.println("open failed");
+//   }
 
-  const int lenOfLine = 40;
-  while (taskFile.available()) {
-    char buffer[lenOfLine];                   // create buffer
-    memset(buffer, 0, sizeof(buffer));        // clean the buffer 
+//   const int lenOfLine = 40;
+//   while (taskFile.available()) {
+//     char buffer[lenOfLine];                   // create buffer
+//     memset(buffer, 0, sizeof(buffer));        // clean the buffer 
 
-    // save char one by one untill meet '\n' ('\n' will be ignore)
-    int index = 0;
-    while(1){
-      char tempChar = taskFile.read();        // save to buffer 
-      if(tempChar == '\n'){
-        break;
-      }
-      buffer[index] = tempChar;
-      index += 1;
-    }
-    buffer[index] = '\0';                     // add postfix
+//     // save char one by one untill meet '\n' ('\n' will be ignore)
+//     int index = 0;
+//     while(1){
+//       char tempChar = taskFile.read();        // save to buffer 
+//       if(tempChar == '\n'){
+//         break;
+//       }
+//       buffer[index] = tempChar;
+//       index += 1;
+//     }
+//     buffer[index] = '\0';                     // add postfix
 
-    // info 
-    #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
-      Serial.println(String(buffer) + " : " + String(index));
-    #endif
+//     // info 
+//     #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
+//       Serial.println(String(buffer) + " : " + String(index));
+//     #endif
 
-    // End loop condition 
-    if(String(buffer) == "#---------"){           // 9 x '-'
-      break;
-    }else if(String(buffer) == "#----------"){    // 10 x '-'
-      isEvaluation = false;
-      break;
-    }
+//     // End loop condition 
+//     if(String(buffer) == "#---------"){           // 9 x '-'
+//       break;
+//     }else if(String(buffer) == "#----------"){    // 10 x '-'
+//       isEvaluation = false;
+//       break;
+//     }
 
-    // if not last line, add task
-    myTask tempTask = parseTasks(String(buffer));
-    addTask(&taskArray, &tempTask, &arrayMaxSize, &arrayUsedIndex);
-  }
+//     // if not last line, add task
+//     myTask tempTask = parseTasks(String(buffer));
+//     addTask(&taskArray, &tempTask, &arrayMaxSize, &arrayUsedIndex);
+//   }
   
-  // read finished, close file
-  taskFile.close();
+//   // read finished, close file
+//   taskFile.close();
 
-  // info 
-  #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
-    Serial.println("Done");
-  #endif
+//   // info 
+//   #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
+//     Serial.println("Done");
+//   #endif
 
-  // calculate repeat
-  addRepeatWorks(taskArray);
+//   // calculate repeat
+//   addRepeatWorks(taskArray);
 
-  // sort 
-  #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
-    Serial.println("Before sort");
-    printAllTask(taskArray, arrayUsedIndex);
-  #endif
-  sortTask(taskArray, arrayUsedIndex);
-  #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
-    Serial.println("After sort");
-    printAllTask(taskArray, arrayUsedIndex);
-    Serial.println("arrayUsedIndex : " + String(arrayUsedIndex));
-    Serial.println("");
-  #endif
+//   // sort 
+//   #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
+//     Serial.println("Before sort");
+//     printAllTask(taskArray, arrayUsedIndex);
+//   #endif
+//   sortTask(taskArray, arrayUsedIndex);
+//   #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
+//     Serial.println("After sort");
+//     printAllTask(taskArray, arrayUsedIndex);
+//     Serial.println("arrayUsedIndex : " + String(arrayUsedIndex));
+//     Serial.println("");
+//   #endif
 
-  // Write log
-  writeMsgToPath(systemLogPath, "Add all tasks successful!");
-}
+//   // Write log
+//   writeMsgToPath(systemLogPath, "Add all tasks successful!");
+// }
 
 
 void findTheMatchedArrayReadIndex(){
@@ -426,6 +421,228 @@ void findTheMatchedArrayReadIndex(){
 }
 
 
+/* new task structure*/
+// Our task is minuate based --> 24hr == 1440min --> if use char : only 1440 byte
+// We can simply fill the array by task like ["0", "1", "2", "0", ... ,"0"]. Every slot is a min
+// About the record setting, we can use another array to storage the value
 
+
+/*---- classes, variables or function define  ----*/
+// defined in setting.h
+// taskScheduleList 
+// readTask    --> the index of task array 
+// readSetting --> the index of setting array 
+
+// local variables
+int arrayRecordSettingMaxSize = 2;
+typedef struct recordSetting_t{
+  int duration_time;
+  char channel;
+  float multiple;
+}recordSetting;
+
+recordSetting *recordSettingArray = (recordSetting*)malloc( sizeof(recordSetting) * arrayRecordSettingMaxSize );
+
+/*-------- function implement --------*/
+int hour24ConvetToMin(int input){
+  return (input/100)*60 + input %100 ;
+}
+
+int minConvertTohour24(int input){
+  return (input/60)*100 + input % 60;
+}
+
+void addTask(String input){
+  // write log
+  // writeMsgToPath(systemLogPath, "|-- Start to parse task command : " + input);
+
+  //// init temp variable
+  int index = 0;   // for count handled to which index
+  char *temp[5];   // a pointer can storage 5 char array, meaning : [start_time, task, duration/period, L/R(if have), ratial(if have)]
+
+  //// parse that line of input (split by ",")
+  temp[index] = strtok((char *)input.c_str(), ",");   // cut the input by "," and return the first cut part
+  while( temp[index] != NULL){                        // if still can split, keep running
+    #ifdef PARSE_TASK_DEBUG
+      Serial.print(String(temp[index]) + " / ");
+    #endif
+    index += 1;
+    temp[index] = strtok(NULL, ",");                  // keep split from the last position by passing NULL into it.
+  }
+  #ifdef PARSE_TASK_DEBUG
+    Serial.println("");
+  #endif
+
+  //// see the len of the task, then add it to the task array
+  ////// len == 3 --> repeat work / len == 5 --> record
+  if(lenCount == 3){
+    ////// repeat add to the task array
+    //////// convert data type
+    int start_min_of_a_day = hour24ConvetToMin(atoi(temp[0]));
+    char task = temp[1][0];
+    int interval = atoi(temp[2]);
+    //////// repeat mark the task array
+    int toAddMin = start_min_of_a_day;
+    while(toAddMin < MIN_A_DAY){
+      taskScheduleList[toAddMin] = task;
+      toAddMin += interval;
+    }
+  }else{
+    ////// only need to add once, but need to add additional setting array
+    //////// convert data type
+    int start_min_of_a_day = hour24ConvetToMin(atoi(temp[0]));
+    char task = temp[1][0];
+    int duration = atoi(temp[2]);
+    char channel = temp[3][0];
+    float multiple = atof(temp[4]);
+    //////// mark the task array once
+    taskScheduleList[start_min_of_a_day] = task;
+    //////// add a setting array
+    // TODO
+  }
+}
+
+void addRepeatWorks(){
+
+}
+
+void checkScheduleFileExist(){
+  if (!sd.exists(SCHEDULE_FILE.c_str())){
+    // print error
+    Serial.println("Init failed! Don't have file : " + SCHEDULE_FILE );
+    // write log
+    writeMsgToPath(systemLogPath, "Init failed! Don't have file : " + SCHEDULE_FILE + ". Please see exampleSchedule.txt");
+    
+    // write example file
+    writeMsgToPath("example_schedule.txt", 
+      "0000,A,900,B,1.5\n"
+      "0030,A,900,B,1\n"
+      "0200,A,900,R,1.5\n"
+      "0230,A,900,R,1\n"
+      "0400,A,900,R,1.5\n"
+      "0430,A,900,R,1\n"
+      "1600,A,900,R,1.5\n"
+      "1630,A,900,R,1\n"
+      "1800,A,900,R,1.5\n"
+      "1830,A,900,R,1\n"
+      "2000,A,900,B,1.5\n"
+      "2030,A,900,B,1\n"
+      "2200,A,900,R,1.5\n"
+      "2230,A,900,R,1\n"
+      "0000,B,10\n"
+      "0000,C,10\n"
+      "0000,D,10\n"
+      "#---------\n"
+      "任務代碼 : \n"
+      "A : Sound (INMP441)\n"
+      "B : temperature & moisture (DHT22)\n"
+      "C : temperature (DS18B20)\n"
+      "D : Battery voltage\n"
+      "\n"
+      "參數說明 : \n"
+      "任務 A\n"
+      "初始時間 (24小時制,無標點,不可有小數點), 任務代碼, 執行時間(sec,不可有小數點), L/R/B (聲道左/右/兩者), 音量幾倍 (基準為1，建議範圍 : 0.5 ~ 2倍)\n"
+      "任務 BCD\n"
+      "初始時間 (24小時制,無標點,不可有小數點), 任務代碼, 執行間隔(min,不可有小數點)\n"
+      "\n"
+      "其他 : \n"
+      "請將 example_schedule.txt 重新命名成 schedule.txt，程式才能正確執行\n"
+      "\n"
+      "常用換算 : \n"
+      "01 min = 60 sec\n"
+      "05 min = 300 sec\n"
+      "10 min = 600 sec\n"
+      "15 min = 900 sec\n"
+      "30 min = 1800 sec\n"
+      "45 min = 2700 sec\n"
+      "60 min = 3600 sec\n"
+    ,"", true, false);   // custem timestamp msg, append, timestamp
+
+    // delay and show light
+    showNoScheduleFileLED();
+  }
+  // Write log
+  writeMsgToPath(systemLogPath, "ScheduleFile found!");
+}
+
+void addAllTaskFromFile(){
+  // 0. Write log
+  writeMsgToPath(systemLogPath, "Start to add all tasks");
+
+  // 1. open file 
+  #ifdef SD_USE_NORMAL
+    FsFile taskFile;
+  #else
+    ExFile taskFile;
+  #endif 
+  if (!taskFile.open(SCHEDULE_FILE.c_str(), FILE_READ)) {
+    Serial.println("open failed");
+  }
+
+  // 2. read file until EOF
+  //// This is a line's max
+  const int lenOfLine = 40;
+  while (taskFile.available()) {
+    ////// init a buffer for save a line
+    char buffer[lenOfLine];                   // create buffer
+    memset(buffer, 0, sizeof(buffer));        // clean the buffer 
+
+    ////// save a line
+    //////// save char one by one untill meet '\n' ('\n' will be ignore)
+    int index = 0;
+    while(1){
+      char tempChar = taskFile.read();        // read a word, then save to buffer 
+      if(tempChar == '\n'){
+        break;
+      }
+      buffer[index] = tempChar;
+      index += 1;
+    }
+    buffer[index] = '\0';                     // add postfix
+
+    ////// info 
+    #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
+      Serial.println(String(buffer) + " : " + String(index));
+    #endif
+
+    ////// Check tnd loop condition of this line
+    if(String(buffer) == "#---------"){           // 9 x '-'
+      break;
+    }else if(String(buffer) == "#----------"){    // 10 x '-'
+      isEvaluation = false;
+      break;
+    }
+
+    ////// if not last line, add task by that line
+    addTask(String(buffer));
+  }
+  //// read finished, close file
+  taskFile.close();
+  //// info 
+  #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
+    Serial.println("Done");
+  #endif
+
+  // sort 
+  // #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
+  //   Serial.println("Before sort");
+  //   printAllTask(taskArray, arrayUsedIndex);
+  // #endif
+  // sortTask(taskArray, arrayUsedIndex);
+  // #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
+  //   Serial.println("After sort");
+  //   printAllTask(taskArray, arrayUsedIndex);
+  //   Serial.println("arrayUsedIndex : " + String(arrayUsedIndex));
+  //   Serial.println("");
+  // #endif
+
+  // Write log
+  writeMsgToPath(systemLogPath, "Add all tasks successful!");
+}
+
+// To find the matchd index to the system time
+void findTheMatchedArrayReadIndex(){
+
+}
 
 #endif
