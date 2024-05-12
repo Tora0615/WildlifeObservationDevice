@@ -41,6 +41,7 @@ void SDInit(){
     Serial.println("Direct turn on SD POWER");
   #endif 
   digitalWrite(SD_PMOS, POWER_ON);   // Turn off. GPIO default is low ->  will let mic ON
+  delay(1000); // give enough time for PMOS power up
   // TODO : turn off when sleep
 
   if(!sd.begin(CHIP_SELECT, SPI_SPEED)){

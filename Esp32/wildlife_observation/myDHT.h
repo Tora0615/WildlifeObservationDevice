@@ -34,7 +34,7 @@ void turnOnDhtPower(){
     Serial.println("Turn on DHT POWER");
   #endif 
   digitalWrite(DHT22_PMOS, POWER_ON);   // Turn on.
-  // delay(200);
+  // delay(200);  // RTOS handle
 
   // init library 
   dht.begin();
@@ -47,6 +47,7 @@ float DHT_get_temperature(){
     isDHTRecording = !isDHTRecording;
   
     // power on
+    // RTOS handle 
     // turnOnDhtPower();
 
     // get value 
@@ -63,7 +64,7 @@ float DHT_get_temperature(){
     }
 
     // disable pullup
-    gpio_pullup_dis(GPIO_NUM_33);
+    gpio_pullup_dis(DHTPIN_FOR_PULLUP_DISABLE);
 
     // power off 
     #ifdef DHT22_DEBUG
@@ -80,6 +81,7 @@ float DHT_get_temperature(){
   else{  // DHT is using 
     // Write log
     writeMsgToPath(systemLogPath, "Now DHT sensor is using, skip this task");
+    Serial.println("Now DHT sensor is using, skip this task");
   }
 }
 
@@ -105,7 +107,7 @@ float DHT_get_Humidity(){
     }
 
     // disable pullup
-    gpio_pullup_dis(GPIO_NUM_33);
+    gpio_pullup_dis(DHTPIN_FOR_PULLUP_DISABLE);
 
     // power off 
     #ifdef DHT22_DEBUG

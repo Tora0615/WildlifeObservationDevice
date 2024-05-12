@@ -57,6 +57,9 @@ void setup() {
   // shine and close
   showInitStatusLED(ALL_INIT_FINISHED); 
 
+  // for function Test
+  // Serial.println("here");
+
   // use dual core by RTOS 
   createRTOSTasks(); 
 }

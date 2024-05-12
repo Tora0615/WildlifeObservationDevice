@@ -446,7 +446,7 @@ void recordDHT(void* pvParameters){
       if ( xSemaphoreTake( xSemaphore_Temp_PMOS, pdMS_TO_TICKS(100) ) == pdTRUE) {
         turnOnDhtPower();
         // use delay to wait it fully powered 
-        vTaskDelay(500 / portTICK_PERIOD_MS);
+        vTaskDelay(PMOS_CHARGING_TIME / portTICK_PERIOD_MS);
         break;
       }
     }
@@ -500,7 +500,7 @@ void recordDS18B20(void* pvParameters){
       if( xSemaphoreTake( xSemaphore_Temp_PMOS, pdMS_TO_TICKS(100) ) == pdTRUE){
         turnOnDs18b20Power();
         // use delay to wait it fully powered 
-        vTaskDelay(500 / portTICK_PERIOD_MS);
+        vTaskDelay(PMOS_CHARGING_TIME / portTICK_PERIOD_MS);
         break;
       }
     }
@@ -565,7 +565,7 @@ void checkDayChange(){
   if( getPassedSecOfToday() > SECONDS_OF_A_DAY){  
     turnOnRtcPower();
     // use delay to wait it fully powered 
-    vTaskDelay(500 / portTICK_PERIOD_MS);
+    vTaskDelay(PMOS_CHARGING_TIME / portTICK_PERIOD_MS);
 
     /* calibrate local time with RTC timer */
     uint32_t tempRtcTime = GetHowManySecondsHasPassedTodayFromRtc();

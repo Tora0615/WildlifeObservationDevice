@@ -10,7 +10,7 @@ void scanConnectedForMS(int countDownTime){
   while(1){
     // check is over time or not
     if ( (millis() - startTime) > countDownTime){
-      Serial.println("Not client connected, closing the AP...");
+      Serial.println("No client connected, closing the AP...");
       break;
     }
 
@@ -66,6 +66,7 @@ void startSoftAp(){
 
 /* we don't need to turn off after firmware updated */
 /* system will automatically restart */
+/* but still need to call in normal situation*/
 void closeSoftAP(){
   // turn off SoftAP
   WiFi.softAPdisconnect(true);

@@ -45,6 +45,7 @@
 #define DHT22_PMOS 32     // 3V_sensor_switch (DS18 & DHT)
 #define DHTPIN 33         // DHT_DATA
 #define DHTTYPE DHT22
+#define DHTPIN_FOR_PULLUP_DISABLE GPIO_NUM_33
 // Battery (ADC)
 #define BATTERY_MONITOR_PIN A0  // GPIO 36 / VP 
 // I2S
@@ -55,6 +56,8 @@
 #define MODE_R_PIN    (15)    // 15 pin weak pull-up / Set LR of that micorphone / High - R
 #define MODE_L_PIN    (2)     // 2 pin weak pull-down / Set LR of that micorphone / Low - L
 #define SOUND_PMOS    (13)    // 3V_I2S_SWITCH
+
+#define PMOS_CHARGING_TIME 3000 // ms, 2500 --> sometimes DS18(fake) don't have value 
 
 
 //== compile setting ==
