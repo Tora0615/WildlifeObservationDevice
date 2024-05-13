@@ -38,6 +38,9 @@ void setup() {
   checkScheduleFileExist(); 
   showInitStatusLED(SCHEDULE_FILE_EXIST);
   addAllTaskFromFile(); 
+
+  while(1) delay(10000);
+  
   showInitStatusLED(TASK_ADDED);
   if(isFirstBoot){
     Serial.println("!! First boot : start to find the matched arrayReadIndex !!");

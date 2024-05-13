@@ -1,3 +1,4 @@
+#include <stdint.h>
 /*---- include guard ----*/
 #ifndef SETTING_H
 #define SETTING_H
@@ -141,8 +142,9 @@ bool isNeedToUpdate = false;
 
 /* new task struct */
 #define MIN_A_DAY 1440
-RTC_DATA_ATTR char taskScheduleList[MIN_A_DAY] = {'Z'};
+RTC_DATA_ATTR uint8_t taskScheduleList[MIN_A_DAY] = {0};
 RTC_DATA_ATTR int readTask = 0;    // read position, re-zero when day change
 RTC_DATA_ATTR int readSetting = 0;    // read position, re-zero when day change
+bool isCrossDay = false;
 
 #endif

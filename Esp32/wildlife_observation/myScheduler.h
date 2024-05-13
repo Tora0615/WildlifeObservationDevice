@@ -188,171 +188,171 @@ void showLowBattery(void* pvParameters){
   }
 }
 
-void checkGoSleep(void* pvParameters){
-  previousRoundOfSleepFinished = true;
-  Serial.println("|- checkGoSleep : created");
-  writeMsgToPath(systemLogPath, "checkGoSleep : created");
-  // if no task is running 
-  while(true){
-    // block itself first, untill we resume it
-    #ifdef RTOS_DETIAL
-      Serial.println("checkGoSleep : suspended");
-    #endif
-    vTaskSuspend(NULL);
+// void checkGoSleep(void* pvParameters){
+//   previousRoundOfSleepFinished = true;
+//   Serial.println("|- checkGoSleep : created");
+//   writeMsgToPath(systemLogPath, "checkGoSleep : created");
+//   // if no task is running 
+//   while(true){
+//     // block itself first, untill we resume it
+//     #ifdef RTOS_DETIAL
+//       Serial.println("checkGoSleep : suspended");
+//     #endif
+//     vTaskSuspend(NULL);
 
-    // if called resume, will go to here
-    #ifdef RTOS_DETIAL
-      Serial.println("checkGoSleep : resumed");
-    #endif
-    Serial.print("isRunningTask : " + String(isRunningTask)); Serial.println(", previousRoundOfSleepFinished : " + String(previousRoundOfSleepFinished));
+//     // if called resume, will go to here
+//     #ifdef RTOS_DETIAL
+//       Serial.println("checkGoSleep : resumed");
+//     #endif
+//     Serial.print("isRunningTask : " + String(isRunningTask)); Serial.println(", previousRoundOfSleepFinished : " + String(previousRoundOfSleepFinished));
     
-    #ifdef USE_DEEP_SLEEP
-      int startTimeOfNext = 0;
-      if((taskArray + arrayReadIndex)->setType == 0){  // simple task
-        startTimeOfNext = (taskArray + arrayReadIndex)->taskType.simple.start_min_of_a_day;
-      }else{
-        startTimeOfNext = (taskArray + arrayReadIndex)->taskType.complex.start_min_of_a_day;
-      }
+//     #ifdef USE_DEEP_SLEEP
+//       int startTimeOfNext = 0;
+//       if((taskArray + arrayReadIndex)->setType == 0){  // simple task
+//         startTimeOfNext = (taskArray + arrayReadIndex)->taskType.simple.start_min_of_a_day;
+//       }else{
+//         startTimeOfNext = (taskArray + arrayReadIndex)->taskType.complex.start_min_of_a_day;
+//       }
 
-      // only sleep in deep mode when still have at least 10 sec
-      if(isRunningTask == 0 && previousRoundOfSleepFinished && (startTimeOfNext * 60 - getPassedSecOfToday()) > 10){
-        previousRoundOfSleepFinished = false;
-        if(nextTaskPreserveTime_sec> 0){
-          goToSleep(nextTaskPreserveTime_sec);
-        }
-      }
-    #else
-      if(isRunningTask == 0 && previousRoundOfSleepFinished){
-        previousRoundOfSleepFinished = false;
-        goToSleep(nextTaskPreserveTime_sec);
-      }
-    #endif
-  }
-}
-
-
-
-void checkTimeAndTask(void* pvParameters){
-  Serial.println("|- checkTimeAndTask : created");
-  writeMsgToPath(systemLogPath, "checkTimeAndTask : created");
-  uint8_t aliveCounter = 0;
-  while(true){
-    // jump out to other tasks
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-
-    // every 50 sec show led when running    
-    if(aliveCounter >= 100){
-      aliveLedShow();
-      aliveCounter = 0;
-    }
-
-    // Debug msg
-    #ifdef CHECK_IS_NEED_TO_RUN_TASK
-      Serial.println("checkTimeAndTask");
-    #endif
-
-    // before task, check day change 
-    // will update variables add create file / folder
-    checkDayChange();
-
-    // get next task's start time
-    int startTimeOfNext = 0;
-    if((taskArray + arrayReadIndex)->setType == 0){  // simple task
-      startTimeOfNext = (taskArray + arrayReadIndex)->taskType.simple.start_min_of_a_day;
-    }else{
-      startTimeOfNext = (taskArray + arrayReadIndex)->taskType.complex.start_min_of_a_day;
-    }
-
-    // check if need to run task now ?
-    if( getPassedSecOfToday() > startTimeOfNext * 60 && !isCrossDay){  // if not cross day, change to sec and compare
-
-      #ifdef CHECK_IS_NEED_TO_RUN_TASK
-        Serial.println("Execute contition of this loop : ");
-        Serial.println("arrayReadIndex : " + String(arrayReadIndex));
-        Serial.println("arrayUsedIndex : " + String(arrayUsedIndex));
-      #endif
-
-      // add sleep lock, this will be release in every task
-      isRunningTask += 1;
-
-      // get task code 
-      char task_code;
-      if((taskArray + arrayReadIndex)->setType == 0){  // simple task
-        task_code = (taskArray + arrayReadIndex)->taskType.simple.task;
-      }else{
-        task_code = (taskArray + arrayReadIndex)->taskType.complex.task;
-      }
-
-      // start the task according to task code. 
-      if (task_code == 'A'){          // Sound record
-        // print and writr log 
-        Serial.println(String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task A (sound record)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
-        writeMsgToPath(systemLogPath, "Run Task A (sound record), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
-        // set global variable 
-        recordTime = (taskArray + arrayReadIndex)->taskType.complex.time;
-        channel_tag = (taskArray + arrayReadIndex)->taskType.complex.channel;
-        gain_ratio = (taskArray + arrayReadIndex)->taskType.complex.multiple;
-        // active the suspended task
-        vTaskResume(tRecordSoundHandler);
-      }else if (task_code == 'B'){    // DHT
-        // print and writr log 
-        Serial.println( String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task B (DHT)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
-        DHT_TimeStamp = String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday()));
-        writeMsgToPath(systemLogPath, "Run Task B (DHT), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")", DHT_TimeStamp);  // write with same timestamp before/after get the data
-        // active the suspended task 
-        vTaskResume(tRecordDHTHandler);
-      }else if (task_code == 'C'){    // DS18B20
-        // print and writr log 
-        Serial.println(String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task C (DS18B20)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
-        DS18B20_TimeStamp = String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday()));
-        writeMsgToPath(systemLogPath, "Run Task C (DS18B20), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")", DS18B20_TimeStamp);
-        // active the suspended task
-        vTaskResume(tRecordDS18B20Handler);
-      }else if (task_code == 'D'){    // battery 
-        // print and writr log 
-        Serial.println(String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task D (battery)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
-        Battery_TimeStamp = String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday()));
-        writeMsgToPath(systemLogPath, "Run Task D (battery), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")", Battery_TimeStamp);
-        // active the suspended task
-        vTaskResume(tRecordBatteryHandler);
-      }
-
-      // swift to next task and check it is cross day or not
-      arrayReadIndex +=1;
-      if (arrayReadIndex == arrayUsedIndex){
-        Serial.println("checkTimeAndTask : Task array out of range, it is cross-day task! Re-zero index now.");
-        writeMsgToPath(systemLogPath, "checkTimeAndTask : Task array out of range, it is cross-day task! Re-zero index now.");
-        arrayReadIndex = 0;
-        // lock the task
-        isCrossDay = true;
-      }
-    }
+//       // only sleep in deep mode when still have at least 10 sec
+//       if(isRunningTask == 0 && previousRoundOfSleepFinished && (startTimeOfNext * 60 - getPassedSecOfToday()) > 10){
+//         previousRoundOfSleepFinished = false;
+//         if(nextTaskPreserveTime_sec> 0){
+//           goToSleep(nextTaskPreserveTime_sec);
+//         }
+//       }
+//     #else
+//       if(isRunningTask == 0 && previousRoundOfSleepFinished){
+//         previousRoundOfSleepFinished = false;
+//         goToSleep(nextTaskPreserveTime_sec);
+//       }
+//     #endif
+//   }
+// }
 
 
-    // save sleep time to global variable
-    if(isCrossDay){
-      // change day
-      Serial.println("checkTimeAndTask -- This sleep will cross day");
-      nextTaskPreserveTime_sec = SECONDS_OF_A_DAY - getPassedSecOfToday() + startTimeOfNext * 60;
-    }else{
-      // normal 
-      nextTaskPreserveTime_sec = startTimeOfNext * 60 - getPassedSecOfToday();
-    }
-    Serial.println("checkTimeAndTask -- nextTaskPreserveTime_sec : " + String(nextTaskPreserveTime_sec));
-    char task_code;
-    if((taskArray + arrayReadIndex)->setType == 0){  // simple task
-      task_code = (taskArray + arrayReadIndex)->taskType.simple.task;
-    }else{
-      task_code = (taskArray + arrayReadIndex)->taskType.complex.task;
-    }
-    Serial.println("checkTimeAndTask -- nextTask : " + String(task_code));
 
-    // active the suspended sleep task
-    vTaskResume(tCheckGoSleepHandler);
+// void checkTimeAndTask(void* pvParameters){
+//   Serial.println("|- checkTimeAndTask : created");
+//   writeMsgToPath(systemLogPath, "checkTimeAndTask : created");
+//   uint8_t aliveCounter = 0;
+//   while(true){
+//     // jump out to other tasks
+//     vTaskDelay(500 / portTICK_PERIOD_MS);
 
-    aliveCounter += 1;
-  }
-}
+//     // every 50 sec show led when running    
+//     if(aliveCounter >= 100){
+//       aliveLedShow();
+//       aliveCounter = 0;
+//     }
+
+//     // Debug msg
+//     #ifdef CHECK_IS_NEED_TO_RUN_TASK
+//       Serial.println("checkTimeAndTask");
+//     #endif
+
+//     // before task, check day change 
+//     // will update variables add create file / folder
+//     checkDayChange();
+
+//     // get next task's start time
+//     int startTimeOfNext = 0;
+//     if((taskArray + arrayReadIndex)->setType == 0){  // simple task
+//       startTimeOfNext = (taskArray + arrayReadIndex)->taskType.simple.start_min_of_a_day;
+//     }else{
+//       startTimeOfNext = (taskArray + arrayReadIndex)->taskType.complex.start_min_of_a_day;
+//     }
+
+//     // check if need to run task now ?
+//     if( getPassedSecOfToday() > startTimeOfNext * 60 && !isCrossDay){  // if not cross day, change to sec and compare
+
+//       #ifdef CHECK_IS_NEED_TO_RUN_TASK
+//         Serial.println("Execute contition of this loop : ");
+//         Serial.println("arrayReadIndex : " + String(arrayReadIndex));
+//         Serial.println("arrayUsedIndex : " + String(arrayUsedIndex));
+//       #endif
+
+//       // add sleep lock, this will be release in every task
+//       isRunningTask += 1;
+
+//       // get task code 
+//       char task_code;
+//       if((taskArray + arrayReadIndex)->setType == 0){  // simple task
+//         task_code = (taskArray + arrayReadIndex)->taskType.simple.task;
+//       }else{
+//         task_code = (taskArray + arrayReadIndex)->taskType.complex.task;
+//       }
+
+//       // start the task according to task code. 
+//       if (task_code == 'A'){          // Sound record
+//         // print and writr log 
+//         Serial.println(String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task A (sound record)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+//         writeMsgToPath(systemLogPath, "Run Task A (sound record), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+//         // set global variable 
+//         recordTime = (taskArray + arrayReadIndex)->taskType.complex.time;
+//         channel_tag = (taskArray + arrayReadIndex)->taskType.complex.channel;
+//         gain_ratio = (taskArray + arrayReadIndex)->taskType.complex.multiple;
+//         // active the suspended task
+//         vTaskResume(tRecordSoundHandler);
+//       }else if (task_code == 'B'){    // DHT
+//         // print and writr log 
+//         Serial.println( String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task B (DHT)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+//         DHT_TimeStamp = String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday()));
+//         writeMsgToPath(systemLogPath, "Run Task B (DHT), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")", DHT_TimeStamp);  // write with same timestamp before/after get the data
+//         // active the suspended task 
+//         vTaskResume(tRecordDHTHandler);
+//       }else if (task_code == 'C'){    // DS18B20
+//         // print and writr log 
+//         Serial.println(String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task C (DS18B20)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+//         DS18B20_TimeStamp = String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday()));
+//         writeMsgToPath(systemLogPath, "Run Task C (DS18B20), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")", DS18B20_TimeStamp);
+//         // active the suspended task
+//         vTaskResume(tRecordDS18B20Handler);
+//       }else if (task_code == 'D'){    // battery 
+//         // print and writr log 
+//         Serial.println(String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + " : run Task D (battery)." + " Set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")");
+//         Battery_TimeStamp = String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday()));
+//         writeMsgToPath(systemLogPath, "Run Task D (battery), set time : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + ")", Battery_TimeStamp);
+//         // active the suspended task
+//         vTaskResume(tRecordBatteryHandler);
+//       }
+
+//       // swift to next task and check it is cross day or not
+//       arrayReadIndex +=1;
+//       if (arrayReadIndex == arrayUsedIndex){
+//         Serial.println("checkTimeAndTask : Task array out of range, it is cross-day task! Re-zero index now.");
+//         writeMsgToPath(systemLogPath, "checkTimeAndTask : Task array out of range, it is cross-day task! Re-zero index now.");
+//         arrayReadIndex = 0;
+//         // lock the task
+//         isCrossDay = true;
+//       }
+//     }
+
+
+//     // save sleep time to global variable
+//     if(isCrossDay){
+//       // change day
+//       Serial.println("checkTimeAndTask -- This sleep will cross day");
+//       nextTaskPreserveTime_sec = SECONDS_OF_A_DAY - getPassedSecOfToday() + startTimeOfNext * 60;
+//     }else{
+//       // normal 
+//       nextTaskPreserveTime_sec = startTimeOfNext * 60 - getPassedSecOfToday();
+//     }
+//     Serial.println("checkTimeAndTask -- nextTaskPreserveTime_sec : " + String(nextTaskPreserveTime_sec));
+//     char task_code;
+//     if((taskArray + arrayReadIndex)->setType == 0){  // simple task
+//       task_code = (taskArray + arrayReadIndex)->taskType.simple.task;
+//     }else{
+//       task_code = (taskArray + arrayReadIndex)->taskType.complex.task;
+//     }
+//     Serial.println("checkTimeAndTask -- nextTask : " + String(task_code));
+
+//     // active the suspended sleep task
+//     vTaskResume(tCheckGoSleepHandler);
+
+//     aliveCounter += 1;
+//   }
+// }
 
 // RTOS task of transmit record data
 void transmitSoundDataToSD(void* pvParameters){

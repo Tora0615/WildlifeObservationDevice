@@ -1,3 +1,5 @@
+#include "HardwareSerial.h"
+#include <stdint.h>
 /*---- include guard ----*/
 #ifndef TASKFILEREADER_H
 #define TASKFILEREADER_H
@@ -12,415 +14,6 @@
 
 
 /*---- classes, variables or function define  ----*/
-/* process task command */
-// int arrayMaxSize = 2;      // task array max 
-// int arrayUsedIndex = 0;    // task array used
-// bool isCrossDay = false;
-
-// typedef struct complexTask_t{
-//   int start_min_of_a_day;
-//   char task;
-//   int time;
-//   char channel;
-//   float multiple;
-// }complexTask;
-
-// typedef struct simpleTask_t{
-//   int start_min_of_a_day;
-//   char task;
-// }simpleTask;
-
-// typedef struct myTask_t {
-//   byte setType;  // 0 for simple, 1 for complex
-//   union {
-//     simpleTask simple;
-//     complexTask complex;
-//   } taskType;
-// }myTask;
-
-// myTask *taskArray = (myTask*)malloc( sizeof(myTask) * arrayMaxSize );
-
-
-/*-------- function implement --------*/
-void addTask(myTask **pointerToTaskArray, myTask *pointerToTask, int *pointerToArrayMaxSize, int *pointerToArrayUsedIndex){  
-  // if array size is not enough
-  if(*pointerToArrayUsedIndex == *pointerToArrayMaxSize){
-    // create a temp array with double size
-    myTask *tempTaskArray = (myTask*)malloc( sizeof(myTask) * *pointerToArrayMaxSize * 2);
-    // copy data to new array
-    memcpy(tempTaskArray, *pointerToTaskArray, *pointerToArrayMaxSize * sizeof(myTask) );
-    // release old array ram space
-    free(*pointerToTaskArray);
-    // new array pointer give to old name
-    *pointerToTaskArray = tempTaskArray;
-    // double variable
-    *pointerToArrayMaxSize = *pointerToArrayMaxSize * 2;
-  }
-
-  // give value to that array slot (copy value, not copy address)
-  *(*pointerToTaskArray + *pointerToArrayUsedIndex) = *pointerToTask;
-  // index + 1
-  *pointerToArrayUsedIndex += 1;
-}
-
-
-
-
-void sortTask(myTask *taskArray, int arrayUsedIndex){
-  // write log
-  writeMsgToPath(systemLogPath, "Start to sort all tasks");
-
-  // bubbleSort
-	int i, j;
-  myTask temp;
-	bool exchanged = true;
-	
-	for (i=0; exchanged && i<arrayUsedIndex-1; i++){ 
-    exchanged = false;
-		for (j=0; j<arrayUsedIndex-1-i; j++){ 
-      // read value depend on struct type
-      int a = taskArray[j].setType == 0 ? taskArray[j].taskType.simple.start_min_of_a_day : taskArray[j].taskType.complex.start_min_of_a_day;
-      int b = taskArray[j+1].setType == 0 ? taskArray[j+1].taskType.simple.start_min_of_a_day : taskArray[j+1].taskType.complex.start_min_of_a_day;
-      
-      #ifdef SORT_TASK_DEBUG
-        Serial.println(a);
-        Serial.println(b);
-      #endif
-
-			if (a>b){ // if statement SHOULDEN'T seperate into two line
-        #ifdef SORT_TASK_DEBUG
-          Serial.println("swap");
-        #endif
-				temp = taskArray[j];
-				taskArray[j] = taskArray[j+1];
-				taskArray[j+1] = temp;
-				exchanged = true; 
-			}
-    }
-  }
-
-  // Write log
-  writeMsgToPath(systemLogPath, "|-- Sort all tasks successful!");
-}
-
-
-// int hour24ConvetToMin(int input){
-//   return (input/100)*60 + input %100 ;
-// }
-
-// int minConvertTohour24(int input){
-//   return (input/60)*100 + input % 60;
-// }
-
-void printAllTask(myTask *taskArray, int inputArrayUsedIndex){
-  for(int index = 0; index < inputArrayUsedIndex; index++){
-    // Serial.println("Address : " + String( (int)(taskArray+index)) );
-    if((taskArray+index)->setType == 0){  // simple task
-      Serial.print("start_min_of_a_day : " + String( (taskArray+index)->taskType.simple.start_min_of_a_day ) + "(" + String( minConvertTohour24( (taskArray+index)->taskType.simple.start_min_of_a_day ) ) + ")");
-      Serial.println(" / task : " + String( (taskArray+index)->taskType.simple.task ));
-    }else{  // complex task
-      Serial.print("start_min_of_a_day : " + String( (taskArray+index)->taskType.complex.start_min_of_a_day ) + "(" + String( minConvertTohour24((taskArray+index)->taskType.complex.start_min_of_a_day) ) + ")");
-      Serial.print(" / task : " + String( (taskArray+index)->taskType.complex.task ));
-      Serial.print(" / time : " + String( (taskArray+index)->taskType.complex.time ));
-      Serial.print(" / channel : " + String( (taskArray+index)->taskType.complex.channel ));
-      Serial.println(" / multiple : " + String( (taskArray+index)->taskType.complex.multiple ));
-    }
-  }
-}
-
-myTask parseTasks(String input){
-  // write log
-  // writeMsgToPath(systemLogPath, "|-- Start to parse task command : " + input);
-
-  int lenCount = 0;
-  char *temp[5];  // a pointer point to a value which can storage 5 char array pointer
-
-  char *token;
-  temp[lenCount] = strtok((char *)input.c_str(), ",");  // remove error "invalid conversion from 'const char*' to 'char*' ""
-  while( temp[lenCount] != NULL){   // if still can parse, keep running
-    #ifdef PARSE_TASK_DEBUG
-      Serial.print(String(temp[lenCount]) + " / ");
-    #endif
-    lenCount += 1;
-    temp[lenCount] = strtok(NULL, ",");
-  }
-  #ifdef PARSE_TASK_DEBUG
-    Serial.println("");
-  #endif
-
-  myTask tempTask;
-  tempTask.setType = 1;
-  if(lenCount == 3){
-    tempTask.taskType.complex.start_min_of_a_day = hour24ConvetToMin(atoi(temp[0]));
-    tempTask.taskType.complex.task = temp[1][0];
-    tempTask.taskType.complex.time = atoi(temp[2]);
-    tempTask.taskType.complex.channel = ' ';
-    tempTask.taskType.complex.multiple = 0.0;
-  }else{
-    tempTask.taskType.complex.start_min_of_a_day = hour24ConvetToMin(atoi(temp[0]));
-    tempTask.taskType.complex.task = temp[1][0];
-    tempTask.taskType.complex.time = atoi(temp[2]);
-    tempTask.taskType.complex.channel = temp[3][0];
-    tempTask.taskType.complex.multiple = atof(temp[4]);
-  }
-  // writeMsgToPath(systemLogPath, "   |-- Parse task command successful!");
-  return tempTask;
-}
-
-
-void addRepeatWorks(myTask *inputTaskArray){
-  // write log
-  writeMsgToPath(systemLogPath, "|-- Start to add repeat works");
-
-  // new variable and larger size array
-  int tempArrayMaxSize = 2;
-  int tempArrayUsedIndex = 0;
-  myTask *temptaskArray = (myTask*)malloc( sizeof(myTask) * tempArrayMaxSize );
-
-  for (int i=0; i<arrayUsedIndex; i++){
-    if((inputTaskArray+i)->taskType.complex.task == 'A'){
-      // direct copy 
-      addTask(&temptaskArray, (inputTaskArray+i), &tempArrayMaxSize, &tempArrayUsedIndex);
-      #ifdef ADD_REPEAT_WORKS_DEBUG
-        Serial.println("direct copy" + String(i));
-        Serial.println("tempArrayMaxSize : " + String(tempArrayMaxSize));
-        Serial.println("tempArrayUsedIndex : " + String(tempArrayUsedIndex));
-      #endif
-    }else{
-      // count repeat time
-      int repeatTime = 24.0 * 60 / ((inputTaskArray+i)->taskType.complex.time);
-      #ifdef ADD_REPEAT_WORKS_DEBUG
-        Serial.println("repeatTime : " + String(repeatTime));
-      #endif
-
-      // repeat N times to add task to temp array
-      for (int j=0; j<repeatTime; j++){
-        myTask tempTask;        // !!same address, if malloc will be different!!
-        tempTask.setType = 0;
-        tempTask.taskType.simple.task = ( (inputTaskArray+i)->taskType.complex.task );
-        tempTask.taskType.simple.start_min_of_a_day = ( (inputTaskArray+i)->taskType.complex.start_min_of_a_day) + j * ((inputTaskArray+i)->taskType.complex.time);
-        addTask(&temptaskArray, &tempTask, &tempArrayMaxSize, &tempArrayUsedIndex);
-
-        #ifdef ADD_REPEAT_WORKS_DEBUG
-          Serial.println("loop create: " + String(j+1));
-          Serial.println("tempArrayMaxSize : " + String(tempArrayMaxSize));
-          Serial.println("tempArrayUsedIndex : " + String(tempArrayUsedIndex));
-        #endif
-      }
-    }
-  }
-
-  // here can confirm change success or not
-  // printAllTask(temptaskArray, tempArrayUsedIndex);
-
-  // replace with new array
-  arrayMaxSize = tempArrayMaxSize;
-  arrayUsedIndex = tempArrayUsedIndex;
-  taskArray = temptaskArray;   // local variable SHOULD NOT same as gloable, or replace will not be success
-
-  // Write log
-  writeMsgToPath(systemLogPath, "|---- Add repeat works successful!");
-}
-
-
-
-// void checkScheduleFileExist(){
-//   if (!sd.exists(SCHEDULE_FILE.c_str())){
-//     // print error
-//     Serial.println("Init failed! Don't have file : " + SCHEDULE_FILE );
-//     // write log
-//     writeMsgToPath(systemLogPath, "Init failed! Don't have file : " + SCHEDULE_FILE + ". Please see exampleSchedule.txt");
-    
-//     // write example file
-//     writeMsgToPath("example_schedule.txt", 
-//       "0000,A,900,B,1.5\n"
-//       "0030,A,900,B,1\n"
-//       "0200,A,900,R,1.5\n"
-//       "0230,A,900,R,1\n"
-//       "0400,A,900,R,1.5\n"
-//       "0430,A,900,R,1\n"
-//       "1600,A,900,R,1.5\n"
-//       "1630,A,900,R,1\n"
-//       "1800,A,900,R,1.5\n"
-//       "1830,A,900,R,1\n"
-//       "2000,A,900,B,1.5\n"
-//       "2030,A,900,B,1\n"
-//       "2200,A,900,R,1.5\n"
-//       "2230,A,900,R,1\n"
-//       "0000,B,10\n"
-//       "0000,C,10\n"
-//       "0000,D,10\n"
-//       "#---------\n"
-//       "任務代碼 : \n"
-//       "A : Sound (INMP441)\n"
-//       "B : temperature & moisture (DHT22)\n"
-//       "C : temperature (DS18B20)\n"
-//       "D : Battery voltage\n"
-//       "\n"
-//       "參數說明 : \n"
-//       "任務 A\n"
-//       "初始時間 (24小時制,無標點,不可有小數點), 任務代碼, 執行時間(sec,不可有小數點), L/R/B (聲道左/右/兩者), 音量幾倍 (基準為1，建議範圍 : 0.5 ~ 2倍)\n"
-//       "任務 BCD\n"
-//       "初始時間 (24小時制,無標點,不可有小數點), 任務代碼, 執行間隔(min,不可有小數點)\n"
-//       "\n"
-//       "其他 : \n"
-//       "請將 example_schedule.txt 重新命名成 schedule.txt，程式才能正確執行\n"
-//       "\n"
-//       "常用換算 : \n"
-//       "01 min = 60 sec\n"
-//       "05 min = 300 sec\n"
-//       "10 min = 600 sec\n"
-//       "15 min = 900 sec\n"
-//       "30 min = 1800 sec\n"
-//       "45 min = 2700 sec\n"
-//       "60 min = 3600 sec\n"
-//     ,"", true, false);   // custem timestamp msg, append, timestamp
-
-//     // delay and show light
-//     showNoScheduleFileLED();
-//   }
-//   // Write log
-//   writeMsgToPath(systemLogPath, "ScheduleFile found!");
-// }
-
-/* read info from file and process*/
-// void addAllTaskFromFile(){
-//   // Write log
-//   writeMsgToPath(systemLogPath, "Start to add all tasks");
-
-//   // open file 
-//   #ifdef SD_USE_NORMAL
-//     FsFile taskFile;
-//   #else
-//     ExFile taskFile;
-//   #endif 
-
-//   if (!taskFile.open(SCHEDULE_FILE.c_str(), FILE_READ)) {
-//     Serial.println("open failed");
-//   }
-
-//   const int lenOfLine = 40;
-//   while (taskFile.available()) {
-//     char buffer[lenOfLine];                   // create buffer
-//     memset(buffer, 0, sizeof(buffer));        // clean the buffer 
-
-//     // save char one by one untill meet '\n' ('\n' will be ignore)
-//     int index = 0;
-//     while(1){
-//       char tempChar = taskFile.read();        // save to buffer 
-//       if(tempChar == '\n'){
-//         break;
-//       }
-//       buffer[index] = tempChar;
-//       index += 1;
-//     }
-//     buffer[index] = '\0';                     // add postfix
-
-//     // info 
-//     #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
-//       Serial.println(String(buffer) + " : " + String(index));
-//     #endif
-
-//     // End loop condition 
-//     if(String(buffer) == "#---------"){           // 9 x '-'
-//       break;
-//     }else if(String(buffer) == "#----------"){    // 10 x '-'
-//       isEvaluation = false;
-//       break;
-//     }
-
-//     // if not last line, add task
-//     myTask tempTask = parseTasks(String(buffer));
-//     addTask(&taskArray, &tempTask, &arrayMaxSize, &arrayUsedIndex);
-//   }
-  
-//   // read finished, close file
-//   taskFile.close();
-
-//   // info 
-//   #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
-//     Serial.println("Done");
-//   #endif
-
-//   // calculate repeat
-//   addRepeatWorks(taskArray);
-
-//   // sort 
-//   #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
-//     Serial.println("Before sort");
-//     printAllTask(taskArray, arrayUsedIndex);
-//   #endif
-//   sortTask(taskArray, arrayUsedIndex);
-//   #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
-//     Serial.println("After sort");
-//     printAllTask(taskArray, arrayUsedIndex);
-//     Serial.println("arrayUsedIndex : " + String(arrayUsedIndex));
-//     Serial.println("");
-//   #endif
-
-//   // Write log
-//   writeMsgToPath(systemLogPath, "Add all tasks successful!");
-// }
-
-
-void findTheMatchedArrayReadIndex(){
-  int startTimeOfNext = 0;
-  char task_code;
-
-  while(1){
-
-    // get next start from index 0 (arrayReadIndex start from 0)
-    if((taskArray + arrayReadIndex)->setType == 0){  // simple task
-      startTimeOfNext = (taskArray + arrayReadIndex)->taskType.simple.start_min_of_a_day;
-      task_code = (taskArray + arrayReadIndex)->taskType.simple.task;
-    }else{
-      startTimeOfNext = (taskArray + arrayReadIndex)->taskType.complex.start_min_of_a_day;
-      task_code = (taskArray + arrayReadIndex)->taskType.complex.task;
-    }
-
-    // index add first 
-    arrayReadIndex += 1;  // it is start at 0
-
-    // check 
-    // if out of range
-    if (arrayReadIndex == arrayUsedIndex){
-      // reset to 0
-      arrayReadIndex = 0;
-      // turn on cross day flag (lock the task)
-      isCrossDay = true;
-      // write flag
-      writeMsgToPath(systemLogPath, "FindTheMatchedArrayReadIndex : Task array out of range, re-zero index");
-      Serial.println("FindTheMatchedArrayReadIndex : Task array out of range, re-zero index");
-      
-      // read again from index 0
-      if((taskArray + arrayReadIndex)->setType == 0){  // simple task
-        startTimeOfNext = (taskArray + arrayReadIndex)->taskType.simple.start_min_of_a_day;
-        task_code = (taskArray + arrayReadIndex)->taskType.simple.task;
-      }else{
-        startTimeOfNext = (taskArray + arrayReadIndex)->taskType.complex.start_min_of_a_day;
-        task_code = (taskArray + arrayReadIndex)->taskType.complex.task;
-      }
-
-      break;
-    }
-    // In the range && match the case 
-    else if( getPassedSecOfToday() < startTimeOfNext * 60 ){
-      // rewind only one index
-      arrayReadIndex -= 1;
-      // write flag
-      writeMsgToPath(systemLogPath, "FindTheMatchedArrayReadIndex : " + String(arrayReadIndex));
-      Serial.println("FindTheMatchedArrayReadIndex : " + String(arrayReadIndex));
-      break;
-    }
-  }
-
-  #ifdef SHOW_NEXT_TASK_WHEN_FIRST_START
-    Serial.println("Now : " + String(secMapTo24Hour(getPassedSecOfToday())) + ", next : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + "), code : " + String(task_code));
-  #endif
-  writeMsgToPath(systemLogPath, "Now : " + String(secMapTo24Hour(getPassedSecOfToday())) + ", next : " + String(startTimeOfNext) + "(" + String( minConvertTohour24(startTimeOfNext) ) + "), code : " + String(task_code));
-}
-
-
 /* new task structure*/
 // Our task is minuate based --> 24hr == 1440min --> if use char : only 1440 byte
 // We can simply fill the array by task like ["0", "1", "2", "0", ... ,"0"]. Every slot is a min
@@ -434,14 +27,15 @@ void findTheMatchedArrayReadIndex(){
 // readSetting --> the index of setting array 
 
 // local variables
-int arrayRecordSettingMaxSize = 2;
+int recordSettingArrayMaxSize = 2;    // to know the malloc situation 
+int recordSettingArrayUsedSize = 0;   // to know the malloc situation 
 typedef struct recordSetting_t{
   int duration_time;
   char channel;
   float multiple;
 }recordSetting;
 
-recordSetting *recordSettingArray = (recordSetting*)malloc( sizeof(recordSetting) * arrayRecordSettingMaxSize );
+recordSetting *recordSettingArray = (recordSetting*)malloc( sizeof(recordSetting) * recordSettingArrayMaxSize);
 
 /*-------- function implement --------*/
 int hour24ConvetToMin(int input){
@@ -450,6 +44,65 @@ int hour24ConvetToMin(int input){
 
 int minConvertTohour24(int input){
   return (input/60)*100 + input % 60;
+}
+
+uint8_t taskTouint8t(char input){
+  // A    B     C     D
+  // 2^3  2^2   2^1   2^0
+  if (input == 'A'){
+    return 8;
+  }else if (input == 'B') {
+    return 4;
+  }else if (input == 'C') {
+    return 2;
+  }else if (input == 'D') {
+    return 1;
+  }else{
+    Serial.print("Unknow task");
+    return 0;
+  }
+}
+
+String uint8ToString(uint8_t input){
+  uint8_t A = 0;
+  uint8_t B = 0;
+  uint8_t C = 0;
+  uint8_t D = 0;
+  A = input / 8;
+  input = input % 8;
+  B = input / 4;
+  input = input % 4;
+  C = input / 2;
+  input = input % 2;
+  D = input;
+  String out = "";
+  if (A) out += 'A';
+  if (B) out += 'B';
+  if (C) out += 'C';
+  if (D) out += 'D';
+  return out;
+}
+
+/* add a pointer to a list end*/
+void addOneSetting(recordSetting **pointerToTaskArray, recordSetting *pointerToTask, int *pointerToArrayMaxSize, int *pointerToArrayUsedIndex){  
+  // if array size is not enough
+  if(*pointerToArrayUsedIndex == *pointerToArrayMaxSize){
+    // create a temp array with double size
+    recordSetting *tempTaskArray = (recordSetting*)malloc( sizeof(recordSetting) * *pointerToArrayMaxSize * 2);
+    // copy data to new array
+    memcpy(tempTaskArray, *pointerToTaskArray, *pointerToArrayMaxSize * sizeof(recordSetting) );
+    // release old array ram space
+    free(*pointerToTaskArray);
+    // new array pointer give to old name
+    *pointerToTaskArray = tempTaskArray;
+    // double variable
+    *pointerToArrayMaxSize = *pointerToArrayMaxSize * 2;
+  }
+
+  // give value to that array slot (copy value, not copy address)
+  *(*pointerToTaskArray + *pointerToArrayUsedIndex) = *pointerToTask;
+  // index + 1
+  *pointerToArrayUsedIndex += 1;
 }
 
 void addTask(String input){
@@ -475,7 +128,7 @@ void addTask(String input){
 
   //// see the len of the task, then add it to the task array
   ////// len == 3 --> repeat work / len == 5 --> record
-  if(lenCount == 3){
+  if(index == 3){
     ////// repeat add to the task array
     //////// convert data type
     int start_min_of_a_day = hour24ConvetToMin(atoi(temp[0]));
@@ -484,7 +137,7 @@ void addTask(String input){
     //////// repeat mark the task array
     int toAddMin = start_min_of_a_day;
     while(toAddMin < MIN_A_DAY){
-      taskScheduleList[toAddMin] = task;
+      taskScheduleList[toAddMin] += taskTouint8t(task);
       toAddMin += interval;
     }
   }else{
@@ -496,15 +149,18 @@ void addTask(String input){
     char channel = temp[3][0];
     float multiple = atof(temp[4]);
     //////// mark the task array once
-    taskScheduleList[start_min_of_a_day] = task;
-    //////// add a setting array
-    // TODO
+    taskScheduleList[start_min_of_a_day] += taskTouint8t(task);
+    //////// add a setting to array
+    ////////// new a struct and give value
+    recordSetting oneTempSetting;
+    oneTempSetting.duration_time = duration;
+    oneTempSetting.channel = channel;
+    oneTempSetting.multiple = multiple;
+    ////////// attach to the malloc array end
+    addOneSetting(&recordSettingArray, &oneTempSetting, &recordSettingArrayMaxSize, &recordSettingArrayUsedSize);
   }
 }
 
-void addRepeatWorks(){
-
-}
 
 void checkScheduleFileExist(){
   if (!sd.exists(SCHEDULE_FILE.c_str())){
@@ -623,19 +279,6 @@ void addAllTaskFromFile(){
     Serial.println("Done");
   #endif
 
-  // sort 
-  // #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
-  //   Serial.println("Before sort");
-  //   printAllTask(taskArray, arrayUsedIndex);
-  // #endif
-  // sortTask(taskArray, arrayUsedIndex);
-  // #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
-  //   Serial.println("After sort");
-  //   printAllTask(taskArray, arrayUsedIndex);
-  //   Serial.println("arrayUsedIndex : " + String(arrayUsedIndex));
-  //   Serial.println("");
-  // #endif
-
   // Write log
   writeMsgToPath(systemLogPath, "Add all tasks successful!");
 }
@@ -643,6 +286,25 @@ void addAllTaskFromFile(){
 // To find the matchd index to the system time
 void findTheMatchedArrayReadIndex(){
 
+}
+
+void printAllTask(){
+  Serial.println("printAllTask -- start");
+  int settingIndex = 0;
+  for (int i=0; i<MIN_A_DAY ;i++){
+    // Have actual task 
+    if (taskScheduleList[i] != 0){
+      Serial.println("Index : " + String(i) + ", task : " + String(taskScheduleList[i]) + "(" + uint8ToString(taskScheduleList[i]) + ")");
+      // if have record task
+      if (taskScheduleList[i] > 7){
+        Serial.println("-- duration_time : " + String(recordSettingArray[settingIndex].duration_time));
+        Serial.println("-- channel : " + String(recordSettingArray[settingIndex].channel));
+        Serial.println("-- multiple : " + String(recordSettingArray[settingIndex].multiple));
+        settingIndex+=1;
+      }
+    }
+  }
+  Serial.println("printAllTask -- end");
 }
 
 #endif
