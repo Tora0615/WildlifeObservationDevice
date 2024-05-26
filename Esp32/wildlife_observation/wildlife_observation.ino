@@ -43,9 +43,9 @@ void setup() {
   
   showInitStatusLED(TASK_ADDED);
   if(isFirstBoot){
-    Serial.println("!! First boot : start to find the matched arrayReadIndex !!");
-    writeMsgToPath(systemLogPath, "First boot : start to find the matched arrayReadIndex");
-    findTheMatchedArrayReadIndex(); 
+    Serial.println("!! First boot : start to find the matched readTaskIndex !!");
+    writeMsgToPath(systemLogPath, "First boot : start to find the matched readTaskIndex");
+    findTheMatchedTaskIndex(); 
     isFirstBoot = false;
   }else {
     Serial.println("!! Still alive : skip to read task index from file !!");

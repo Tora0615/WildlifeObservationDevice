@@ -21,10 +21,10 @@
 
 
 /*---- classes, variables or function define  ----*/
-// defined in setting.h
-// taskScheduleList 
-// readTask    --> the index of task array 
-// readSetting --> the index of setting array 
+// defined in "setting.h"
+// taskScheduleList --> the define of when to do what task
+// readTaskIndex    --> the index of task array 
+// readSettingIndex --> the index of setting array 
 
 // local variables
 int recordSettingArrayMaxSize = 2;    // to know the malloc situation 
@@ -284,8 +284,19 @@ void addAllTaskFromFile(){
 }
 
 // To find the matchd index to the system time
-void findTheMatchedArrayReadIndex(){
+// Then we can execute future tasks by this basic shift
+void findTheMatchedTaskIndex(){
+  // compair time and save to "readTaskIndex" in "setting.h"
+  // "readTaskIndex" is the index of the task "GOING TO RUN"
+  // taskScheduleList is a array in MIN_A_DAY(1440) size 
 
+  // <60 sec == run at the moment of the min 0 change to 1
+  readTaskIndex = getPassedSecOfToday()/60 + 1;  
+  // 23:59:00 ~ 23:59:59 == 1439min00sec~59sec --> readTaskIndex == 1440, but out of range
+  // so it need to re-zero
+  if (readTaskIndex==MIN_A_DAY){
+    readTaskIndex=0;
+  }
 }
 
 void printAllTask(){

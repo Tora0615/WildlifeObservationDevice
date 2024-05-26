@@ -709,3 +709,11 @@ void checkDayChange(){
 
 // URL 
 // https://wiki.csie.ncku.edu.tw/embedded/freertos
+
+
+/*
+About task execute
+role 1 : only execute the previous task 
+  * we sleep exceed the real trigger time --> go back to the previous one
+role 2 : if is first boot, ignore role 1 until next task is coming
+*/
