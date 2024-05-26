@@ -100,15 +100,12 @@
 /*--- myScheduler ---*/
 #define GOTOSLEEP_DEBUG
 // #define FEED_DOG_DEBUG
-#define USE_DEEP_SLEEP
 
 /*=================== global variable ==================*/
 const String SCHEDULE_FILE = "schedule.txt";
 String today;
 String systemLogPath;
 String sensorDataPath;
-
-int nextTaskPreserveTime_sec;
 
 // some status flag
 bool isRecording = false;
@@ -146,5 +143,8 @@ RTC_DATA_ATTR uint8_t taskScheduleList[MIN_A_DAY] = {0};
 RTC_DATA_ATTR int readTaskIndex = 0;       // read position, re-zero when day change (original is arrayReadIndex)
 RTC_DATA_ATTR int readSettingIndex = 0;    // read position, re-zero when day change (original is arrayReadIndex)
 bool isCrossDay = false;
+
+/* sleep relative */
+int nextTaskPreserveTime_sec;
 
 #endif
