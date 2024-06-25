@@ -61,19 +61,19 @@
 #define PMOS_CHARGING_TIME 3000 // ms, 2500 --> sometimes DS18(fake) don't have value 
 
 
-//== compile setting ==
+//====================== compile setting ===========================
 // #define KEEP_SET_TIME_FILE     // for test change RTC time by file
 // #define SD_USE_BASIC           // SD Use setting 
 // #define USE_FAKE_TIME          // use fake test time setting 
 
 
-//== debug setting ==
+//====================== debug setting ============================
 // #define DS18B20_DEBUG
 // #define DHT22_DEBUG
 // #define RTC_DEBUG
 /*--- myScheduler ---*/
 // #define CHECK_DAY_CHANGE_DEBUG
-// #define CHECK_IS_NEED_TO_RUN_TASK
+#define CHECK_IS_NEED_TO_RUN_TASK   // setting of "now, current index, task code, isExecuted?""
 // #define RECORD_SOUND_DEBUG
 // #define RECORD_BATTERY_DEBUG
 #define GET_DS18B20_TEMP_DEBUG
@@ -141,8 +141,16 @@ bool isNeedToUpdate = false;
 #define MIN_A_DAY 1440
 RTC_DATA_ATTR uint8_t taskScheduleList[MIN_A_DAY] = {0};
 RTC_DATA_ATTR int readTaskIndex = 0;       // read position, re-zero when day change (original is arrayReadIndex)
-RTC_DATA_ATTR int readSettingIndex = 0;    // read position, re-zero when day change (original is arrayReadIndex)
+RTC_DATA_ATTR int readSettingIndex = 0;    // read position, re-zero when day change 
 bool isCrossDay = false;
+RTC_DATA_ATTR int recordSettingArrayMaxSize = 2;    // to know the malloc situation 
+RTC_DATA_ATTR int recordSettingArrayUsedSize = 0;   // to know the malloc situation 
+typedef struct recordSetting_t{
+  int duration_time;
+  char channel;
+  float multiple;
+}recordSetting;
+RTC_DATA_ATTR recordSetting *recordSettingArray = (recordSetting*)malloc( sizeof(recordSetting) * recordSettingArrayMaxSize);
 
 /* sleep relative */
 int nextTaskPreserveTime_sec;

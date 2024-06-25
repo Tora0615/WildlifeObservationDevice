@@ -147,4 +147,31 @@ void checkFirmwareUpdate(){
   }
 }
 
+// 
+void readTaskIndex_moveToNext() {
+  // always add one until there have a task
+  while(1){
+    readTaskIndex +=1;
+    //// cross day
+    if (readTaskIndex == MIN_A_DAY){
+      Serial.println("checkTimeAndTask : Task array out of range, it is cross-day task! Re-zero index now.");
+      writeMsgToPath(systemLogPath, "checkTimeAndTask : Task array out of range, it is cross-day task! Re-zero index now.");
+      readTaskIndex = 0;
+    }
+    if (taskScheduleList[readTaskIndex] > 0){
+      break;
+    }
+  }
+}
+
+void readSettingIndex_moveToNext() {
+  readSettingIndex +=1;
+  //// overflow re-zero
+  if (readSettingIndex == recordSettingArrayUsedSize){
+    Serial.println("checkTimeAndTask : record sound setting array out of range, re-zero index now.");
+    writeMsgToPath(systemLogPath, "checkTimeAndTask : record sound setting  array out of range, re-zero index now.");
+    readSettingIndex = 0;
+  }
+}
+
 #endif

@@ -25,17 +25,10 @@
 // taskScheduleList --> the define of when to do what task
 // readTaskIndex    --> the index of task array 
 // readSettingIndex --> the index of setting array 
-
-// local variables
-int recordSettingArrayMaxSize = 2;    // to know the malloc situation 
-int recordSettingArrayUsedSize = 0;   // to know the malloc situation 
-typedef struct recordSetting_t{
-  int duration_time;
-  char channel;
-  float multiple;
-}recordSetting;
-
-recordSetting *recordSettingArray = (recordSetting*)malloc( sizeof(recordSetting) * recordSettingArrayMaxSize);
+// int recordSettingArrayMaxSize = 2;    // to know the malloc situation 
+// int recordSettingArrayUsedSize = 0;   // to know the malloc situation 
+// recordSetting struct 
+// recordSetting *recordSettingArray = (recordSetting*)malloc( sizeof(recordSetting) * recordSettingArrayMaxSize);
 
 /*-------- function implement --------*/
 int hour24ConvetToMin(int input){
@@ -63,24 +56,52 @@ uint8_t taskTouint8t(char input){
   }
 }
 
-String uint8ToString(uint8_t input){
-  uint8_t A = 0;
-  uint8_t B = 0;
-  uint8_t C = 0;
-  uint8_t D = 0;
-  A = input / 8;
+// return the pointer of task array 
+#define uzipTaskLength 4
+#define TASK_A 0
+#define TASK_B 1
+#define TASK_C 2
+#define TASK_D 3
+uint8_t* uint8NumToCharArr(uint8_t input){
+  // [A,B,C,D]
+  uint8_t *taskArray = (uint8_t*)malloc(sizeof(uint8_t)*4);
+  // A
+  taskArray[TASK_A] = input / 8;
   input = input % 8;
-  B = input / 4;
+  // B
+  taskArray[TASK_B]  = input / 4;
   input = input % 4;
-  C = input / 2;
+  // C
+  taskArray[TASK_C]  = input / 2;
   input = input % 2;
-  D = input;
-  String out = "";
-  if (A) out += 'A';
-  if (B) out += 'B';
-  if (C) out += 'C';
-  if (D) out += 'D';
-  return out;
+  // D
+  taskArray[TASK_D]  = input;
+  return taskArray;
+}
+
+String uint8ToString(uint8_t input){
+  
+  // input is from 0 to 15
+  // the four bit is : A, B, C, D (2^3, 2^2, 2^1, 2^0)
+  // We want to get a task string like "ABCD" if the bit is 1
+  // e.g : 15 --> 1111 --> ABCD
+  // e.g : 10 --> 1010 --> AC
+  // e.g :  5 --> 0101 --> BD
+
+  String rtn = "";
+  char tasks[] = {'D', 'C', 'B', 'A'};
+  for (int i = 0; i < 4; ++i) {  
+      // i++ and ++i is the same in this case, but in compiler level, ++i is faster
+      // input compare with the bit mask, 1<<i is 2^i
+      if (input & (1 << i)) {
+        // this can make the order noemal
+        rtn = String(tasks[i]) + rtn;
+      }
+  }
+  if (input == 0){
+    return String("N/A");
+  }
+  return rtn;
 }
 
 /* add a pointer to a list end*/
@@ -235,7 +256,22 @@ void addAllTaskFromFile(){
     Serial.println("open failed");
   }
 
+  ////// info - list all items in empty array (check array clean or not)
+  #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
+    Serial.println("-- before adding tasks -- check array clean or not --");
+    for (int i=0; i<24; i++){
+      for (int j=0; j< 60; j++){
+        Serial.print(String(taskScheduleList[i*60+j]) + "\t");
+      }
+      Serial.println("");
+    }
+  #endif
+
   // 2. read file until EOF
+  //// info 
+  #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
+    Serial.println("\nStart to print lines we read : ");
+  #endif
   //// This is a line's max
   const int lenOfLine = 40;
   while (taskFile.available()) {
@@ -276,21 +312,34 @@ void addAllTaskFromFile(){
   taskFile.close();
   //// info 
   #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
-    Serial.println("Done");
+    Serial.println("Add tasks done\n");
+  #endif
+
+  ////// info - list all items in fulled array (check array items)
+  #ifdef ADD_ALL_TASK_FROM_FILE_DEBUG
+    Serial.println("-- after adding tasks -- check array items --");
+    for (int i=0; i<24; i++){
+      for (int j=0; j< 60; j++){
+        Serial.print(String(taskScheduleList[i*60+j]) + "\t");
+      }
+      Serial.println("");
+    }
   #endif
 
   // Write log
   writeMsgToPath(systemLogPath, "Add all tasks successful!");
 }
 
+// TODO, maybe can delete it ?
 // To find the matchd index to the system time
 // Then we can execute future tasks by this basic shift
-void findTheMatchedTaskIndex(){
+void findTheIndexOfCurrentTime(){
   // compair time and save to "readTaskIndex" in "setting.h"
   // "readTaskIndex" is the index of the task "GOING TO RUN"
   // taskScheduleList is a array in MIN_A_DAY(1440) size 
 
   // <60 sec == run at the moment of the min 0 change to 1
+  // !! this is the index of current time !! 
   readTaskIndex = getPassedSecOfToday()/60 + 1;  
   // 23:59:00 ~ 23:59:59 == 1439min00sec~59sec --> readTaskIndex == 1440, but out of range
   // so it need to re-zero
