@@ -199,8 +199,11 @@ void setup() {
     }
   });
 
-  // 啟動Web Server
+  // 啟動 Web Server
   server.begin();
+
+  // test will web server block the code or not 
+  Serial.println("I'm here"); // the real situation is : "YES"
 }
 
 void loop() {

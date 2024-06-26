@@ -9,7 +9,7 @@
 /*---- official lib ----*/ 
 #include <WiFi.h>
 #include <WiFiClient.h>
-#include <WebServer.h>
+#include <ESPAsyncWebServer.h>
 #include <Update.h>
 #include <WiFiAP.h>
 
@@ -19,7 +19,6 @@
 #include "updateServer.h"
 
 /*---- classes, variables or function define  ----*/
-
 
 /*-------- function implement --------*/
 
@@ -139,7 +138,12 @@ void checkFirmwareUpdate(){
   if(isFirstCheckOTA){
     Serial.println("Fisrt boot -- check firmware updates");
     startSoftAp();
-    if (isNeedToUpdate) startUpdateServer();
+    if (isNeedToUpdate) {
+      startUpdateServer();
+      // the code will keep execute to next
+      // block the code get into "closeSoftAP()""
+      while(1) {yield();}
+    }
     closeSoftAP();
     isFirstCheckOTA = false;
   }else{

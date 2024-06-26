@@ -131,7 +131,7 @@ RTC_DATA_ATTR bool isFirstBoot = true;
 RTC_DATA_ATTR int noSdRetry = 0;
 
 /* OTA relative */
-#define AP_TIMEOUT_MS 30000  // 30 sec
+#define AP_TIMEOUT_MS 45000  // 45 sec
 // This status will only keep when light/deep sleep (reset will clean the status)
 RTC_DATA_ATTR bool isFirstCheckOTA = true;
 bool isNeedToUpdate = false;
@@ -156,3 +156,38 @@ RTC_DATA_ATTR recordSetting *recordSettingArray = (recordSetting*)malloc( sizeof
 int nextTaskPreserveTime_sec;
 
 #endif
+
+
+
+
+
+
+
+
+/*
+Issue list : 
+* [ok] conflict between <sdfat> and <espasyncwebserver> 
+  * error : FS.h:30:25: error: invalid conversion from 'const char*' to 'oflag_t' {aka 'int'} [-fpermissive]  #define FILE_READ       >>>>>"r"<<<<<
+  * same/similer issue : 
+    * https://github.com/greiman/SdFat/issues/148
+    * https://github.com/greiman/SdFat/issues/471
+  * result : 
+    * The file operate code conflict
+      * change repersent type from FILE_READ (w) to O_RDONLY (int, read only)
+
+* [ok] error of combination of SoftAP and AsyncWebServer
+  * expectation : loop executing AsyncWebServer 
+  * error/real situation : 
+    * looks like it skiped the AsyncWebServer, then go to the softAP close function.
+    * and it caused the web disconneted
+  * result : 
+    * Server.begin() of AsyncWebServer is an unblocking operate. Just use a while loop to stop it run away.
+
+* [] 
+  * error : 
+    * Guru Meditation Error: Core 1 panic'ed (LoadProhibited). Exception was unhandled.
+    * and it caused the web disconneted
+  * guess
+    * looks like we use the RTC lib without init it?
+
+*/

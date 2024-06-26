@@ -251,8 +251,8 @@ void addAllTaskFromFile(){
     FsFile taskFile;
   #else
     ExFile taskFile;
-  #endif 
-  if (!taskFile.open(SCHEDULE_FILE.c_str(), FILE_READ)) {
+  #endif  
+  if (!taskFile.open(SCHEDULE_FILE.c_str(), O_RDONLY)) {  // read only 
     Serial.println("open failed");
   }
 

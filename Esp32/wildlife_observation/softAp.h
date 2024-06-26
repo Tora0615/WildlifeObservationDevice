@@ -1,6 +1,5 @@
 #include "setting.h"
 
-WebServer server(80);
 const char* ssid = "ESP32";
 
 void scanConnectedForMS(int countDownTime){
@@ -29,7 +28,7 @@ void scanConnectedForMS(int countDownTime){
     // check the num of connected
     if (numDevices != 0){
       // escape the while loop
-      Serial.print("Setup update service...");
+      Serial.println("Setup update service - client connect");
       isNeedToUpdate = true;
       break;
     }
@@ -42,6 +41,7 @@ void scanConnectedForMS(int countDownTime){
 
 /* Init soft ap service and show basic info*/
 void startSoftAp(){
+  Serial.println("SoftAP starting...");
   // create a soft ip
   if (!WiFi.softAP(ssid)) {
     log_e("Soft AP creation failed.");
@@ -70,4 +70,5 @@ void startSoftAp(){
 void closeSoftAP(){
   // turn off SoftAP
   WiFi.softAPdisconnect(true);
+  Serial.println("SoftAP closed");
 }
