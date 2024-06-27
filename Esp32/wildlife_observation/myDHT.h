@@ -56,7 +56,7 @@ float DHT_get_temperature(){
     for (int i = 0; i<sample_time; i++){
       float temp = dht.readTemperature();
       #ifdef DHT22_DEBUG
-        Serial.println("DHT Temperature : " + String(temp));
+        Serial.println("[DHT Temperature : " + String(temp) + "]");
         Serial.println(millis());
       #endif 
       sum += temp;
@@ -100,7 +100,7 @@ float DHT_get_Humidity(){
     for (int i = 0; i<sample_time; i++){
       float temp = dht.readHumidity();
       #ifdef DHT22_DEBUG
-        Serial.println("DHT Humidity : " + String(temp));
+        Serial.println("[DHT Humidity : " + String(temp) + "]");
       #endif 
       sum += temp; 
       // delay(50);

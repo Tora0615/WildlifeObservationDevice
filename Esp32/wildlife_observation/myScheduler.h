@@ -205,7 +205,7 @@ void checkGoSleep(void* pvParameters){
       Serial.println("checkGoSleep : resumed");
     #endif
     Serial.println("* checkGoSleep");
-    Serial.print("- isRunningTask : " + String(isRunningTask)); Serial.println(", previousRoundOfSleepFinished : " + String(previousRoundOfSleepFinished));
+    Serial.print("- isRunningTask : " + String(isRunningTask)); Serial.println(", previousRoundOfSleepFinished : " + String(previousRoundOfSleepFinished) + "\n");
     
     // no task running and the last triggered sleep was finished
     // or it might repeat trigger when temp wakeup
@@ -542,7 +542,7 @@ void recordDS18B20(void* pvParameters){
     vTaskDelay(100 / portTICK_PERIOD_MS);
     float temperature = getDS18B20Temp();
     #ifdef GET_DS18B20_TEMP_DEBUG
-      Serial.println("DS18B20 : " + String(temperature) + " C");
+      Serial.println("[DS18B20 : " + String(temperature) + " C]");
     #endif
 
     // finished, release power switch 

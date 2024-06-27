@@ -91,6 +91,7 @@ void getWakeupReason(){
     Serial.println("== " + reason_text + " ==");
   #endif
   writeMsgToPath(systemLogPath, "== " + reason_text + " ==");
+  delay(1); // for log print order
 }
 
 void checkRtcAdjustFile(){
@@ -139,6 +140,11 @@ void checkFirmwareUpdate(){
     Serial.println("Fisrt boot -- check firmware updates");
     startSoftAp();
     if (isNeedToUpdate) {
+      // turn rtc switch on if test env is PCB board
+      #ifndef HAND_MADE_ENV   //current is pcb_v1 env
+        digitalWrite(RTC_PMOS, POWER_ON);   
+      #endif
+      // the start the server
       startUpdateServer();
       // the code will keep execute to next
       // block the code get into "closeSoftAP()""

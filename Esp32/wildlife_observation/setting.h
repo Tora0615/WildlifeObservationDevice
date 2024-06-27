@@ -58,13 +58,15 @@
 #define MODE_L_PIN    (2)     // 2 pin weak pull-down / Set LR of that micorphone / Low - L
 #define SOUND_PMOS    (13)    // 3V_I2S_SWITCH
 
-#define PMOS_CHARGING_TIME 3000 // ms, 2500 --> sometimes DS18(fake) don't have value 
+#define PMOS_CHARGING_TIME 3200 // ms, 2500 for sometimes DS18(fake), caused by don't have value 
 
 
 //====================== compile setting ===========================
+// #define USE_DEEP_SLEEP         // use deep sleep mode
 // #define KEEP_SET_TIME_FILE     // for test change RTC time by file
 // #define SD_USE_BASIC           // SD Use setting 
 // #define USE_FAKE_TIME          // use fake test time setting 
+// #define HAND_MADE_ENV          // just for some small module test
 #define HTML_ZH                // for language of html msg
 
 //====================== debug setting ============================
@@ -191,5 +193,13 @@ Issue list :
     * looks like we use the RTC lib without init it?
   * result
     * Just like we guest. We init RTC first, then it works.
+
+* [ok]
+  * error : 
+    * RTC show correct in hand-wiring ver, but show 2165-00-00 00:165:00 in PCB one
+  * guess : 
+    * There has a MOS switch on PCB noard 
+  * result :
+    * Forgot to open that switch
 
 */

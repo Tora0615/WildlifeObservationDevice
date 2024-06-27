@@ -77,7 +77,7 @@ float getDS18B20Temp(){
       return tempC;
     }else{
       #ifdef DS18B20_DEBUG
-        Serial.println("Error: Could not read temperature data");
+        Serial.println("-------- Error(DS18B20) : Could not read temperature data");
       #endif 
       // Write log
       writeMsgToPath(systemLogPath, "Error: Could not read temperature data");
