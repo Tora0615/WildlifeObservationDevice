@@ -103,6 +103,26 @@ const char* serverIndex =
 
       // 監聽表單提交事件
       "document.getElementById('upload_form').addEventListener('submit', function(event) {"
+        /*--- 檢查部分 ---*/
+        // 檢查是否選擇了文件 
+        "var fileInput = document.getElementById('file');"
+        "if (fileInput.files.length === 0) {"
+          // 彈出式警告
+          "alert('Please select a file.');"
+          "event.preventDefault();"
+          "return;"
+        "}"
+
+        // 檢查文件是否為.ino.bin結尾 
+        "var file = fileInput.files[0];"
+        "if (!file.name.endsWith('.ino.bin')) {"
+          // 彈出式警告
+          "alert('Invalid file type. Please select a .ino.bin file.');"
+          "event.preventDefault();"
+          "return;"
+        "}"
+
+        /*--- 正式處理邏輯 ---*/
         // 取得文件輸入元素
         "var fileInput = document.getElementById('file');"
         // 取得第一個選取的文件
