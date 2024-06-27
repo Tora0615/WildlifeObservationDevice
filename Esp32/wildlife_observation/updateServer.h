@@ -108,7 +108,11 @@ const char* serverIndex =
         "var fileInput = document.getElementById('file');"
         "if (fileInput.files.length === 0) {"
           // 彈出式警告
-          "alert('Please select a file.');"
+          #ifdef HTML_ZH
+            "alert('待上傳檔案不可為空');"
+          #else
+            "alert('Please select a file.');"
+          #endif
           "event.preventDefault();"
           "return;"
         "}"
@@ -117,7 +121,11 @@ const char* serverIndex =
         "var file = fileInput.files[0];"
         "if (!file.name.endsWith('.ino.bin')) {"
           // 彈出式警告
-          "alert('Invalid file type. Please select a .ino.bin file.');"
+          #ifdef HTML_ZH
+            "alert('待上傳檔案類型錯誤! 請檢察檔案是否為 .ino.bin 結尾');"
+          #else
+            "alert('Invalid file type. Please select a .ino.bin file.');"
+          #endif
           "event.preventDefault();"
           "return;"
         "}"
