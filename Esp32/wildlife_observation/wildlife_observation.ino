@@ -5,12 +5,13 @@ void setup() {
   // To indicate setup status, it will allway on if failed
   initLEDs();
   showInitStatusLED(JUST_START);
-  checkFirmwareUpdate();
+  
   // system basic part init 
-  SDInit();
-  showInitStatusLED(SD_STARTED);
   RTCInit();
   showInitStatusLED(RTC_STARTED);
+  checkFirmwareUpdate();  // rely on rtc lib
+  SDInit();
+  showInitStatusLED(SD_STARTED);
   
   // for test
   // #ifdef USE_FAKE_TIME

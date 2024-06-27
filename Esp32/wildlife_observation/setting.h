@@ -65,7 +65,7 @@
 // #define KEEP_SET_TIME_FILE     // for test change RTC time by file
 // #define SD_USE_BASIC           // SD Use setting 
 // #define USE_FAKE_TIME          // use fake test time setting 
-
+#define HTML_ZH                // for language of html msg
 
 //====================== debug setting ============================
 // #define DS18B20_DEBUG
@@ -183,11 +183,13 @@ Issue list :
   * result : 
     * Server.begin() of AsyncWebServer is an unblocking operate. Just use a while loop to stop it run away.
 
-* [] 
+* [ok] 
   * error : 
     * Guru Meditation Error: Core 1 panic'ed (LoadProhibited). Exception was unhandled.
     * and it caused the web disconneted
   * guess
     * looks like we use the RTC lib without init it?
+  * result
+    * Just like we guest. We init RTC first, then it works.
 
 */

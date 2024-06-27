@@ -28,7 +28,8 @@ void scanConnectedForMS(int countDownTime){
     // check the num of connected
     if (numDevices != 0){
       // escape the while loop
-      Serial.println("Setup update service - client connect");
+      Serial.println("Setup update service");
+      Serial.println("  |-- client connect ");
       isNeedToUpdate = true;
       break;
     }

@@ -8,20 +8,36 @@ const char* serverIndex =
 "<html>"
   "<body>"
     /*--- the area of rtc ---*/
-    "<h2>RTC Time</h2>"
-    //// realtime rtc refresh
-    "<p>Current Time: <span id='current-time'>Loading...</span></p>"
-    //// set time area
-    "<p>"
-      "<label for='datetime'>Set Time (YYYY-MM-DD HH:MM:SS):</label>"
-      "<input type='text' id='datetime'>"
-      "<button onclick='setTime()'>Set Time</button>"
-    "</p>"
+    #ifdef HTML_ZH
+      "<h2>RTC 時間</h2>"
+      //// realtime rtc refresh
+      "<p>現在時間 : <span id='current-time'> 載入中...</span></p>"
+      //// set time area
+      "<p>"
+        "<label for='datetime'>設置 (YYYY-MM-DD HH:MM:SS) --- </label>"
+        "<input type='text' id='datetime'>"
+        "<button onclick='setTime()'>更新</button>"
+      "</p>"
+    #else
+      "<h2>RTC Time</h2>"
+      //// realtime rtc refresh
+      "<p>Current Time : <span id='current-time'>Loading...</span></p>"
+      //// set time area
+      "<p>"
+        "<label for='datetime'>Set Time (YYYY-MM-DD HH:MM:SS) --- </label>"
+        "<input type='text' id='datetime'>"
+        "<button onclick='setTime()'>update</button>"
+      "</p>"
+    #endif
     //// update result, only shown 3 sec
     "<p id='set-time-result'></p>"
 
     /*--- the area of firmware upload ---*/
-    "<h2>Firmware upload</h2>"
+    #ifdef HTML_ZH
+      "<h2>韌體更新</h2>"
+    #else
+      "<h2>Firmware upload</h2>"
+    #endif
     //// file select area
     "<div id='upload_form_container'>"
       "<form id='upload_form' enctype='multipart/form-data' method='post'>"
@@ -38,6 +54,9 @@ const char* serverIndex =
   "</body>"
 
   "<head>"
+    /*--- encoding type ---*/
+    "<meta charset='UTF-8'>"
+
     /*--- browser tab name ---*/
     "<title>Setting page</title>"
 
@@ -106,8 +125,13 @@ const char* serverIndex =
             // progress bar
             "document.getElementById('progress_bar').value = Math.round(percentComplete * 100);"
             "if (percentComplete == 1) {"
-              "document.getElementById('progress').textContent = 'Upload finished! Device will auto restart. You can close the window now.';"
-              "document.getElementById('msg').textContent = 'Dont forget to press reset button after you disconnect from wifi named ESP32!';"
+              #ifdef HTML_ZH
+                "document.getElementById('progress').textContent = '完成!';"
+                "document.getElementById('msg').textContent = '請記得切斷ESP32連線並重啟!';"
+              #else
+                "document.getElementById('progress').textContent = 'Upload finished!';"
+                "document.getElementById('msg').textContent = 'Dont forget to reset ESP32 after you disconnected from its wifi!';"
+              #endif
             "}"
           "}"
         "});"
@@ -130,7 +154,7 @@ const char* serverIndex =
 
 
 void startUpdateServer(){
-  Serial.println("Setup update service - webserver");
+  Serial.println("  |-- webserver");
 
   // root page
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -150,9 +174,24 @@ void startUpdateServer(){
     if (request->hasParam("datetime", true)) {
       String datetime = request->getParam("datetime", true)->value();
       int year, month, day, hour, minute, second;
-      sscanf(datetime.c_str(), "%d-%d-%d %d:%d:%d", &year, &month, &day, &hour, &minute, &second);
-      rtc.adjust(DateTime(year, month, day, hour, minute, second));
-      request->send(200, "text/plain", "Time updated");
+      // 檢查輸入格式是否正確
+      int parsed = sscanf(datetime.c_str(), "%d-%d-%d %d:%d:%d", &year, &month, &day, &hour, &minute, &second);
+      if (parsed == 6 && year >= 2000 && year <= 2099 && month >= 1 && month <= 12 &&
+          day >= 1 && day <= 31 && hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59 &&
+          second >= 0 && second <= 59) {
+        rtc.adjust(DateTime(year, month, day, hour, minute, second));
+        #ifdef HTML_ZH
+          request->send(200, "text/plain", "時間更新完成!");
+        #else
+          request->send(200, "text/plain", "Time updated!");
+        #endif
+      } else {
+        #ifdef HTML_ZH
+          request->send(400, "text/plain", "錯誤,請檢察輸入");
+        #else
+          request->send(400, "text/plain", "error, check your input");
+        #endif
+      }
     } else {
       request->send(400, "text/plain", "Bad Request");
     }
