@@ -344,7 +344,8 @@ void findTheIndexOfCurrentTime(){
   // 23:59:00 ~ 23:59:59 == 1439min00sec~59sec --> readTaskIndex == 1440, but out of range
   // so it need to re-zero
   if (readTaskIndex==MIN_A_DAY){
-    readTaskIndex=0;
+    readTaskIndex = 0;
+    isCrossDay = true;
   }
 }
 

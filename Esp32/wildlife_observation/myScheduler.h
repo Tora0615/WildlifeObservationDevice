@@ -235,6 +235,7 @@ void checkTimeAndTask(void* pvParameters){
     // Debug msg
     #ifdef CHECK_IS_NEED_TO_RUN_TASK
       Serial.println("* checkTimeAndTask");
+      writeMsgToPath(sensorDataPath, "* checkTimeAndTask");
     #endif
 
     // before task, check day change 
@@ -299,6 +300,12 @@ void checkTimeAndTask(void* pvParameters){
         Serial.println("--- readTaskIndex : " + String(readTaskIndex) + "(" + minConvertTohour24(readTaskIndex) +")");
         Serial.println("--- tasks : " + uint8ToString(taskScheduleList[readTaskIndex]));
         Serial.println("--- execute : [True], now is exceed the set time.");
+
+        writeMsgToPath(sensorDataPath, "- Execute status of this loop : ");
+        writeMsgToPath(sensorDataPath, "--- now : " + secMapTo24Hour(getPassedSecOfToday()));
+        writeMsgToPath(sensorDataPath, "--- readTaskIndex : " + String(readTaskIndex) + "(" + minConvertTohour24(readTaskIndex) +")");
+        writeMsgToPath(sensorDataPath, "--- tasks : " + uint8ToString(taskScheduleList[readTaskIndex]));
+        writeMsgToPath(sensorDataPath, "--- execute : [True], now is exceed the set time.");
       #endif
 
       //// if task bit exist 
@@ -367,6 +374,12 @@ void checkTimeAndTask(void* pvParameters){
         Serial.println("--- readTaskIndex : " + String(readTaskIndex) + "(" + minConvertTohour24(readTaskIndex) +")");
         Serial.println("--- tasks : " + uint8ToString(taskScheduleList[readTaskIndex]));
         Serial.println("--- execute : [False], now is before the set time.");
+
+        writeMsgToPath(sensorDataPath, "- Execute status of this loop : ");
+        writeMsgToPath(sensorDataPath, "--- now : " + secMapTo24Hour(getPassedSecOfToday()));
+        writeMsgToPath(sensorDataPath, "--- readTaskIndex : " + String(readTaskIndex) + "(" + minConvertTohour24(readTaskIndex) +")");
+        writeMsgToPath(sensorDataPath, "--- tasks : " + uint8ToString(taskScheduleList[readTaskIndex]));
+        writeMsgToPath(sensorDataPath, "--- execute : [False], now is before the set time.");
       #endif
     }
 

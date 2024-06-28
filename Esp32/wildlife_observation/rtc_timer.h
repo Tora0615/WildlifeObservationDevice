@@ -13,6 +13,7 @@
 /*---- variables or function define  ----*/
 DateTime now;
 RTC_DS3231 rtc;  // default I2C address is : 0x57 (you can choose 0x57 ~ 0x50)
+// uint32_t for day count can save >>>>> 4x days (in millis)
 uint32_t sys_RTC_time_offset;         // RTC clock. It will only change when first boot or date changed. First day equal the boot time, others day it will allways close to 0
 uint32_t sys_millis_time_offset;    // millis clock.
 const char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
