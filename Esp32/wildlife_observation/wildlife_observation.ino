@@ -44,9 +44,6 @@ void setup() {
     Serial.println("!! First boot : start to find the matched readTaskIndex !!");
     writeMsgToPath(systemLogPath, "First boot : start to find the matched readTaskIndex");
     findTheIndexOfCurrentTime(); 
-    // readSettingIndex add until have task in that index
-    //// it have auto re-zero when overflow
-    readTaskIndex_moveToNext();
     isFirstBoot = false;
   }else {
     Serial.println("!! Still alive : skip to read task index from file !!");
