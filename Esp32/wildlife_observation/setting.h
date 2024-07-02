@@ -77,7 +77,7 @@
 // #define CHECK_DAY_CHANGE_DEBUG
 #define CHECK_IS_NEED_TO_RUN_TASK   // setting of "now, current index, task code, isExecuted?""
 // #define RECORD_SOUND_DEBUG
-// #define RECORD_BATTERY_DEBUG
+#define RECORD_BATTERY_DEBUG
 #define GET_DS18B20_TEMP_DEBUG
 #define DHT_GET_TEMPERATURE_DEBUG   // value
 #define DHT_GET_HUMIDITY_DEBUG      // value

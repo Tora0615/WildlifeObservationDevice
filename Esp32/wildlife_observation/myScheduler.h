@@ -501,14 +501,14 @@ void recordDHT(void* pvParameters){
     vTaskDelay(100 / portTICK_PERIOD_MS);
     float temperature = DHT_get_temperature();
     #ifdef DHT_GET_TEMPERATURE_DEBUG
-      Serial.println("DHT temperature : " + String(temperature) + " C");
+      Serial.println("[DHT temperature : " + String(temperature) + " C]");
     #endif
 
     // get data of humidity
     vTaskDelay(100 / portTICK_PERIOD_MS);
     float humidity = DHT_get_Humidity();
     #ifdef DHT_GET_HUMIDITY_DEBUG
-      Serial.println("DHT Humidity : " + String(humidity) + " %");
+      Serial.println("[DHT Humidity : " + String(humidity) + " %]");
     #endif
 
     // finished, release power switch 
@@ -589,7 +589,7 @@ void recordBattery(void* pvParameters){
       Serial.println("recordBattery : resumed");
     #endif
     #ifdef RECORD_BATTERY_DEBUG
-      Serial.println("Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ " %)");
+      Serial.println("[Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ " %)]");
     #endif
     writeMsgToPath(sensorDataPath, "Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ "%)", Battery_TimeStamp);
 
