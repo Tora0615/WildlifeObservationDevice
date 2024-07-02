@@ -63,7 +63,7 @@ void createRTOSTasks() {
   xTaskCreatePinnedToCore(
     showTaskRunningLED,                           /* Task function. */
     "showTaskRunningLED",                         /* name of task. */
-    4096,                                  /* Stack size of task */
+    2048,                                  /* Stack size of task */
     NULL,                                   /* parameter of the task */
     3,                                      /* priority of the task */
     &tShowTaskRunningLEDHandler,                       /* task handle */
@@ -73,7 +73,7 @@ void createRTOSTasks() {
   xTaskCreatePinnedToCore(
     showLowBattery,                           /* Task function. */
     "showLowBattery",                         /* name of task. */
-    4096,                                  /* Stack size of task */
+    2048,                                  /* Stack size of task */
     NULL,                                   /* parameter of the task */
     3,                                      /* priority of the task */
     &tShowLowBatteryHandler,                       /* task handle */
@@ -83,7 +83,7 @@ void createRTOSTasks() {
   xTaskCreatePinnedToCore(
     checkGoSleep,                           /* Task function. */
     "checkGoSleep",                         /* name of task. */
-    8192,                                  /* Stack size of task */
+    4096,                                  /* Stack size of task */
     NULL,                                   /* parameter of the task */
     2,                                      /* priority of the task */
     &tCheckGoSleepHandler,                       /* task handle */
@@ -93,7 +93,7 @@ void createRTOSTasks() {
   xTaskCreatePinnedToCore(
     checkTimeAndTask,                           /* Task function. */
     "checkTimeAndTask",                         /* name of task. */
-    8192,                                  /* Stack size of task */
+    4096,                                  /* Stack size of task */
     NULL,                                   /* parameter of the task */
     2,                                      /* priority of the task */
     &tCheckTimeAndTaskHandler,                       /* task handle */
@@ -114,7 +114,7 @@ void createRTOSTasks() {
     xTaskCreatePinnedToCore(
       recordSound,                           /* Task function. */
       "recordSound",                         /* name of task. */
-      20480,                                  /* Stack size of task */
+      32768,                                  /* Stack size of task */
       NULL,                                   /* parameter of the task */
       5,                                      /* priority of the task */
       &tRecordSoundHandler,                       /* task handle */
@@ -124,17 +124,17 @@ void createRTOSTasks() {
     xTaskCreatePinnedToCore(
       recordDHT,                           /* Task function. */
       "recordDHT",                         /* name of task. */
-      8192,                                  /* Stack size of task */
+      4096,                                  /* Stack size of task */
       NULL,                                   /* parameter of the task */
       3,                                      /* priority of the task */
       &tRecordDHTHandler,                       /* task handle */
-      OTHER_TASK_CPU                          /* CPU core */
+      OTHER_TASK_CPU                          /* CPU core */  
     );
 
     xTaskCreatePinnedToCore(
       recordDS18B20,                           /* Task function. */
       "recordDS18B20",                         /* name of task. */
-      8192,                                  /* Stack size of task */
+      4096,                                  /* Stack size of task */
       NULL,                                   /* parameter of the task */
       3,                                      /* priority of the task */
       &tRecordDS18B20Handler,                       /* task handle */
@@ -144,7 +144,7 @@ void createRTOSTasks() {
     xTaskCreatePinnedToCore(
       recordBattery,                           /* Task function. */
       "recordBattery",                         /* name of task. */
-      8192,                                  /* Stack size of task */
+      4096,                                  /* Stack size of task */
       NULL,                                   /* parameter of the task */
       3,                                      /* priority of the task */
       &tRecordBatteryHandler,                       /* task handle */
