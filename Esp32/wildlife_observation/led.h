@@ -19,8 +19,8 @@ void initLEDs(){
 
 
 // Only LED function put here
-void showErrorLed(){
-  Serial.println("!!!! showErrorLed : triggered !!!!");
+void showErrorLedThenReboot(){
+  Serial.println("!!!! showErrorLedThenReboot : triggered !!!!");
   digitalWrite(LED_RED, HIGH); 
   delay(10000);
   ESP.restart();

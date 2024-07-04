@@ -49,7 +49,7 @@ void exportBufferData(uint8_t* dataBuffer, int numOfData){
 void startTheRecord(int recordSeconds, char *filenameWithPath, float gain_ratio, uint8_t channel_input){
 
   #ifdef INMP_COMMON_DEBUG
-    Serial.println("Dual record");
+    Serial.println("[Dual record]");
   #endif
 
   // RESET WATCHDOG
@@ -86,16 +86,16 @@ void startTheRecord(int recordSeconds, char *filenameWithPath, float gain_ratio,
     if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){
       /*--- execute part ---*/
       while(microphone.begin(SAMPLE_RATE, DATA_BIT, CHANNEL) != 0){
-        Serial.println(" I2S init failed");
+        Serial.println("[I2S init failed]");
       }
       #ifdef INMP_COMMON_DEBUG
-        Serial.println("I2S init success");
+        Serial.println("[I2S init success]");
       #endif
 
       // create header data
       microphone.createWavHeader(header, recordSeconds, SAMPLE_RATE, DATA_BIT, CHANNEL);
       if (!soundFile.open(filenameWithPath, O_WRONLY | O_CREAT )) {     // open need char array, not string. So use c_str to convert
-        Serial.println(" --> open file failed, dual channel , header");
+        Serial.println("[ --> open file failed, dual channel , header]");
       }
       soundFile.write(header, 44);
       soundFile.close(); 
@@ -107,7 +107,7 @@ void startTheRecord(int recordSeconds, char *filenameWithPath, float gain_ratio,
 
     /*--- record part ---*/
     #ifdef INMP_COMMON_DEBUG
-      Serial.println("start");
+      Serial.println("[start]");
     #endif
 
     #ifdef RECORD_TIME_DEBUG
@@ -125,9 +125,10 @@ void startTheRecord(int recordSeconds, char *filenameWithPath, float gain_ratio,
     int loopCount = wavDataSize / numOfData + 1;
     unsigned long intervalTotalLen = recordSeconds * 1000.0 * 1000.0 / loopCount;
     #ifdef RECORD_TIME_DEBUG
-      Serial.print("interval of each task (sec) : ");
-      Serial.println(intervalTotalLen/1000000.0, 8);
-      Serial.println("loopCount : " + String(loopCount));
+      Serial.print("[interval of each task (sec) : ");
+      Serial.print(intervalTotalLen/1000000.0, 8);
+      Serial.println("]");
+      Serial.println("[loopCount : " + String(loopCount) + "]");
     #endif
     for (int j = 0; j < loopCount; ++j) {
 
@@ -182,14 +183,14 @@ void startTheRecord(int recordSeconds, char *filenameWithPath, float gain_ratio,
     }
     microphone.end();
     #ifdef INMP_COMMON_DEBUG
-      Serial.println("finish");
+      Serial.println("[finish]");
     #endif
 
     #ifdef RECORD_TIME_DEBUG
-      Serial.println("use time : " + String ((millis() - duration)/1000.0, 4));
-      Serial.println("I2s_duration : " + String (I2s_duration/1000.0, 4));
-      Serial.println("writeFile_duration : " + String (writeFile_duration/1000.0, 4));
-      Serial.println("busyWait_duration : " + String (busyWait_duration/1000000.0, 4));
+      Serial.println("[use time : " + String ((millis() - duration)/1000.0, 4) + " sec]");
+      Serial.println("[I2s_duration : " + String (I2s_duration/1000.0, 4) + "sec]");
+      Serial.println("[writeFile_duration : " + String (writeFile_duration/1000.0, 4) + "sec]");
+      Serial.println("[busyWait_duration : " + String (busyWait_duration/1000000.0, 4) + "sec]");
     #endif
 
     // flag switch
