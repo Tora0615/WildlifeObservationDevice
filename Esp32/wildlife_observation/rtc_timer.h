@@ -5,6 +5,7 @@
 /*---- macro or define ----*/
 
 /*---- official lib ----*/ 
+#include <driver/gpio.h>
 #include <RTClib.h>
 
 /*---- other involve lib  ----*/

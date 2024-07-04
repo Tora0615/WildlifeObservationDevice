@@ -93,7 +93,7 @@ void createRTOSTasks() {
   xTaskCreatePinnedToCore(
     checkTimeAndTask,                           /* Task function. */
     "checkTimeAndTask",                         /* name of task. */
-    4096,                                  /* Stack size of task */
+    12288,                                  /* Stack size of task */
     NULL,                                   /* parameter of the task */
     2,                                      /* priority of the task */
     &tCheckTimeAndTaskHandler,                       /* task handle */
@@ -104,7 +104,7 @@ void createRTOSTasks() {
     xTaskCreatePinnedToCore(
       transmitSoundDataToSD,                           /* Task function. */
       "transmitSoundDataToSD",                         /* name of task. */
-      8192,                                  /* Stack size of task */
+      16384,                                  /* Stack size of task */
       NULL,                                   /* parameter of the task */
       4,                                      /* priority of the task */
       &tSdTransmitHandler,                       /* task handle */
