@@ -90,43 +90,49 @@ void writeMsgToPath(String path, String msg, String customTimeStamp = "", bool r
 
   myFileFormat tempfile;
 
+  // enable timestamp
   if(timeStamp){
+    // default timestamp
     if(customTimeStamp == ""){
       msg = "[" + String(today) + "_" + String(secMapTo24Hour(getPassedSecOfToday())) + "] " + msg; 
-    }else{
+    }
+    // custom timestamp
+    else{
       msg = "[" + customTimeStamp + "] " + msg; 
     }
   }
   
   
   while(true){
-    // vTaskDelay(50);
     // if got the power of control, lock SD opreation 
     if(xSemaphoreTake( xSemaphore_SD, pdMS_TO_TICKS(50) ) == pdTRUE){
       #ifdef SD_WRITE_MSG_DEBUG
         Serial.println("Got Semaphore : " + String(millis()));
       #endif
+
+      // flag setting
+      oflag_t flag;
       if(replace){
-        if (!tempfile.open(path.c_str(), O_WRONLY | O_CREAT)) {     // open need char array, not string. So use c_str to convert
-          Serial.println(" --> open " + path + " failed");
-          showErrorLed();
-          // while(1){
-          //   delay(1000);
-          // }
-        }else{
-          tempfile.println(msg.c_str());
-        }
+        flag = O_WRONLY | O_CREAT;
       }else{
-        if (!tempfile.open(path.c_str(), O_WRONLY | O_CREAT | O_APPEND)) {     // open need char array, not string. So use c_str to convert
-          Serial.println(" --> open " + path + " failed");
-          showErrorLed();
-          // while(1){
-          //   delay(1000);
-          // }
-        }else{
-          tempfile.println(msg.c_str());
-        }
+        flag = O_WRONLY | O_CREAT | O_APPEND;
       }
+
+      // open file
+      Serial.println("path : " + path);
+      Serial.println("msg : " + msg);
+      //// failed to open
+      ////// open need char array, not string. So use c_str to convert
+      if (!tempfile.open(path.c_str(), flag)) {      
+        Serial.println(" --> open " + path + " failed");
+        showErrorLedThenReboot();
+      }
+      //// success to open
+      else{
+        tempfile.println(msg.c_str());
+      }
+
+      // close file
       tempfile.close();
       xSemaphoreGive( xSemaphore_SD );
       break;
