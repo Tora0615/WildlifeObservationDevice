@@ -247,11 +247,8 @@ void addAllTaskFromFile(){
   writeMsgToPath(systemLogPath, "Start to add all tasks");
 
   // 1. open file 
-  #ifdef SD_USE_NORMAL
-    FsFile taskFile;
-  #else
-    ExFile taskFile;
-  #endif  
+  myFileFormat taskFile;
+
   if (!taskFile.open(SCHEDULE_FILE.c_str(), O_RDONLY)) {  // read only 
     Serial.println("open failed");
   }

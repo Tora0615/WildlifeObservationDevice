@@ -23,15 +23,22 @@ const int8_t DISABLE_CHIP_SELECT = -1;
 
 
 /*-------- function implement --------*/
-// global file pointer (SD_FAT_TYPE 3 (FAT16/FAT32 and exFAT) )
-#ifdef SD_USE_BASIC
-  SdFs sd;
-  FsFile systemLog;
-  FsFile sensorData;
-#else
+#ifdef SD_USE_FAT16_32
+  // FAT16/FAT32 (SD_FAT_TYPE 1)
+  SdFat32 sd;
+  typedef File32 myFileFormat;
+#endif 
+
+#ifdef SD_EXFAT
+  // exFAT (SD_FAT_TYPE 2)
   SdExFat sd;
-  ExFile systemLog;
-  ExFile sensorData;
+  typedef ExFile myFileFormat;
+#endif 
+
+#ifdef SD_HYBRID_FAT1632_EXFAT
+  // FAT16/FAT32 and exFAT (SD_FAT_TYPE 3)
+  SdFs sd;
+  typedef FsFile myFileFormat;
 #endif 
 
 void SDInit(){
@@ -81,11 +88,7 @@ void writeMsgToPath(String path, String msg, String customTimeStamp = "", bool r
     Serial.println("writeMsgToPath called : " + String(millis()));
   #endif
 
-  #ifdef SD_USE_NORMAL
-    FsFile tempfile;
-  #else
-    ExFile tempfile;
-  #endif 
+  myFileFormat tempfile;
 
   if(timeStamp){
     if(customTimeStamp == ""){
@@ -160,12 +163,7 @@ void checkAndCreateFolder(String path){
 
 
 void checkAndCreateFile(String path){
-  #ifdef SD_USE_NORMAL
-    FsFile createFile;
-  #else
-    ExFile createFile;
-  #endif 
-
+  myFileFormat createFile;
   bool isExist;
   // lock sd 
   if(xSemaphoreTake( xSemaphore_SD, portMAX_DELAY ) == pdTRUE){

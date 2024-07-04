@@ -64,7 +64,9 @@
 //====================== compile setting ===========================
 // #define USE_DEEP_SLEEP         // use deep sleep mode
 // #define KEEP_SET_TIME_FILE     // for test change RTC time by file
-// #define SD_USE_BASIC           // SD Use setting 
+// #define SD_FAT16_32            // SD Use setting 
+#define SD_EXFAT
+// #define SD_HYBRID_FAT1632_EXFAT
 // #define USE_FAKE_TIME          // use fake test time setting 
 // #define HAND_MADE_ENV          // just for some small module test
 #define HTML_ZH                // for language of html msg

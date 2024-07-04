@@ -79,11 +79,7 @@ void startTheRecord(int recordSeconds, char *filenameWithPath, float gain_ratio,
     byte dataBuffer[numOfData];
 
     // SD setting 
-    #ifdef SD_USE_NORMAL
-      FsFile soundFile;
-    #else
-      ExFile soundFile;
-    #endif
+    myFileFormat soundFile;
 
     /*--- header setup part ---*/
     // lock SD

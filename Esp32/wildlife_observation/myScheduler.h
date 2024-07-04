@@ -405,12 +405,10 @@ void transmitSoundDataToSD(void* pvParameters){
   Serial.println("|- transmitSoundDataToSD : created");
   writeMsgToPath(systemLogPath, "transmitSoundDataToSD : created");
   const TickType_t xMaxBlockTime = pdMS_TO_TICKS(100);
+  
   // SD setting 
-  #ifdef SD_USE_NORMAL
-    FsFile soundFile;
-  #else
-    ExFile soundFile;
-  #endif
+  myFileFormat soundFile;
+
   // task part 
   while (true) {
     // jump out to other tasks
