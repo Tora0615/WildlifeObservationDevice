@@ -56,7 +56,7 @@ class INMP441{
     * @param len     len of data buffer
     * @return len
     */
-    uint32_t read(byte* buffer, size_t len);
+    size_t read(byte* buffer, size_t len);
 
     /**
     * @fn 
@@ -176,8 +176,8 @@ uint8_t INMP441::begin(uint16_t sampleRate, uint8_t bit, uint8_t channelSetting)
 }
 
 
-uint32_t INMP441::read(byte* buffer,size_t len){
-  uint32_t returnDataLen;
+size_t INMP441::read(byte* buffer,size_t len){
+  size_t returnDataLen;
   i2s_read(I2S_NUM, (char*)buffer, len, &returnDataLen, 1);  // 1 portMAX_DELAY
   return returnDataLen;
 }

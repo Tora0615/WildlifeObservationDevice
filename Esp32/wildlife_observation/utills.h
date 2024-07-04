@@ -94,46 +94,7 @@ void getWakeupReason(){
   delay(1); // for log print order
 }
 
-void checkRtcAdjustFile(){
-  char timeWords[15] = {0};
-  #ifdef SD_USE_BASIC
-    FsFile setTimeFile;
-  #else
-    ExFile setTimeFile;
-  #endif 
-
-  // check file exist or not 
-  if (sd.exists("setTime.txt")) {
-    Serial.println("|-- RTC adjust file exist");
-
-    // if exist 
-    if (!setTimeFile.open("setTime.txt", O_RDONLY)) {
-      Serial.println("open RTC adjust file failed"); 
-    }
-
-    // read all 14 char
-    for (int i=0; i<14; i++){
-      timeWords[i] = setTimeFile.read();
-    }
-    timeWords[14] = '\0';
-    Serial.println("|-- The time read from file : " + String(timeWords));
-
-    // Do file operation 
-    setTimeFile.close();
-    #ifdef KEEP_SET_TIME_FILE
-      Serial.println("!! Don't forgot to adjust the setting of change time by file !!");
-    #else
-      sd.remove("setTime.txt");
-    #endif
-    Serial.println("|-- setTime.txt deleted");
-
-    // set time
-    setTime(timeWords);
-  }else{
-    Serial.println("|-- No need to adjust RTC time, skip");
-  }
-}
-
+// by using wifi
 void checkFirmwareUpdate(){
   Serial.println("== Start to check for firmware update ==");
   if(isFirstCheckOTA){

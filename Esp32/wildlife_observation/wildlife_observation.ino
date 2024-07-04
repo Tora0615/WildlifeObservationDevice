@@ -18,8 +18,6 @@ void setup() {
   //   setTestTime();
   // #endif
   
-  // check if need to change time
-  checkRtcAdjustFile();
   // get current time as stander time
   sys_RTC_time_offset = GetHowManySecondsHasPassedTodayFromRtc();
   sys_millis_time_offset = millis();
