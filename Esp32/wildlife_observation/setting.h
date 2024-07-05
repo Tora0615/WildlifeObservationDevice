@@ -84,6 +84,7 @@
 #define DHT_GET_TEMPERATURE_DEBUG   // value
 #define DHT_GET_HUMIDITY_DEBUG      // value
 // #define RTOS_DETIAL
+#define STACK_DEBUG
 /*--- taskFileReader ---*/
 // #define PARSE_TASK_DEBUG
 // #define ADD_REPEAT_WORKS_DEBUG

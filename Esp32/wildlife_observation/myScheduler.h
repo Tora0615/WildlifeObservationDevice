@@ -158,17 +158,33 @@ void createRTOSTasks() {
 void showTaskRunningLED(void* pvParameters){
   Serial.println("|- showLowBattery : created");
   writeMsgToPath(systemLogPath, "showLowBattery : created");
+
+  #ifdef STACK_DEBUG
+  UBaseType_t uxHighWaterMark;
+  #endif
+
   while(true){
     if(isRunningTask > 0){
       runningTaskLedShow();
     }
     vTaskDelay(30000 / portTICK_PERIOD_MS);
+
+    #ifdef STACK_DEBUG
+    uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+    Serial.println("#### showTaskRunningLED stack : " + String(uxHighWaterMark) + "(byte) ####");
+    writeMsgToPath(systemLogPath, "#### showTaskRunningLED stack : " + String(uxHighWaterMark) + "(byte) ####");
+    #endif
   }
 }
 
 void showLowBattery(void* pvParameters){
   Serial.println("|- showLowBattery : created");
   writeMsgToPath(systemLogPath, "showLowBattery : created");
+
+  #ifdef STACK_DEBUG
+  UBaseType_t uxHighWaterMark;
+  #endif
+
   while(true){
     // check state
     if(!isLowBattery){
@@ -185,6 +201,12 @@ void showLowBattery(void* pvParameters){
     }else{
       vTaskDelay(300000 / portTICK_PERIOD_MS);
     }
+
+    #ifdef STACK_DEBUG
+    uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+    Serial.println("#### showLowBattery stack : " + String(uxHighWaterMark) + "(byte) ####");
+    writeMsgToPath(systemLogPath, "#### showLowBattery stack : " + String(uxHighWaterMark) + "(byte) ####");
+    #endif
   }
 }
 
@@ -192,6 +214,11 @@ void checkGoSleep(void* pvParameters){
   previousRoundOfSleepFinished = true;
   Serial.println("|- checkGoSleep : created");
   writeMsgToPath(systemLogPath, "checkGoSleep : created");
+  
+  #ifdef STACK_DEBUG
+  UBaseType_t uxHighWaterMark;
+  #endif
+  
   // if no task is running 
   while(true){
     // block itself first, untill we resume it
@@ -213,6 +240,12 @@ void checkGoSleep(void* pvParameters){
       previousRoundOfSleepFinished = false;
       goToSleep(nextTaskPreserveTime_sec);
     }
+
+    #ifdef STACK_DEBUG
+    uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+    Serial.println("#### checkGoSleep stack : " + String(uxHighWaterMark) + "(byte) ####");
+    writeMsgToPath(systemLogPath, "#### checkGoSleep stack : " + String(uxHighWaterMark) + "(byte) ####");
+    #endif
   }
 }
 
@@ -221,6 +254,10 @@ void checkTimeAndTask(void* pvParameters){
   writeMsgToPath(systemLogPath, "checkTimeAndTask : created");
   uint8_t aliveCounter = 0;
 
+  #ifdef STACK_DEBUG
+  UBaseType_t uxHighWaterMark;
+  #endif
+  
   // every 500ms for a task check 
   while(true){
     // jump out to other tasks
@@ -397,6 +434,12 @@ void checkTimeAndTask(void* pvParameters){
     // active the suspended sleep task
     vTaskResume(tCheckGoSleepHandler);
     aliveCounter += 1;
+
+    #ifdef STACK_DEBUG
+    uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+    Serial.println("#### checkTimeAndTask stack : " + String(uxHighWaterMark) + "(byte) ####");
+    writeMsgToPath(systemLogPath, "#### checkTimeAndTask stack : " + String(uxHighWaterMark) + "(byte) ####");
+    #endif
   }
 }
 
@@ -409,6 +452,10 @@ void transmitSoundDataToSD(void* pvParameters){
   // SD setting 
   myFileFormat soundFile;
 
+  #ifdef STACK_DEBUG
+  UBaseType_t uxHighWaterMark;
+  #endif
+  
   // task part 
   while (true) {
     // jump out to other tasks
@@ -427,6 +474,12 @@ void transmitSoundDataToSD(void* pvParameters){
         soundFile.close(); 
       }xSemaphoreGive( xSemaphore_SD );
     }
+
+    #ifdef STACK_DEBUG
+    uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+    Serial.println("#### transmitSoundDataToSD stack : " + String(uxHighWaterMark) + "(byte) ####");
+    writeMsgToPath(systemLogPath, "#### transmitSoundDataToSD stack : " + String(uxHighWaterMark) + "(byte) ####");
+    #endif
   }
 }
 
@@ -436,6 +489,11 @@ void transmitSoundDataToSD(void* pvParameters){
 void recordSound(void* pvParameters){
   Serial.println("|- recordSound : created");
   writeMsgToPath(systemLogPath, "recordSound : created");
+  
+  #ifdef STACK_DEBUG
+  UBaseType_t uxHighWaterMark;
+  #endif
+  
   while(true){
     // block itself first, untill we resume it
     #ifdef RTOS_DETIAL
@@ -463,6 +521,12 @@ void recordSound(void* pvParameters){
     }else if(channel_tag == 'R'){
       startTheRecord(recordTime, filename, gain_ratio, CHANNEL_RIGHT);
     }
+
+    #ifdef STACK_DEBUG
+    uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+    Serial.println("#### recordSound stack : " + String(uxHighWaterMark) + "(byte) ####");
+    writeMsgToPath(systemLogPath, "#### recordSound stack : " + String(uxHighWaterMark) + "(byte) ####");
+    #endif
   }
 }
 
@@ -472,6 +536,11 @@ void recordSound(void* pvParameters){
 void recordDHT(void* pvParameters){
   Serial.println("|- recordDHT : created");
   writeMsgToPath(systemLogPath, "recordDHT : created");
+  
+  #ifdef STACK_DEBUG
+  UBaseType_t uxHighWaterMark;
+  #endif
+  
   while(true){
     // block itself first, untill we resume it
     #ifdef RTOS_DETIAL
@@ -518,6 +587,12 @@ void recordDHT(void* pvParameters){
 
     // release sleep lock and delete itself
     isRunningTask -= 1;
+
+    #ifdef STACK_DEBUG
+    uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+    Serial.println("#### recordDHT stack : " + String(uxHighWaterMark) + "(byte) ####");
+    writeMsgToPath(systemLogPath, "#### recordDHT stack : " + String(uxHighWaterMark) + "(byte) ####");
+    #endif
   }
 }
 
@@ -527,6 +602,11 @@ void recordDHT(void* pvParameters){
 void recordDS18B20(void* pvParameters){
   Serial.println("|- recordDS18B20 : created");
   writeMsgToPath(systemLogPath, "recordDS18B20 : created");
+  
+  #ifdef STACK_DEBUG
+  UBaseType_t uxHighWaterMark;
+  #endif
+  
   while(true){
     // block itself first, untill we resume it
     #ifdef RTOS_DETIAL
@@ -564,6 +644,12 @@ void recordDS18B20(void* pvParameters){
     
     // release sleep lock 
     isRunningTask -= 1;
+
+    #ifdef STACK_DEBUG
+    uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+    Serial.println("#### recordDS18B20 stack : " + String(uxHighWaterMark) + "(byte) ####");
+    writeMsgToPath(systemLogPath, "#### recordDS18B20 stack : " + String(uxHighWaterMark) + "(byte) ####");
+    #endif
   }
 }
 
@@ -573,6 +659,11 @@ void recordDS18B20(void* pvParameters){
 void recordBattery(void* pvParameters){
   Serial.println("|- recordBattery : created");
   writeMsgToPath(systemLogPath, "recordBattery : created");
+  
+  #ifdef STACK_DEBUG
+  UBaseType_t uxHighWaterMark;
+  #endif
+  
   while(true){
     // block itself first, untill we resume it
     #ifdef RTOS_DETIAL
@@ -592,6 +683,12 @@ void recordBattery(void* pvParameters){
     writeMsgToPath(sensorDataPath, "Battery status : " + String(getBatteryVoltage()) + "v (" + String(getBatteryPercentage())+ "%)", Battery_TimeStamp);
 
     isRunningTask -= 1;
+
+    #ifdef STACK_DEBUG
+    uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+    Serial.println("#### recordBattery stack : " + String(uxHighWaterMark) + "(byte) ####");
+    writeMsgToPath(systemLogPath, "#### recordBattery stack : " + String(uxHighWaterMark) + "(byte) ####");
+    #endif
   }
 }
 
