@@ -198,6 +198,9 @@ void startTheRecord(int recordSeconds, char *filenameWithPath, float gain_ratio,
 
     // wait enough untill sd write finished, then release ram
     vTaskDelay(500 / portTICK_PERIOD_MS);
+
+    // restart
+    ESP.restart();
   }
   // if INMP was occupied 
   else{
