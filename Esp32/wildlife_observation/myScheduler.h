@@ -15,7 +15,6 @@
 /*---- other involve lib  ----*/
 #include "myDHT.h"
 #include "utills.h"   // include sd_operation / rtc_timer / setting
-#include "battery.h"
 #include "myINMP441.h"
 #include "myDS18B20.h"
 #include "taskFileReader.h"

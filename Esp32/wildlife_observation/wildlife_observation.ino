@@ -9,7 +9,8 @@ void setup() {
   // system basic part init 
   RTCInit();
   showInitStatusLED(RTC_STARTED);
-  checkFirmwareUpdate();  // rely on rtc lib
+  batteryMonitorInit(false); 
+  checkFirmwareUpdate();  // server open here, rely on rtc lib and battery 
   SDInit();
   showInitStatusLED(SD_STARTED);
   
@@ -49,7 +50,6 @@ void setup() {
   }
   
   // system advance part inint
-  batteryMonitorInit(); 
   DS18B20Init(); 
   DHT_init(); 
 

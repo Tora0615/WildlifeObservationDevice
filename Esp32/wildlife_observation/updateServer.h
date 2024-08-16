@@ -1,4 +1,5 @@
 #include "setting.h"
+#include "battery.h"
 
 AsyncWebServer server(80);
 
@@ -31,6 +32,14 @@ const char* serverIndex =
     #endif
     //// update result, only shown 3 sec
     "<p id='set-time-result'></p>"
+
+    /*--- battery status ---*/
+    #ifdef HTML_ZH
+      "<h2>電池狀態</h2>"
+      "<p>電壓 : <span id='current-voltage'> 載入中...</span></p>"
+    #else
+
+    #endif
 
     /*--- the area of firmware upload ---*/
     #ifdef HTML_ZH
@@ -74,6 +83,13 @@ const char* serverIndex =
         "document.getElementById('current-time').innerText = time;"
       "};"
 
+      /*--- how the web get the current voltage by api ---*/
+      "async function updateVoltage() {"
+        "const response = await fetch('/voltage');"
+        "const voltage = await response.text();"
+        "document.getElementById('current-voltage').innerText = voltage;"
+      "};"
+
       /*--- the thing need to do when press setTime ---*/
       "async function setTime() {"
         "const datetime = document.getElementById('datetime').value;"
@@ -98,6 +114,7 @@ const char* serverIndex =
       /*--- auto refresh timer ---*/
       "window.onload = function() {"
         "updateTime();"
+        "updateVoltage();"
         "setInterval(updateTime, 1000);"
       "};"
 
@@ -194,6 +211,15 @@ void startUpdateServer(){
     DateTime now = rtc.now();
     char buffer[30];
     snprintf(buffer, 30, "%02d-%02d-%02d %02d:%02d:%02d", now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second());
+    request->send(200, "text/plain", buffer);
+  });
+
+  // current voltage api
+  server.on("/voltage", HTTP_GET, [](AsyncWebServerRequest *request){
+    float voltage = getBatteryVoltage();
+    float percentage = getBatteryPercentage();
+    char buffer[30];
+    snprintf(buffer, 30, "%.2fv(%.1f%%)", voltage, percentage);
     request->send(200, "text/plain", buffer);
   });
 

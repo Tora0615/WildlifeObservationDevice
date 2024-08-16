@@ -21,7 +21,7 @@
 const float voltage_division_factor = 0.2272;  // 150k : 510k -->  150 / (150 + 510) = 0.2272
 
 /*-------- function implement --------*/
-void batteryMonitorInit(){
+void batteryMonitorInit(bool msg=true){
   pinMode(BATTERY_MONITOR_PIN, INPUT);        // GPIO36 (A0) (read only)
   analogSetAttenuation(ADC_2_5db);            // max 1.5V
   analogSetWidth(ADC_BIT_12);                 // 12 bit -> 0 ~ 4095
@@ -43,7 +43,9 @@ void batteryMonitorInit(){
   #endif
 
   // Write log
-  writeMsgToPath(systemLogPath, "Battery monitor init successful!");
+  if (msg){
+    writeMsgToPath(systemLogPath, "Battery monitor init successful!");
+  }
 }
 
 float getBatteryVoltage(){
