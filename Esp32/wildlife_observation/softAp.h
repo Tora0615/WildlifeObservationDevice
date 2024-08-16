@@ -71,5 +71,6 @@ void startSoftAp(){
 void closeSoftAP(){
   // turn off SoftAP
   WiFi.softAPdisconnect(true);
+  WiFi.mode(WIFI_OFF);  // important! To close the wifi completely
   Serial.println("SoftAP closed");
 }

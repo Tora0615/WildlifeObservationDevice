@@ -1,6 +1,9 @@
 #include "myScheduler.h"
+#include "soc/soc.h"
+#include "soc/rtc_cntl_reg.h"
 
 void setup() {
+  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);  // disable brownout detector
   Serial.begin(115200);  
   // To indicate setup status, it will allway on if failed
   initLEDs();
@@ -25,6 +28,8 @@ void setup() {
   }
 
   checkFirmwareUpdate();  // server open here, rely on rtc lib and battery 
+
+
   SDInit();
   showInitStatusLED(SD_STARTED);
   
