@@ -119,8 +119,8 @@ void writeMsgToPath(String path, String msg, String customTimeStamp = "", bool r
       }
 
       // open file
-      Serial.println("path : " + path);
-      Serial.println("msg : " + msg);
+      // Serial.println("path : " + path);
+      // Serial.println("msg : " + msg);
       //// failed to open
       ////// open need char array, not string. So use c_str to convert
       if (!tempfile.open(path.c_str(), flag)) {      

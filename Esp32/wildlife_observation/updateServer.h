@@ -38,7 +38,8 @@ const char* serverIndex =
       "<h2>電池狀態</h2>"
       "<p>電壓 : <span id='current-voltage'> 載入中...</span></p>"
     #else
-
+      "<h2>Battery status</h2>"
+      "<p>Battery voltage : <span id='current-voltage'> loading...</span></p>"
     #endif
 
     /*--- the area of firmware upload ---*/
@@ -114,8 +115,9 @@ const char* serverIndex =
       /*--- auto refresh timer ---*/
       "window.onload = function() {"
         "updateTime();"
-        "updateVoltage();"
         "setInterval(updateTime, 1000);"
+        "updateVoltage();"
+        "setInterval(updateVoltage, 1000);"
       "};"
 
       // 監聽表單提交事件
@@ -218,8 +220,8 @@ void startUpdateServer(){
   server.on("/voltage", HTTP_GET, [](AsyncWebServerRequest *request){
     float voltage = getBatteryVoltage();
     float percentage = getBatteryPercentage();
-    char buffer[30];
-    snprintf(buffer, 30, "%.2fv(%.1f%%)", voltage, percentage);
+    char buffer[15];
+    snprintf(buffer, 15, "%.2fv (%.1f%%)", voltage, percentage);
     request->send(200, "text/plain", buffer);
   });
 

@@ -9,7 +9,21 @@ void setup() {
   // system basic part init 
   RTCInit();
   showInitStatusLED(RTC_STARTED);
-  batteryMonitorInit(false); 
+  batteryMonitorInit(false);  // init without write msg to sd
+
+
+  // Before trigger battery protect (3.2v <---> 3v), just show LED and sleep
+  if (getBatteryVoltage() < EMPTY_BATTERY_VOLTAGE){ 
+    digitalWrite(LED_RED, HIGH); 
+    const int LOW_BAT_SLEEP_MIN = 5;
+    esp_sleep_enable_timer_wakeup(LOW_BAT_SLEEP_MIN * 60 * 1000 * ms_TO_uS_FACTOR);
+    while(1){
+      Serial.println("Sleep for 5 min");
+      delay(10);
+      esp_light_sleep_start();
+    }
+  }
+
   checkFirmwareUpdate();  // server open here, rely on rtc lib and battery 
   SDInit();
   showInitStatusLED(SD_STARTED);

@@ -12,8 +12,8 @@
 #define SPI_SPEED SD_SCK_MHZ(10)
 #define ADC_BIT_12 12
 #define FULL_BATTERY_VOLTAGE 4.2    // battery : 4.2
-#define LOW_BATTERY_VOLTAGE 3.5     // ?
-#define EMPTY_BATTERY_VOLTAGE 3.2   // protect board : 2.54 +- 0.1 / battery : 2.5, DC_DC module : 3V  / rt5707wsc need at least ?v to step down to 3v 
+#define LOW_BATTERY_VOLTAGE 3.5     // warning
+#define EMPTY_BATTERY_VOLTAGE 3.2   // less then this, hault the system. (protect board : 2.54 +- 0.1 / battery : 2.5, DC_DC module : out 3V  / rt5707wsc need at least ?v to step down to 3v)
 #define DOUBLE_PMOS_SWITCH
 #ifdef DOUBLE_PMOS_SWITCH
   #define POWER_ON  HIGH
@@ -84,7 +84,7 @@
 #define DHT_GET_TEMPERATURE_DEBUG   // value
 #define DHT_GET_HUMIDITY_DEBUG      // value
 // #define RTOS_DETIAL
-#define STACK_DEBUG
+// #define STACK_DEBUG
 /*--- taskFileReader ---*/
 // #define PARSE_TASK_DEBUG
 // #define ADD_REPEAT_WORKS_DEBUG

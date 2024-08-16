@@ -74,7 +74,5 @@ float getBatteryPercentage(){
   percentage = percentage < 0 ? 0 : percentage;
   return percentage * 100;  
 }
-              
-
 
 #endif

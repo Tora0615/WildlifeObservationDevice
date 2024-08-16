@@ -155,8 +155,8 @@ void createRTOSTasks() {
 // When have any error, set flag to true, then use highest task to block all tasks.
 
 void showTaskRunningLED(void* pvParameters){
-  Serial.println("|- showLowBattery : created");
-  writeMsgToPath(systemLogPath, "showLowBattery : created");
+  Serial.println("|- showTaskRunningLED : created");
+  writeMsgToPath(systemLogPath, "showTaskRunningLED : created");
 
   #ifdef STACK_DEBUG
   UBaseType_t uxHighWaterMark;
