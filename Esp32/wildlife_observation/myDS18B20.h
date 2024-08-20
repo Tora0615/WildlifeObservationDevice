@@ -25,6 +25,8 @@ void DS18B20Init(){
   #endif 
   digitalWrite(DS18B20_PMOS, POWER_OFF);   // Turn off. GPIO default is low ->  will let mic ON
 
+  // set onewire pin to input first, override wifi setting before
+  pinMode(ONE_WIRE_BUS, INPUT);
   // Start up the library
   sensor.begin();
   // Write log

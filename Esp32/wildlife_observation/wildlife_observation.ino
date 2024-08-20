@@ -49,6 +49,18 @@ void setup() {
   sensorDataPath = today + "/SENSOR_DATA.txt";
   checkAndCreateFile(sensorDataPath);
 
+  /*-- test code here --*/
+  // pinMode(ONE_WIRE_BUS, INPUT);
+  // DS18B20Init();
+  // turnOnDs18b20Power();
+  // while(1){
+  //   sensor.requestTemperatures();
+  //   float tempC = sensor.getTempCByIndex(0);
+  //   Serial.println(tempC);
+  //   delay(1000);
+  // }
+  /*-- test code here --*/
+
   // print reboot msg if not first boot (sd is new)
   bool notfirstBoot = sd.exists(systemLogPath);
   if (notfirstBoot) getResetReason();
