@@ -41,7 +41,7 @@
 #define CHIP_SELECT 5
 // DS18B20 (And one wire)
 #define DS18B20_PMOS 32   // 3V_sensor_switch (DS18 & DHT)
-#define ONE_WIRE_BUS 25   // DS18_DATA (DS18B20)
+#define ONE_WIRE_BUS 25   // DS18_DATA (DS18B20) (also wifi)
 // DHT
 #define DHT22_PMOS 32     // 3V_sensor_switch (DS18 & DHT)
 #define DHTPIN 33         // DHT_DATA
@@ -58,7 +58,7 @@
 #define MODE_L_PIN    (2)     // 2 pin weak pull-down / Set LR of that micorphone / Low - L
 #define SOUND_PMOS    (13)    // 3V_I2S_SWITCH
 
-#define PMOS_CHARGING_TIME 3200 // ms, 2500 for sometimes DS18(fake), caused by don't have value 
+#define PMOS_CHARGING_TIME 1000 // ms, 2500 for sometimes DS18(fake), caused by don't have value 
 
 
 //====================== compile setting ===========================
@@ -77,7 +77,7 @@
 // #define RTC_DEBUG
 /*--- myScheduler ---*/
 // #define CHECK_DAY_CHANGE_DEBUG
-#define CHECK_IS_NEED_TO_RUN_TASK   // setting of "now, current index, task code, isExecuted?""
+// #define CHECK_IS_NEED_TO_RUN_TASK   // setting of "now, current index, task code, isExecuted?""
 // #define RECORD_SOUND_DEBUG
 #define RECORD_BATTERY_DEBUG
 #define GET_DS18B20_TEMP_DEBUG

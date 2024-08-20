@@ -15,7 +15,7 @@ void setup() {
   batteryMonitorInit(false);  // init without write msg to sd
 
 
-  // Before trigger battery protect (3.2v <---> 3v), just show LED and sleep
+  // Before trigger battery protect (3v <---> 3.2v), just show LED and sleep
   if (getBatteryVoltage() < EMPTY_BATTERY_VOLTAGE){ 
     digitalWrite(LED_RED, HIGH); 
     const int LOW_BAT_SLEEP_MIN = 5;
@@ -29,14 +29,8 @@ void setup() {
 
   checkFirmwareUpdate();  // server open here, rely on rtc lib and battery 
 
-
   SDInit();
   showInitStatusLED(SD_STARTED);
-  
-  // for test
-  // #ifdef USE_FAKE_TIME
-  //   setTestTime();
-  // #endif
   
   // get current time as stander time
   sys_RTC_time_offset = GetHowManySecondsHasPassedTodayFromRtc();
@@ -88,7 +82,6 @@ void setup() {
   showInitStatusLED(ALL_INIT_FINISHED); 
 
   // for function Test
-  // Serial.println("here");
 
   // use dual core by RTOS 
   createRTOSTasks(); 
