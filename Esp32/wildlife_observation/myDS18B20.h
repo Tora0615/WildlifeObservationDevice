@@ -30,7 +30,7 @@ void DS18B20Init(){
   // Start up the library
   sensor.begin();
   // Write log
-  writeMsgToPath(systemLogPath, "DS18B20 init successful!");
+  // writeMsgToPath(systemLogPath, "DS18B20 init successful!");
 }
 
 

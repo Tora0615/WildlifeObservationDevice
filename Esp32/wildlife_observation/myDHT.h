@@ -24,7 +24,7 @@ void DHT_init(){
   digitalWrite(DHT22_PMOS,POWER_OFF);   // Turn off. GPIO default is low ->  will let mic ON
 
   // Write log
-  writeMsgToPath(systemLogPath, "DHT init successful!");
+  // writeMsgToPath(systemLogPath, "DHT init successful!");
 }
 
 

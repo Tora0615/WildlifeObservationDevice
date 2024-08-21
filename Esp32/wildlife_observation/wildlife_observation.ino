@@ -65,13 +65,15 @@ void setup() {
   addAllTaskFromFile(); 
   showInitStatusLED(TASK_ADDED);
   if(isFirstBoot){
-    Serial.println("!! First boot : start to find the matched readTaskIndex !!");
-    writeMsgToPath(systemLogPath, "First boot : start to find the matched readTaskIndex");
+    Serial.println("== !! First boot : start to find the matched readTaskIndex !! == ");
+    writeMsgToPath(systemLogPath, "== !! First boot : start to find the matched readTaskIndex !! == ");
     findTheIndexOfCurrentTime(); 
     isFirstBoot = false;
+    Serial.println("  |-- Finished! ");
+    writeMsgToPath(systemLogPath, "  |-- Finished! ");
   }else {
-    Serial.println("!! Still alive : skip to read task index from file !!");
-    writeMsgToPath(systemLogPath, "Still alive : skip to read task index from file");
+    Serial.println("== !! Still alive : skip to read task index from file !! ==");
+    writeMsgToPath(systemLogPath, "== !! Still alive : skip to read task index from file !! ==");
   }
   
   // system advance part inint

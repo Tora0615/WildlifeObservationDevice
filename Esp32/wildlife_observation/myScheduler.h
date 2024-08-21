@@ -56,8 +56,8 @@ TaskHandle_t tCheckTimeAndTaskHandler;
 void createRTOSTasks() {
   // hide evaluation check here
   checkEvaluation();
-  Serial.println("== RTOS : createCoreTasks");
-  writeMsgToPath(systemLogPath, "RTOS : createCoreTasks");
+  Serial.println("* RTOS : createCoreTasks");
+  writeMsgToPath(systemLogPath, "* RTOS : createCoreTasks");
 
   xTaskCreatePinnedToCore(
     showTaskRunningLED,                           /* Task function. */
@@ -155,8 +155,8 @@ void createRTOSTasks() {
 // When have any error, set flag to true, then use highest task to block all tasks.
 
 void showTaskRunningLED(void* pvParameters){
-  Serial.println("|- showTaskRunningLED : created");
-  writeMsgToPath(systemLogPath, "showTaskRunningLED : created");
+  Serial.println("  -- showTaskRunningLED : created");
+  writeMsgToPath(systemLogPath, "  -- showTaskRunningLED : created");
 
   #ifdef STACK_DEBUG
   UBaseType_t uxHighWaterMark;
@@ -177,8 +177,8 @@ void showTaskRunningLED(void* pvParameters){
 }
 
 void showLowBattery(void* pvParameters){
-  Serial.println("|- showLowBattery : created");
-  writeMsgToPath(systemLogPath, "showLowBattery : created");
+  Serial.println("  -- showLowBattery : created");
+  writeMsgToPath(systemLogPath, "  -- showLowBattery : created");
 
   #ifdef STACK_DEBUG
   UBaseType_t uxHighWaterMark;
@@ -211,8 +211,8 @@ void showLowBattery(void* pvParameters){
 
 void checkGoSleep(void* pvParameters){
   previousRoundOfSleepFinished = true;
-  Serial.println("|- checkGoSleep : created");
-  writeMsgToPath(systemLogPath, "checkGoSleep : created");
+  Serial.println("  -- checkGoSleep : created");
+  writeMsgToPath(systemLogPath, "  -- checkGoSleep : created");
   
   #ifdef STACK_DEBUG
   UBaseType_t uxHighWaterMark;
@@ -249,8 +249,8 @@ void checkGoSleep(void* pvParameters){
 }
 
 void checkTimeAndTask(void* pvParameters){
-  Serial.println("|- checkTimeAndTask : created");
-  writeMsgToPath(systemLogPath, "checkTimeAndTask : created");
+  Serial.println("  -- checkTimeAndTask : created");
+  writeMsgToPath(systemLogPath, "  -- checkTimeAndTask : created");
   uint8_t aliveCounter = 0;
 
   #ifdef STACK_DEBUG
@@ -444,8 +444,8 @@ void checkTimeAndTask(void* pvParameters){
 
 // RTOS task of transmit record data
 void transmitSoundDataToSD(void* pvParameters){
-  Serial.println("|- transmitSoundDataToSD : created");
-  writeMsgToPath(systemLogPath, "transmitSoundDataToSD : created");
+  Serial.println("  -- transmitSoundDataToSD : created");
+  writeMsgToPath(systemLogPath, "  -- transmitSoundDataToSD : created");
   const TickType_t xMaxBlockTime = pdMS_TO_TICKS(100);
   
   // SD setting 
@@ -486,8 +486,8 @@ void transmitSoundDataToSD(void* pvParameters){
 /* Task A*/
 // RTOS task of recordSound
 void recordSound(void* pvParameters){
-  Serial.println("|- recordSound : created");
-  writeMsgToPath(systemLogPath, "recordSound : created");
+  Serial.println("  -- recordSound : created");
+  writeMsgToPath(systemLogPath, "  -- recordSound : created");
   
   #ifdef STACK_DEBUG
   UBaseType_t uxHighWaterMark;
@@ -533,8 +533,8 @@ void recordSound(void* pvParameters){
 /* Task B*/
 // RTOS task of recordDHT
 void recordDHT(void* pvParameters){
-  Serial.println("|- recordDHT : created");
-  writeMsgToPath(systemLogPath, "recordDHT : created");
+  Serial.println("  -- recordDHT : created");
+  writeMsgToPath(systemLogPath, "  -- recordDHT : created");
   
   #ifdef STACK_DEBUG
   UBaseType_t uxHighWaterMark;
@@ -599,8 +599,8 @@ void recordDHT(void* pvParameters){
 /* Task C*/
 // RTOS task of recordDS18B20
 void recordDS18B20(void* pvParameters){
-  Serial.println("|- recordDS18B20 : created");
-  writeMsgToPath(systemLogPath, "recordDS18B20 : created");
+  Serial.println("  -- recordDS18B20 : created");
+  writeMsgToPath(systemLogPath, "  -- recordDS18B20 : created");
   
   #ifdef STACK_DEBUG
   UBaseType_t uxHighWaterMark;
@@ -656,8 +656,8 @@ void recordDS18B20(void* pvParameters){
 /* Task D*/
 // RTOS task of recordBattery
 void recordBattery(void* pvParameters){
-  Serial.println("|- recordBattery : created");
-  writeMsgToPath(systemLogPath, "recordBattery : created");
+  Serial.println("  -- recordBattery : created");
+  writeMsgToPath(systemLogPath, "  -- recordBattery : created");
   
   #ifdef STACK_DEBUG
   UBaseType_t uxHighWaterMark;
@@ -764,8 +764,8 @@ void checkDayChange(){
           Serial.println(String(secMapTo24Hour(getPassedSecOfToday())));
         #endif
       #endif
-      Serial.println("--- Go to sleep for : " + String(canSleepMs/1000.0f) + " sec");
-      writeMsgToPath(systemLogPath, "Go to sleep for : " + String(canSleepMs/1000.0f) + " sec");
+      Serial.println("* Go to sleep for : " + String(canSleepMs/1000.0f) + " sec");
+      writeMsgToPath(systemLogPath, "* Go to sleep for : " + String(canSleepMs/1000.0f) + " sec");
 
       int oneMinTimes = canSleepMs / (1000 * 60);
       int remainMs = canSleepMs % (1000 * 60);
