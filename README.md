@@ -4,13 +4,19 @@
 
 
 A card-sized **tiny, low-power field bioacoustic recording device**, measuring only **50x70 mm**.
+
 Contains temperature, humidity detection, RTC timer and a web for time adjustment and firmware update.
+
 You can set when to perform tasks every day and automatically save them to the SD card.
+
 And it can operate continuously for more than 40 days with four 18650 batteries, 14 times of 15-minute recording and 144 times of temperature and humidity sensing per day.
 
 一個卡片大小的 **迷你、低功耗的野外生物聲學紀錄裝置**，大小僅 **50x70 mm**。
+
 包含溫度、濕度偵測、RTC 時鐘、時間調整及韌體更新的簡易網頁。
+
 可設定每日何時執行任務，並自動儲存至 SD 卡。
+
 並且可以在四顆 18650 電池，每日執行 14 次 15 分鐘錄音與 144 次溫濕度感測的設置下，連續運作 <u>**40日**</u> 以上。
 
 <p float="left">
